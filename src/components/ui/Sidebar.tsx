@@ -3,10 +3,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  IoColorPaletteOutline,
-  IoNewspaperOutline,
-  IoMegaphoneOutline,
-  IoPersonAddOutline,
+  IoPeopleOutline,
+  IoBuildOutline,
+  IoSettingsOutline,
+  IoWalletOutline,
+  IoPersonOutline,
 } from "react-icons/io5";
 
 interface NavItem {
@@ -17,12 +18,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Customer", icon: <IoColorPaletteOutline />, href: "/customer" },
-  { label: "Employee", icon: <IoNewspaperOutline />, href: "/employee" },
-  { label: "Account", icon: <IoMegaphoneOutline />, href: "/account" },
-  { label: "Payment", icon: <IoPersonAddOutline />, href: "/payment" },
-  { label: "Service", icon: <IoPersonAddOutline />, href: "/service" },
-];
+  { label: "Customer", icon: <IoPeopleOutline />, href: "/customer" },       
+  { label: "Service", icon: <IoBuildOutline />, href: "/service" },          
+  { label: "Account", icon: <IoSettingsOutline />, href: "/account" },       
+  { label: "Payment", icon: <IoWalletOutline />, href: "/payment" },         
+  { label: "Employee", icon: <IoPersonOutline />, href: "/employee" },       ];
 
 const Sidebar = () => {
   const pathname = usePathname();

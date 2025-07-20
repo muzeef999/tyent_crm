@@ -45,13 +45,13 @@ export const GET = async () => {
 
     try {
         await connectDB();
-        const customers = await Customer.find().populate('upcomingServices');
+        const employees = await Employee.find();
         
         return NextResponse.json(
             {
                 success: true,
-                message: "Customers fetched successfully",
-                data: customers,
+                message: "employees fetched successfully",
+                data: employees,
             },
             { status: 200 }
         );

@@ -1,7 +1,7 @@
 import axiosInstance from "@/lib/axiosInstance";
 import { Account, Customer, Employee, Payment, Service } from "@/types/customer";
 
-//CUSTOMERS
+//CUSTOMERS 
 export const getCustomers = () => axiosInstance.get("/customers").then((res) => res.data);
 export const createCustomer = (data: Omit<Customer, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/customers", data).then((res) => res.data);
 export const updateCustomer = (id: string) =>axiosInstance.put(`/customers/${id}`).then((res) => res.data);
