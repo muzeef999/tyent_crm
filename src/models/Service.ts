@@ -22,4 +22,8 @@ const serviceSchema = new Schema({
   employeeId: { type: Schema.Types.ObjectId, ref: 'Employee' },
 }, { timestamps: true });
 
-export default mongoose.model('Service', serviceSchema);
+const Service = mongoose.models.Service || mongoose.model("Service", serviceSchema);
+
+export default Service;
+
+

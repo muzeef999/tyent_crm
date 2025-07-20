@@ -24,10 +24,11 @@ body {
   /* Dark mode variables */
   --color-dark-background: #1e1b1d;
   --color-dark-card-background: #2a2629;
-
+  
 
   --color-dark-text-primary: #f5f5f5;
-  --color-dark-text-secondary: #b0b0b0;
+  --color-dark-text-secondary: #FFFF
+;
   
 }
 
@@ -36,22 +37,25 @@ body {
 
   --background: var(--color-background);
   --card-background: var(--color-card-background);
+  --Table-background: var(--color-table-background);
 
 
   --text-primary: var(--color-text-primary);
   --text-secondary: var(--color-text-secondary);
   
-
 }
 
 /* Dark mode override */
 .dark {
   --background: var(--color-dark-background);
   --card-background: var(--color-dark-card-background);
+  --table-background: var(--color-dark-card-background);
 
 
   --text-primary: var(--color-dark-text-primary);
   --text-secondary: var(--color-dark-text-secondary);
+
+
  
 }
 
@@ -72,5 +76,34 @@ body {
   .text-secondary {
     color: var(--text-secondary);
   }
+
+  .customtable {
+  background-color: var(--background);
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.customtable thead {
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+}
+
+.customtable th,
+.customtable td {
+  padding: 14px 20px;
+  text-align: left;
+   border-bottom: 1px solid #FFF /* soft look */
+}
+
+
+.customtable tbody tr:hover {
+  background-color: var(--card-background);
+  transition: background-color 0.2s ease;
+}
+
+
 
 }

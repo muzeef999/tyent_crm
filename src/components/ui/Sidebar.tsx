@@ -22,7 +22,6 @@ const navItems: NavItem[] = [
   { label: "Account", icon: <IoMegaphoneOutline />, href: "/account" },
   { label: "Payment", icon: <IoPersonAddOutline />, href: "/payment" },
   { label: "Service", icon: <IoPersonAddOutline />, href: "/service" },
-  
 ];
 
 const Sidebar = () => {
@@ -39,17 +38,13 @@ const Sidebar = () => {
               <Link
                 href={item.href || "#"}
                 className={`flex items-center justify-between px-3 py-2  text-secondary transition-colors cursor-pointer 
-                  ${
-                    isActive
-                      ? "bg-card-background rounded-l-xl"
-                      : "hover-bg"
-                  }`}
+                  ${isActive ? "bg-card-background rounded-l-xl" : "hover-bg"}`}
               >
                 <span className="flex items-center gap-3">
                   {item.icon}
                   {item.label}
                 </span>
-                              </Link>
+              </Link>
             </li>
           );
         })}

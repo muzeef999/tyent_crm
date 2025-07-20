@@ -29,7 +29,9 @@ export const POST = async (req: NextRequest) => {
     const upcomingServiceDocs = await Service.insertMany(serviceDates);
 
     // Step 4: Update customer with upcoming services
-    newCustomer.upcomingServices = upcomingServiceDocs.map(service => service._id);
+    newCustomer.upcomingServices = upcomingServiceDocs.map(
+      (service) => service._id
+    );
     await newCustomer.save();
 
     return NextResponse.json(
@@ -46,6 +48,33 @@ export const POST = async (req: NextRequest) => {
       {
         success: false,
         message: "Internal Server Error",
+        error: errorMsg,
+      },
+      { status: 500 }
+    );
+  }
+};
+
+export const GET = async () => {
+  try {
+    await connectDB();
+
+    const service = await Service.find();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Services fetched successfully",
+        data: service,
+      },
+      { status: 200 }
+    );
+  } catch (err: unknown) {
+    const errorMsg = getErrorMessage(err);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Database connection failed",
         error: errorMsg,
       },
       { status: 500 }
