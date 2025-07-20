@@ -5,7 +5,7 @@ import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import React from "react";
 
-const page = () => {
+const Page = () => {
   const {
     data: employees,
     isLoading,
@@ -51,4 +51,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

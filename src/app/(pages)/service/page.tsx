@@ -5,7 +5,7 @@ import { Service } from '@/types/customer';
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
 
 
   const {data: service, isLoading, error } = useReactQuery({
@@ -53,4 +53,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

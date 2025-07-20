@@ -5,6 +5,7 @@ import AppBar from "@/components/ui/AppBar";
 import Sidebar from "@/components/ui/Sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

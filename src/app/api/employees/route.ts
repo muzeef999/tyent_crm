@@ -1,5 +1,4 @@
 import { connectDB } from "@/lib/mongodb";
-import Customer from "@/models/Customer";
 import Employee from "@/models/Employee";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
