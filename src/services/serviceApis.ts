@@ -34,7 +34,7 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 //EMPLOYEES
 export const getEmployees = () => axiosInstance.get("/employees").then((res) => res.data);
-export const createEmployee = (data: Omit<Employee, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/employees", data).then((res) => res.data);
+export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);
 export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);

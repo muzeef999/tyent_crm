@@ -8,4 +8,9 @@ const accountSchema = new Schema({
   paymentStatus: { type: String }, // PAID / PENDING / PARTIALLY
 }, { timestamps: true });
 
-export default mongoose.model('Account', accountSchema);
+
+const Accocunt =  mongoose.models.Account || mongoose.model('Account', accountSchema);
+
+export default Accocunt
+
+ 

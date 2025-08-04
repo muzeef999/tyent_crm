@@ -1,5 +1,6 @@
 // lib/db.ts
 import mongoose from "mongoose";
+import { NextResponse } from "next/server";
 
 interface MongoConnection {
   conn: typeof mongoose | null;
@@ -11,7 +12,7 @@ interface MongoConnection {
 const mongoConnection: MongoConnection = {
   conn: null,
   promise: null,
-  lastConnected: null
+  lastConnected: null,
 };
 
 // Time constants
@@ -54,8 +55,10 @@ function isConnectionAlive(): boolean {
   }
 
   // If we recently connected, consider it alive even if readyState disagrees
-  if (mongoConnection.lastConnected && 
-      (Date.now() - mongoConnection.lastConnected) < RECONNECT_THRESHOLD_MS) {
+  if (
+    mongoConnection.lastConnected &&
+    Date.now() - mongoConnection.lastConnected < RECONNECT_THRESHOLD_MS
+  ) {
     return true;
   }
 
@@ -70,7 +73,7 @@ async function createNewConnection(): Promise<typeof mongoose> {
     maxPoolSize: 10,
     minPoolSize: 2,
     retryWrites: true,
-    retryReads: true
+    retryReads: true,
   };
 
   try {
@@ -97,6 +100,11 @@ function setupConnectionEvents() {
 
   mongoose.connection.on("error", (err) => {
     console.error("MongoDB connection error:", err);
+
+    return NextResponse.json(
+      { success: false, message: "MongoDB connection failed", error: err },
+      { status: 500 }
+    );
   });
 }
 

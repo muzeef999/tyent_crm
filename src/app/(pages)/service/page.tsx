@@ -13,7 +13,6 @@ const Page = () => {
     queryFn: () => getServices(),
   })
 
-  console.log("service",service);
 
   if (isLoading) return <div>Loading...</div>
 
@@ -42,7 +41,6 @@ const Page = () => {
     <td>{item.assignedDate ? new Date(item.assignedDate).toLocaleDateString() : 'N/A'}</td>
     <td>{item.closingDate ? new Date(item.closingDate).toLocaleDateString() : 'N/A'}</td>
     <td>{item.serviceType?.join(', ')}</td>
- 
     <td>{item.notes}</td>
   </tr>
 ))}

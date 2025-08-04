@@ -59,7 +59,7 @@ export const GET = async () => {
   try {
     await connectDB();
 
-    const service = await Service.find();
+    const service = await Service.find().populate("customerId");
 
     return NextResponse.json(
       {
