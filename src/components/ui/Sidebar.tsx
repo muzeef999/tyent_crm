@@ -18,17 +18,20 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Customer", icon: <IoPeopleOutline />, href: "/customer" },       
-  { label: "Service", icon: <IoBuildOutline />, href: "/service" },          
-  { label: "Account", icon: <IoSettingsOutline />, href: "/account" },       
-  { label: "Payment", icon: <IoWalletOutline />, href: "/payment" },         
-  { label: "Employee", icon: <IoPersonOutline />, href: "/employee" },       ];
+  { label: "Customer", icon: <IoPeopleOutline />, href: "/customer" },
+  { label: "Service", icon: <IoBuildOutline />, href: "/service" },
+  { label: "Account", icon: <IoSettingsOutline />, href: "/account" },
+  { label: "Payment", icon: <IoWalletOutline />, href: "/payment" },
+  { label: "Employee", icon: <IoPersonOutline />, href: "/employee" },
+];
 
 const Sidebar = () => {
   const pathname = usePathname();
 
   return (
     <div className="hidden lg:flex flex-col w-64 h-screen pl-6 space-y-6 fixed overflow-y-auto ">
+      
+
       <ul className="space-y-4 mt-4">
         {navItems.map((item, idx) => {
           const isActive = pathname === item.href;
