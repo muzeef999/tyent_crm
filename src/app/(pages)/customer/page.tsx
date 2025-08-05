@@ -3,7 +3,11 @@ import useReactQuery from "@/hooks/useReactQueary";
 import { getCustomers } from "@/services/serviceApis";
 import { Customer } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import React from "react";
+import React, { useState } from "react";
+import Offcanvas from "@/components/ui/Offcanvas";
+import CustomerDetails from "@/components/CustomerDetails";
+
+
 
 const Page = () => {
   const {
@@ -14,6 +18,14 @@ const Page = () => {
     queryKey: ["users"],
     queryFn: () => getCustomers(),
   });
+
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const handleRowClick = (customer : Customer) => {
+  setSelectedCustomer(customer); // ✅ Add this line back
+  setShowSidebar(true);
+};
 
   if (error) {
     return (
@@ -39,14 +51,18 @@ const Page = () => {
         <tbody>
           {isLoading
             ? Array.from({ length: 5 }).map((_, idx) => (
-      <tr key={idx} className="border-t">
-        <td colSpan={4} className="px-4 py-3">
-          <div className="h-5 w-full rounded-md shimmer"></div>
-        </td>
-      </tr>
-    ))
+                <tr key={idx} className="border-t">
+                  <td colSpan={4} className="px-4 py-3">
+                    <div className="h-5 w-full rounded-md shimmer"></div>
+                  </td>
+                </tr>
+              ))
             : customers.data?.map((customer: Customer) => (
-                <tr key={customer._id} className="transition">
+                <tr
+                  key={customer._id}
+                  className="transition"
+                  onClick={() => handleRowClick(customer)}
+                >
                   <td>{customer.name}</td>
                   <td>{customer.contactNumber}</td>
                   <td>{customer.installedModel}</td>
@@ -73,6 +89,10 @@ const Page = () => {
               ))}
         </tbody>
       </table>
+
+      <Offcanvas show={showSidebar} onClose={() => setShowSidebar(false)} title="Customer Info">
+        {selectedCustomer && <CustomerDetails customer={selectedCustomer} />}
+      </Offcanvas>
     </>
   );
 };

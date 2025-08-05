@@ -5,7 +5,7 @@ const serviceSchema = new Schema({
   customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
   visitNo: { type: Number },
   serviceDate: { type: Date },
-  nextDueDate: { type: String },
+  nextDueDate: { type: Date },
   notes: { type: String },
   paymentIds: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
   assignedDate: { type: Date },

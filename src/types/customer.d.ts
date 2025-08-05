@@ -72,7 +72,7 @@ export interface Service {
   customerId: Types.ObjectId;
   visitNo?: number;
   serviceDate?: Date;
-  nextDueDate?: string;
+  nextDueDate?: Date;
   notes?: string;
   paymentIds?: Types.ObjectId[];
   assignedDate?: Date;

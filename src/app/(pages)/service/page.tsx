@@ -37,7 +37,6 @@ const Page = () => {
     {service.data?.map((item: Service) => (
   <tr key={item._id?.toString()}>
     <td>{item.serviceDate ? new Date(item.serviceDate).toLocaleDateString() : 'N/A'}</td>
-    <td>{item.nextDueDate ? new Date(item.nextDueDate).toLocaleDateString() : 'N/A'}</td>
     <td>{item.assignedDate ? new Date(item.assignedDate).toLocaleDateString() : 'N/A'}</td>
     <td>{item.closingDate ? new Date(item.closingDate).toLocaleDateString() : 'N/A'}</td>
     <td>{item.serviceType?.join(', ')}</td>

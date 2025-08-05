@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { CiDark } from "react-icons/ci";
+import { IoSunnyOutline } from "react-icons/io5";
+
+
 
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
@@ -24,10 +28,10 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full bg-background  text-lg"
+      className="p-1 rounded-full bg-background"
       title="Toggle Theme"
     >
-      {isDark ? '🌞' : '🌙'}
+      {isDark ? <IoSunnyOutline  size={24}/> : <CiDark size={24} />}
     </button>
   );
 };
