@@ -54,7 +54,10 @@ export const POST = async (req: NextRequest) => {
 export const GET = async () => {
   try {
     await connectDB();
-    const customers = await Customer.find();
+   const customers = await Customer.find({})
+  .select('name contactNumber installedModel invoiceNumber price amcRenewed installedBy')
+  .sort({ createdAt: -1 })
+  .lean();
     return NextResponse.json(
       {
         success: true,
@@ -64,7 +67,7 @@ export const GET = async () => {
       { status: 200 }
     );
   } catch (err: unknown) {
-   const errorMsg = getErrorMessage(err);
+    const errorMsg = getErrorMessage(err);
     return NextResponse.json(
       {
         success: false,

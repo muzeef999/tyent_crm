@@ -17,7 +17,7 @@ const Page = () => {
     isLoading,
     error,
   } = useReactQuery({
-    queryKey: ["users"],
+    queryKey: ["customers"],
     queryFn: () => getCustomers(),
   });
 
@@ -119,7 +119,7 @@ const Page = () => {
         title="Add Customer"
       >
         <div className="p-4">
-        <AddCustomer />
+        <AddCustomer onClose={() => setShowAddSidebar(false)} />
         </div>
       </Offcanvas>
 

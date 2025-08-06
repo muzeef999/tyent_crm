@@ -31,7 +31,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-background text-secondary`}
         >
           <AppBar />
-                <Toaster />
+                <Toaster richColors  position="top-center"/>
 
 
           <ReactQueryDevtools/>
