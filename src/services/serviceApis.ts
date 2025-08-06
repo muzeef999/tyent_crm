@@ -3,6 +3,7 @@ import { Account, Customer, Employee, Payment, Service } from "@/types/customer"
 
 //CUSTOMERS 
 export const getCustomers = () => axiosInstance.get("/customers").then((res) => res.data);
+export const getCustomerInDetail = (id: string) => axiosInstance.get(`customers/${id}`).then((res) => res.data);
 export const createCustomer = (data: Omit<Customer, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/customers", data).then((res) => res.data);
 export const updateCustomer = (id: string) =>axiosInstance.put(`/customers/${id}`).then((res) => res.data);
 export const deleteCustomer = (id: string) => axiosInstance.delete(`/customers/${id}`).then((res) => res.data);

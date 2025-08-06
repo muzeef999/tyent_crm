@@ -74,6 +74,7 @@ const Offcanvas: React.FC<OffcanvasProps> = ({ show, onClose, title = "Details",
                 Close
               </button>
             </div>
+            <hr/>
             {children}
           </motion.div>
         </>

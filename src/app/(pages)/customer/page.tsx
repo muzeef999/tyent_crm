@@ -20,10 +20,10 @@ const Page = () => {
   });
 
   const [showSidebar, setShowSidebar] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(null);
 
-  const handleRowClick = (customer : Customer) => {
-  setSelectedCustomer(customer); // ✅ Add this line back
+  const handleRowClick = (customerId : string) => {
+  setSelectedCustomer(customerId); // ✅ Add this line back
   setShowSidebar(true);
 };
 
@@ -50,9 +50,9 @@ const Page = () => {
         </thead>
         <tbody>
           {isLoading
-            ? Array.from({ length: 5 }).map((_, idx) => (
+            ? Array.from({ length: 15 }).map((_, idx) => (
                 <tr key={idx} className="border-t">
-                  <td colSpan={4} className="px-4 py-3">
+                  <td colSpan={9} className="px-4 py-3">
                     <div className="h-5 w-full rounded-md shimmer"></div>
                   </td>
                 </tr>
@@ -61,7 +61,7 @@ const Page = () => {
                 <tr
                   key={customer._id}
                   className="transition"
-                  onClick={() => handleRowClick(customer)}
+                  onClick={() => handleRowClick(customer._id!)}
                 >
                   <td>{customer.name}</td>
                   <td>{customer.contactNumber}</td>
@@ -91,7 +91,7 @@ const Page = () => {
       </table>
 
       <Offcanvas show={showSidebar} onClose={() => setShowSidebar(false)} title="Customer Info">
-        {selectedCustomer && <CustomerDetails customer={selectedCustomer} />}
+        {selectedCustomerId && <CustomerDetails customerId={selectedCustomerId} />}
       </Offcanvas>
     </>
   );
