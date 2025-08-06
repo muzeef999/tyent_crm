@@ -3,6 +3,7 @@ import { getCustomerInDetail } from "@/services/serviceApis";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 
+
 const CustomerDetails = ({ customerId }: { customerId: string }) => {
   const {
     data: response,

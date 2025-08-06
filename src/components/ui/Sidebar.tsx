@@ -29,7 +29,7 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-    <div className="hidden lg:flex flex-col w-64 h-screen pl-6 space-y-6 fixed overflow-y-auto ">
+    <div className="hidden lg:flex flex-col w-64 h-screen mt-12 pl-6 space-y-6 fixed overflow-y-auto ">
       
 
       <ul className="space-y-4 mt-4">
