@@ -4,7 +4,7 @@ import "./globals.css";
 import AppBar from "@/components/ui/AppBar";
 import Sidebar from "@/components/ui/Sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import  {ReactQueryDevtools} from "@tanstack/react-query-devtools"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -30,11 +30,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-background text-secondary`}
         >
-          <AppBar />
-                <Toaster richColors  position="top-center"/>
+          <Toaster richColors position="top-center" />
 
-
-          <ReactQueryDevtools/>
+          <ReactQueryDevtools />
 
           <div className="flex">
             <div className="fixed top-14 left-0 w-64 h-screen z-20">
@@ -42,6 +40,7 @@ export default function RootLayout({
             </div>
 
             <main className="flex-1 ml-64 mt-14  rounded-xl  bg-card-background h-screen">
+              <AppBar />
               {children}
             </main>
           </div>

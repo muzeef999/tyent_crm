@@ -2,10 +2,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
-import Image from "next/image";
-import logo from "@/asserts/logo.png";
+
 import { IoNotificationsOutline } from "react-icons/io5";
-import { CgProfile } from "react-icons/cg";
 
 const AppBar = () => {
   const [scrolling, setScrolling] = useState(false);
@@ -24,23 +22,12 @@ const AppBar = () => {
 
   return (
     <div
-      className={`fixed w-full top-0 z-50 transition-shadow px-8 ${
+      className={`fixed left-60 right-0 top-0 z-50 transition-shadow px-8 ${
         scrolling ? "shadow-md" : ""
       }`}
     >
-      <div className="flex justify-between items-center p-2 px-t">
-     
-        <div className="flex items-center">
-          <Image
-            src={logo}
-            alt="logo"
-            width={120}
-            height={40}
-            priority
-            className="object-contain"
-          />
-        </div>
-     
+      <div className="flex relative justify-between items-center p-2 px-t">
+        <div></div>
         <div className="flex items-center space-x-3 mb-2">
           <div className="border rounded-full">
             <ThemeToggle />
@@ -48,9 +35,15 @@ const AppBar = () => {
           <div className="border rounded-full p-1">
             <IoNotificationsOutline size={24} />
           </div>
-          <div className="border rounded-full p-1">
-            <CgProfile size ={24} />
-          </div>
+        </div>
+
+        <div className="absolute mt-8 flex justify-between w-full">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">
+            Need help?
+          </h1>
+
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">Hello, Muzeef 👋</h1>
+          <div></div>
         </div>
       </div>
     </div>

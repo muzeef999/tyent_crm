@@ -19,7 +19,8 @@ const Page = () => {
 
   return (
     
-      <table className="w-full  customtable">
+    <div className='p-6 overflow-x-auto'>
+      <table className="w-full min-w-[1000px] customtable">
         <thead>
           <tr>
           <th>Name</th>
@@ -40,6 +41,7 @@ const Page = () => {
           ))}
         </tbody>
         </table> 
+        </div>
   )
 }
 

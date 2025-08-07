@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import useReactQuery from "@/hooks/useReactQueary";
 import { getCustomers } from "@/services/serviceApis";
@@ -23,7 +23,9 @@ const Page = () => {
 
   const [showAddSidebar, setShowAddSidebar] = useState(false);
   const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
-  const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(null);
+  const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(
+    null
+  );
 
   const handleRowClick = (customerId: string) => {
     setSelectedCustomer(customerId);
@@ -31,7 +33,9 @@ const Page = () => {
   };
 
   if (error) {
-    return <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>;
+    return (
+      <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
+    );
   }
 
   return (
@@ -39,13 +43,13 @@ const Page = () => {
       {/* 🔹 Top Section */}
       <div className="flex flex-wrap justify-between items-center bg-background px-6 py-4 gap-4">
         <div>
-          <h1 className="text-xl font-bold">Hello, Muzeef 👋</h1>
-          <p className="text-gray-600">Great experiences begin with great customers.</p>
+          <p className="text-gray-600">Just ask me — I’ve got your back! 🚀</p>
         </div>
 
         <div>
-          <h1 className="text-xl font-bold">Need help?</h1>
-          <p className="text-gray-600">Just ask me — I’ve got your back! 🚀</p>
+          <p className="text-gray-600">
+            Great experiences begin with great customers.
+          </p>
         </div>
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
@@ -103,7 +107,9 @@ const Page = () => {
                     </td>
                     <td>{customer.installedBy}</td>
                     <td>
-                      <button className="text-blue-600 hover:underline">View</button>
+                      <button className="text-blue-600 hover:underline">
+                        View
+                      </button>
                     </td>
                     <td>{5}/5</td>
                   </tr>
@@ -119,7 +125,7 @@ const Page = () => {
         title="Add Customer"
       >
         <div className="p-4">
-        <AddCustomer onClose={() => setShowAddSidebar(false)} />
+          <AddCustomer onClose={() => setShowAddSidebar(false)} />
         </div>
       </Offcanvas>
 
