@@ -16,7 +16,6 @@ const Page = () => {
     if (error)
       return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;
   
-
   return (
     
     <div className='p-6 overflow-x-auto'>

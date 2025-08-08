@@ -1,12 +1,20 @@
 "use client";
+import AddService from "@/components/AddService";
+import AssignService from "@/components/AssignService";
+import Button from "@/components/ui/Button";
+import Offcanvas from "@/components/ui/Offcanvas";
 import useReactQuery from "@/hooks/useReactQueary";
 import { getServices } from "@/services/serviceApis";
 import { Service } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
+import { IoIosAdd } from "react-icons/io";
 
 const Page = () => {
+  const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
+  const [showupDateSidebar, setShowupDateSidebar]= useState<boolean>(false);
+
   const {
     data: service,
     isLoading,
@@ -25,6 +33,23 @@ const Page = () => {
 
   return (
     <>
+      <div className="flex flex-wrap justify-between items-center bg-background px-6 py-4 gap-4">
+        <div>
+          <p className="text-gray-600">Just ask me — I’ve got your back! 🚀</p>
+        </div>
+
+        <div>
+          <p className="text-gray-600">
+            Great experiences begin with great customers.
+          </p>
+        </div>
+
+        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
+          <IoIosAdd size={22} />
+          Add Service
+        </Button>
+      </div>
+
       <div className="p-6 overflow-x-auto">
         <table className="w-full min-w-[1000px]  customtable">
           <thead>
@@ -41,7 +66,10 @@ const Page = () => {
           </thead>
           <tbody>
             {service.data?.map((item: Service) => (
-              <tr key={item._id?.toString()}>
+              <tr
+                key={item._id?.toString()}
+                onClick={() => setShowupDateSidebar(true)}
+              >
                 <td>
                   {item.serviceDate
                     ? (() => {
@@ -80,20 +108,20 @@ const Page = () => {
                       })()
                     : "N/A"}
                 </td>
+                <td>{item.customerId.installedModel}</td>
+
                 <td>
-                 {item.customerId.installedModel}
+                  {item.assignedDate
+                    ? new Date(item.assignedDate).toLocaleDateString() // or .toISOString()
+                    : "Not assigned"}
                 </td>
 
                 <td>
-                 {item.assignedDate ? "Muzeef" : "Not assigned" }
-                </td>
-                
-                <td>
                   {item.closingDate
-                    ?  "1/15/2025"
+                    ? new Date(item.closingDate).toLocaleDateString() // or .toISOString()
                     : "Not closed"}
                 </td>
-                
+
                 <td>{item.serviceType?.join(", ")}</td>
                 <td>5/5</td>
                 <td>ongoing</td>
@@ -103,6 +131,27 @@ const Page = () => {
           </tbody>
         </table>
       </div>
+
+      <Offcanvas
+        show={showAddSidebar}
+        onClose={() => setShowAddSidebar(false)}
+        title="Add New Service"
+      >
+        <div className="p-4">
+          <AddService onClose={() => setShowAddSidebar(false)} />
+        </div>
+      </Offcanvas>
+
+
+      <Offcanvas
+        show={showupDateSidebar}
+        onClose={() => setShowupDateSidebar(false)}
+        title="Update Service"
+      >
+        <div className="p-4">
+          <AssignService onClose={() => setShowupDateSidebar(false)} />
+        </div>
+      </Offcanvas>
     </>
   );
 };
