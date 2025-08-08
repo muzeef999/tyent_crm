@@ -3,7 +3,6 @@
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import React from "react";
 
-
 interface OffcanvasProps {
   show: boolean;
   onClose: () => void;
@@ -11,7 +10,7 @@ interface OffcanvasProps {
   children: React.ReactNode;
 }
 
-const backdropVariants : Variants  = {
+const backdropVariants: Variants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
   visible: {
     opacity: 1,
@@ -20,14 +19,14 @@ const backdropVariants : Variants  = {
   },
 };
 
-const panelVariants : Variants  = {
+const panelVariants: Variants = {
   hidden: { x: "100%", opacity: 0 },
   visible: {
     x: 0,
     opacity: 1,
     transition: {
       duration: 0.5,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number,number,number], // custom cubic bezier = smoother
+      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number], // custom cubic bezier = smoother
     },
   },
   exit: {
@@ -35,12 +34,17 @@ const panelVariants : Variants  = {
     opacity: 0,
     transition: {
       duration: 0.4,
-      ease: [0.76, 0, 0.24, 1] as [number, number,number,number],
+      ease: [0.76, 0, 0.24, 1] as [number, number, number, number],
     },
   },
 };
 
-const Offcanvas: React.FC<OffcanvasProps> = ({ show, onClose, title = "Details", children }) => {
+const Offcanvas: React.FC<OffcanvasProps> = ({
+  show,
+  onClose,
+  title = "Details",
+  children,
+}) => {
   return (
     <AnimatePresence>
       {show && (
@@ -69,12 +73,12 @@ const Offcanvas: React.FC<OffcanvasProps> = ({ show, onClose, title = "Details",
               <h2 className="text-xl font-semibold">{title}</h2>
               <button
                 onClick={onClose}
-                className="text-red-600 font-semibold hover:opacity-70 transition"
+                className="text-red-600 font-semibold hover:opacity-70 transition cursor-pointer"
               >
                 Close
               </button>
             </div>
-            <hr/>
+            <hr />
             {children}
           </motion.div>
         </>

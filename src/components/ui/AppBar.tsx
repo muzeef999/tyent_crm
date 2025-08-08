@@ -7,6 +7,7 @@ import { IoNotificationsOutline } from "react-icons/io5";
 
 const AppBar = () => {
   const [scrolling, setScrolling] = useState(false);
+  
 
   useEffect(() => {
     const handleScroll = () => {

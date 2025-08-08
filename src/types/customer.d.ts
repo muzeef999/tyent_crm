@@ -39,12 +39,12 @@ export interface Employee {
   _id?: Types.ObjectId;
   name: string;
   email?: string;
-  contactNumber?: string;
-  role?: string;
+  contactNumber?: string; // Changed to string for form compatibility
+  role?: 'Admin' | 'Manager' | 'Customer Service' | 'Leads Manager' | 'Accounts' | 'Employee' | 'Technician' | 'HR' | '';
   department?: string;
-  status?: 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE';
-  joiningDate?: Date;
-  lastWorkingDate?: Date;
+  status?: 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | '';
+  joiningDate?: string; // string for form inputs (convert to Date before sending to backend)
+  lastWorkingDate?: string;
   address?: string;
   assignedServices?: Types.ObjectId[];
   createdAt?: Date;
