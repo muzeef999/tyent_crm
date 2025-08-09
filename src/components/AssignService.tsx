@@ -2,10 +2,10 @@ import React, { useState } from "react";
 
 type AssignedServiceProp = {
   onClose: () => void;
-  onSubmit: (formData: any) => void; // You’ll connect this to your useMutation
+  // onSubmit: (formData: any) => void; // You’ll connect this to your useMutation
 };
 
-const AssignService: React.FC<AssignedServiceProp> = ({ onClose, onSubmit }) => {
+const AssignService: React.FC<AssignedServiceProp> = ({ onClose }) => {
   const [formData, setFormData] = useState({
     visitNo: "",
     serviceDate: "",
@@ -40,7 +40,7 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, onSubmit }) => 
         ? formData.paymentIds.split(",").map((id) => id.trim())
         : [],
     };
-    onSubmit(payload); // You’ll pass your mutation call here
+    // onSubmit(payload); // You’ll pass your mutation call here
   };
 
   return (
