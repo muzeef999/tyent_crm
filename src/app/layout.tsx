@@ -3,9 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppBar from "@/components/ui/AppBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
+import { getEmployees } from "@/services/serviceApis";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <QueryClientProvider client={queryClient}>
+        <PrefetchEmployees /> 
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-background text-secondary`}
         >
@@ -48,4 +50,14 @@ export default function RootLayout({
       </QueryClientProvider>
     </html>
   );
+}
+
+
+function PrefetchEmployees() {
+  useQuery({
+    queryKey: ["employees"],
+    queryFn: getEmployees,
+    staleTime: 1000 * 60 * 5, // 5 min cache
+  });
+  return null; // nothing to render
 }

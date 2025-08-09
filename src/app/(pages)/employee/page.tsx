@@ -34,9 +34,9 @@ const Page = () => {
   const handleAddEmployee = () => {
     const newEmployee: Employee = {
       name: "Nelima Shaik",
-      role: "Frontend Developer",
+      // role: "Frontend Developer",
       status: "ACTIVE",
-      joiningDate: new Date(),
+      // joiningDate: new Date(),
       department: "Engineering",
       contactNumber: "+91 9876543210",
     };

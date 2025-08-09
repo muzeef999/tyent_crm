@@ -13,14 +13,20 @@ export const PATCH = async (
 
     // Validate service ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid service ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid service ID" },
+        { status: 400 }
+      );
     }
 
     const body = await req.json();
 
     // ✅ Optional: validate employeeId if provided
     if (body.employeeId && !mongoose.Types.ObjectId.isValid(body.employeeId)) {
-      return NextResponse.json({ error: "Invalid employee ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid employee ID" },
+        { status: 400 }
+      );
     }
 
     await connectDB();
@@ -37,11 +43,33 @@ export const PATCH = async (
     }
 
     return NextResponse.json(
-      { success: true, message: "Service updated successfully", data: updatedService },
+      {
+        success: true,
+        message: "Service updated successfully",
+        data: updatedService,
+      },
       { status: 200 }
     );
   } catch (err) {
     const Error = getErrorMessage(err);
     return NextResponse.json({ success: false, error: Error }, { status: 500 });
+  }
+};
+
+export const GET = async (
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  try {
+    const { id } = await params;
+    const service = Service.findById(id);
+
+    return NextResponse.json(
+      { success: true, message: service },
+      { status: 200 }
+    );
+  } catch (err) {
+    const Error = getErrorMessage(err);
+    return NextResponse.json({ sucess: true, error: Error }, { status: 500 });
   }
 };
