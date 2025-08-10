@@ -2,10 +2,11 @@
 import AddEmployee from "@/components/AddEmployee";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
-import {  getEmployees } from "@/services/serviceApis";
+import TableLoading from "@/components/ui/TableLoading";
+import { getEmployees } from "@/services/serviceApis";
 import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import {  useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 
@@ -17,8 +18,6 @@ const Page = () => {
     isLoading,
     error,
   } = useQuery({ queryKey: ["employees"], queryFn: getEmployees });
-
-  if (isLoading) return <div>Loading...</div>;
 
   if (error)
     return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;
@@ -57,26 +56,30 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-            {employees?.data?.map((employee: Employee) => (
-              <tr key={employee._id}>
-                <td>{employee.name}</td>
-                <td>{employee.status}</td>
-                <td>{employee?.designation}</td>
-                <td>
-                  {employee.joiningDate
-                    ? new Date(employee.joiningDate).toLocaleDateString()
-                    : "N/A"}
-                </td>
-                <td>
-                  {employee.lastWorkingDate
-                    ? new Date(employee.lastWorkingDate).toLocaleDateString()
-                    : "continue"}
-                </td>
-                <td>{employee.contactNumber}</td>
-                <td>{employee.email}</td>
-                <td>{employee.address}</td>
-              </tr>
-            ))}
+            {isLoading ? (
+              <TableLoading />
+            ) : (
+              employees?.data?.map((employee: Employee) => (
+                <tr key={employee._id}>
+                  <td>{employee.name}</td>
+                  <td>{employee.status}</td>
+                  <td>{employee?.designation}</td>
+                  <td>
+                    {employee.joiningDate
+                      ? new Date(employee.joiningDate).toLocaleDateString()
+                      : "N/A"}
+                  </td>
+                  <td>
+                    {employee.lastWorkingDate
+                      ? new Date(employee.lastWorkingDate).toLocaleDateString()
+                      : "continue"}
+                  </td>
+                  <td>{employee.contactNumber}</td>
+                  <td>{employee.email}</td>
+                  <td>{employee.address}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -13,6 +13,7 @@ import TypeSearch from "@/components/TypeSearch";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
+import { formatIndianRupees } from "@/utils/formatIndianRupees";
 
 // ✅ Debounce Hook
 function useDebounce<T>(value: T, delay = 500): T {
@@ -70,6 +71,8 @@ const Page = () => {
     );
   }
 
+
+
   return (
     <>
       {/* 🔹 Top Section */}
@@ -120,12 +123,12 @@ const Page = () => {
                   className="transition hover:bg-gray-50 cursor-pointer border-t"
                   onClick={() => handleRowClick(customer._id!)}
                 >
-                  <td>{customer.name}</td>
-                  <td>{customer.contactNumber}</td>
-                  <td>{customer.installedModel}</td>
-                  <td>{customer.invoiceNumber}</td>
-                  <td>₹{customer.price}</td>
-                  <td
+                  <td data-tooltip={customer.name}>{customer.name}</td>
+                  <td data-tooltip={customer.contactNumber}>{customer.contactNumber}</td>
+                  <td data-tooltip={customer.installedModel}>{customer.installedModel}</td>
+                  <td data-tooltip={customer.invoiceNumber}>{customer.invoiceNumber}</td>
+                  <td data-tooltip={customer.price}>{formatIndianRupees(customer.price)}</td>
+                  <td data-tooltip={customer.amcRenewed}
                     className={
                       customer.amcRenewed === "YES"
                         ? "text-green-500"
@@ -134,7 +137,7 @@ const Page = () => {
                   >
                     {customer.amcRenewed}
                   </td>
-                  <td>{customer.installedBy}</td>
+                  <td data-tooltip={customer.installedBy}>{customer.installedBy}</td>
                   <td>
                     <button className="text-blue-600 hover:underline">
                       View

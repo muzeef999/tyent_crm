@@ -3,6 +3,7 @@ import AddService from "@/components/AddService";
 import AssignService from "@/components/AssignService";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
+import TableLoading from "@/components/ui/TableLoading";
 import useReactQuery from "@/hooks/useReactQueary";
 import { getServices } from "@/services/serviceApis";
 import { Service } from "@/types/customer";
@@ -13,7 +14,7 @@ import { IoIosAdd } from "react-icons/io";
 
 const Page = () => {
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
-  const [showupDateSidebar, setShowupDateSidebar]= useState<boolean>(false);
+  const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
 
   const {
     data: service,
@@ -23,8 +24,6 @@ const Page = () => {
     queryKey: ["services"],
     queryFn: () => getServices(),
   });
-
-  if (isLoading) return <div>Loading...</div>;
 
   if (error)
     return (
@@ -65,69 +64,76 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-            {service.data?.map((item: Service) => (
-              <tr
-                key={item._id?.toString()}
-                onClick={() => setShowupDateSidebar(true)}
-              >
-                <td>
-                  {item.serviceDate
-                    ? (() => {
-                        const serviceDate = dayjs(item.serviceDate);
-                        const today = dayjs();
+            {isLoading ? (
+              <TableLoading />
+            ) : (
+              service.data?.map((item: Service) => (
+                <tr
+                  key={item._id?.toString()}
+                  onClick={() => setShowupDateSidebar(true)}
+                >
+                  <td>
+                    {item.serviceDate
+                      ? (() => {
+                          const serviceDate = dayjs(item.serviceDate);
+                          const today = dayjs();
 
-                        const formattedDate = serviceDate.format("DD/MM/YYYY");
+                          const formattedDate =
+                            serviceDate.format("DD/MM/YYYY");
 
-                        const isFuture = serviceDate.isAfter(today);
-                        const diffDays = Math.abs(
-                          today.diff(serviceDate, "day")
-                        );
-
-                        if (diffDays < 30) {
-                          return `${formattedDate} • ${
-                            isFuture
-                              ? `in ${diffDays} day${diffDays === 1 ? "" : "s"}`
-                              : `${diffDays} day${
-                                  diffDays === 1 ? "" : "s"
-                                } ago`
-                          }`;
-                        } else {
-                          const diffMonths = Math.abs(
-                            today.diff(serviceDate, "month")
+                          const isFuture = serviceDate.isAfter(today);
+                          const diffDays = Math.abs(
+                            today.diff(serviceDate, "day")
                           );
-                          return `${formattedDate} - ${
-                            isFuture
-                              ? `in ${diffMonths} month${
-                                  diffMonths === 1 ? "" : "s"
-                                }`
-                              : `${diffMonths} month${
-                                  diffMonths === 1 ? "" : "s"
-                                } ago`
-                          }`;
-                        }
-                      })()
-                    : "N/A"}
-                </td>
-                <td>{item.customerId.installedModel}</td>
 
-                <td>
-                  {item.assignedDate
-                    ? new Date(item.assignedDate).toLocaleDateString() // or .toISOString()
-                    : "Not assigned"}
-                </td>
+                          if (diffDays < 30) {
+                            return `${formattedDate} • ${
+                              isFuture
+                                ? `in ${diffDays} day${
+                                    diffDays === 1 ? "" : "s"
+                                  }`
+                                : `${diffDays} day${
+                                    diffDays === 1 ? "" : "s"
+                                  } ago`
+                            }`;
+                          } else {
+                            const diffMonths = Math.abs(
+                              today.diff(serviceDate, "month")
+                            );
+                            return `${formattedDate} - ${
+                              isFuture
+                                ? `in ${diffMonths} month${
+                                    diffMonths === 1 ? "" : "s"
+                                  }`
+                                : `${diffMonths} month${
+                                    diffMonths === 1 ? "" : "s"
+                                  } ago`
+                            }`;
+                          }
+                        })()
+                      : "N/A"}
+                  </td>
+                  <td>{item.customerId.installedModel}</td>
 
-                <td>
-                  {item.closingDate
-                    ? new Date(item.closingDate).toLocaleDateString() // or .toISOString()
-                    : "Not closed"}
-                </td>
+                  <td>
+                    {item.assignedDate
+                      ? new Date(item.assignedDate).toLocaleDateString() // or .toISOString()
+                      : "Not assigned"}
+                  </td>
 
-                <td>{item.serviceType?.join(", ")}</td>
-                <td>5/5</td>
-                <td>ongoing</td>
-                <td>{item.notes}</td>
-              </tr>
-            ))}
+                  <td>
+                    {item.closingDate
+                      ? new Date(item.closingDate).toLocaleDateString() // or .toISOString()
+                      : "Not closed"}
+                  </td>
+
+                  <td>{item.serviceType?.join(", ")}</td>
+                  <td>5/5</td>
+                  <td>ongoing</td>
+                  <td>{item.notes}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -141,7 +147,6 @@ const Page = () => {
           <AddService onClose={() => setShowAddSidebar(false)} />
         </div>
       </Offcanvas>
-
 
       <Offcanvas
         show={showupDateSidebar}
