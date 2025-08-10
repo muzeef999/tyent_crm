@@ -59,46 +59,10 @@ export const GET = async () => {
   try {
     await connectDB();
 
-    const today = new Date();
-
+    
    const Services  = await Service.find().populate("customerId", "name installedModel");
 
-    // const customersWithUpcomingServices = await Customer.aggregate([
-    //   {
-    //     $lookup: {
-    //       from: "services", // 💡 Collection name must match actual collection in MongoDB
-    //       localField: "upcomingServices",
-    //       foreignField: "_id",
-    //       as: "upcomingServicesData",
-    //     },
-    //   },
-    //   {
-    //     $addFields: {
-    //       upcomingServices: {
-    //         $filter: {
-    //           input: "$upcomingServicesData",
-    //           as: "service",
-    //           cond: {
-    //             $and: [
-    //               { $gte: ["$$service.serviceDate", today] },
-    //               { $eq: ["$$service.closingDate", null] }, // only open services
-    //             ],
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       name: 1,
-    //       contactNumber: 1,
-    //       email: 1,
-    //       address: 1,
-    //       upcomingServices: 1,
-    //     },
-    //   },
-    // ]);
-
+    
     return NextResponse.json(
       {
         success: true,

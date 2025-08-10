@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/mongodb";
 import Employee from "@/models/Employee";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { employeeValidation } from "@/validations/employeeValidation";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -8,11 +9,14 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
     try {
 
-        const body = await req.json();
+    const body = await req.json();
+
+        const validatedData = employeeValidation.parse(body);
+
         await connectDB();
 
         // Create a new customer
-        const newEmployee = await Employee.create(body);
+        const newEmployee = await Employee.create(validatedData);
 
         return NextResponse.json(
             {

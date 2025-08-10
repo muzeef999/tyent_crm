@@ -1,4 +1,3 @@
-// components/ui/Offcanvas.tsx
 "use client";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import React from "react";
@@ -14,8 +13,13 @@ const backdropVariants: Variants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
   visible: {
     opacity: 1,
-    backdropFilter: "blur(1px)",
+    backdropFilter: "blur(2px)",
     transition: { duration: 0.4, ease: "easeOut" },
+  },
+  exit: {
+    opacity: 0,
+    backdropFilter: "blur(0px)",
+    transition: { duration: 0.3, ease: "easeIn" },
   },
 };
 
@@ -25,16 +29,17 @@ const panelVariants: Variants = {
     x: 0,
     opacity: 1,
     transition: {
-      duration: 0.5,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number], // custom cubic bezier = smoother
+      duration: 0.45,
+      ease: [0.25, 0.1, 0.25, 1],
     },
   },
   exit: {
     x: "100%",
     opacity: 0,
+      backdropFilter: "blur(0px)",
     transition: {
-      duration: 0.4,
-      ease: [0.76, 0, 0.24, 1] as [number, number, number, number],
+      duration: 0.55,
+      ease: "easeInOut",
     },
   },
 };
@@ -46,17 +51,17 @@ const Offcanvas: React.FC<OffcanvasProps> = ({
   children,
 }) => {
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {show && (
         <>
           {/* Overlay */}
           <motion.div
             key="backdrop"
-            className="fixed inset-0 bg-black/60 backdrop-blur-none z-40"
+            className="fixed inset-0 bg-black/60 z-40"
+            variants={backdropVariants}
             initial="hidden"
             animate="visible"
-            exit="hidden"
-            variants={backdropVariants}
+            exit="exit"
             onClick={onClose}
           />
 
@@ -64,10 +69,10 @@ const Offcanvas: React.FC<OffcanvasProps> = ({
           <motion.div
             key="panel"
             className="fixed top-0 right-0 w-full sm:w-[800px] h-full bg-white z-50 shadow-xl p-6 overflow-y-auto rounded-l-2xl"
+            variants={panelVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={panelVariants}
           >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">{title}</h2>

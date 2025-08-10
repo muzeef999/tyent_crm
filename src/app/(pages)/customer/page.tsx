@@ -1,24 +1,47 @@
 "use client";
 
-import useReactQuery from "@/hooks/useReactQueary";
 import { getCustomers } from "@/services/serviceApis";
 import { Customer } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Offcanvas from "@/components/ui/Offcanvas";
 import CustomerDetails from "@/components/CustomerDetails";
 import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
 import AddCustomer from "@/components/AddCustomer";
+import TypeSearch from "@/components/TypeSearch";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Pagination from "@/components/ui/Pagination";
+import TableLoading from "@/components/ui/TableLoading";
+
+// ✅ Debounce Hook
+function useDebounce<T>(value: T, delay = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 const Page = () => {
-  const {
-    data: customers,
-    isLoading,
-    error,
-  } = useReactQuery({
-    queryKey: ["customers"],
-    queryFn: () => getCustomers(),
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 500);
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["customers", page, limit, debouncedSearchText],
+    queryFn: () =>
+      getCustomers({
+        page,
+        limit,
+        searchQuery: debouncedSearchText, // ✅ fixed param name
+      }),
+    placeholderData: keepPreviousData,
   });
 
   const [showAddSidebar, setShowAddSidebar] = useState(false);
@@ -32,6 +55,15 @@ const Page = () => {
     setShowDetailsSidebar(true);
   };
 
+  // ✅ Correct extraction
+  const customers: Customer[] = data?.data || [];
+  const pagination = data?.pagination;
+  const totalPages = pagination?.totalPages || 1;
+
+  const totalCustomers = pagination?.total || 0;
+  const newCustomers = 10;
+  const unsatisfiedCustomers = 5;
+
   if (error) {
     return (
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
@@ -41,14 +73,18 @@ const Page = () => {
   return (
     <>
       {/* 🔹 Top Section */}
-      <div className="flex flex-wrap justify-between items-center bg-background px-6 py-4 gap-4">
+      <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
         <div>
-          <p className="text-gray-600">Just ask me — I’ve got your back! 🚀</p>
+          <TypeSearch onSearch={setSearchText} />
         </div>
 
         <div>
           <p className="text-gray-600">
-            Great experiences begin with great customers.
+            Total customers:{" "}
+            <span className="font-medium">{totalCustomers}</span>, new customers
+            this month: <span className="font-medium">{newCustomers}</span>,{" "}
+            unsatisfied customers:{" "}
+            <span className="font-medium">{unsatisfiedCustomers}</span>
           </p>
         </div>
 
@@ -75,48 +111,44 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-            {isLoading
-              ? Array.from({ length: 15 }).map((_, idx) => (
-                  <tr key={idx} className="border-t">
-                    <td colSpan={9} className="px-4 py-3">
-                      <div className="h-5 w-full rounded-md shimmer"></div>
-                    </td>
-                  </tr>
-                ))
-              : customers.data?.map((customer: Customer) => (
-                  <tr
-                    key={customer._id}
-                    className="transition hover:bg-gray-50 cursor-pointer border-t"
-                    onClick={() => handleRowClick(customer._id!)}
+            {isLoading ? (
+              <TableLoading />
+            ) : (
+              customers.map((customer) => (
+                <tr
+                  key={customer._id}
+                  className="transition hover:bg-gray-50 cursor-pointer border-t"
+                  onClick={() => handleRowClick(customer._id!)}
+                >
+                  <td>{customer.name}</td>
+                  <td>{customer.contactNumber}</td>
+                  <td>{customer.installedModel}</td>
+                  <td>{customer.invoiceNumber}</td>
+                  <td>₹{customer.price}</td>
+                  <td
+                    className={
+                      customer.amcRenewed === "YES"
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }
                   >
-                    <td>{customer.name}</td>
-                    <td>{customer.contactNumber}</td>
-                    <td>{customer.installedModel}</td>
-                    <td>{customer.invoiceNumber}</td>
-                    <td>₹{customer.price}</td>
-                    <td>
-                      <span
-                        className={
-                          customer.amcRenewed === "YES"
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }
-                      >
-                        {customer.amcRenewed}
-                      </span>
-                    </td>
-                    <td>{customer.installedBy}</td>
-                    <td>
-                      <button className="text-blue-600 hover:underline">
-                        View
-                      </button>
-                    </td>
-                    <td>{5}/5</td>
-                  </tr>
-                ))}
+                    {customer.amcRenewed}
+                  </td>
+                  <td>{customer.installedBy}</td>
+                  <td>
+                    <button className="text-blue-600 hover:underline">
+                      View
+                    </button>
+                  </td>
+                  <td>5/5</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       {/* 🔹 Offcanvas for Add Customer */}
       <Offcanvas

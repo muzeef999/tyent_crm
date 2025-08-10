@@ -1,12 +1,39 @@
 "use client";
 
 import Input from "@/components/ui/Input";
-import { createCustomer } from "@/services/serviceApis";
+import { createCustomer, getEmployees } from "@/services/serviceApis";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import CustomDropdown from "./ui/CustomDropdown";
+import { Employee } from "@/types/customer";
 
+const warrantyOptions = [
+  { label: "1 Year", value: "1" },
+  { label: "2 Years", value: "2" },
+  { label: "3 Years", value: "3" },
+  { label: "4 Years", value: "4" },
+  { label: "5 Years", value: "5" },
+  { label: "6 Years", value: "6" },
+];
+
+const amcOptions = [
+  { label: "Yes", value: "YES" },
+  { label: "No", value: "NO" },
+];
+
+const installedModelOptions = [
+  { label: "NMP-5", value: "NMP-5" },
+  { label: "NMP-7", value: "NMP-7" },
+  { label: "NMP-9", value: "NMP-9" },
+  { label: "NMP-11", value: "NMP-11" },
+  { label: "UCE-9", value: "UCE-9" },
+  { label: "UCE-11", value: "UCE-11" },
+  { label: "UCE-13", value: "UCE-13" },
+  { label: "Hbride-H2", value: "Hbride-H2" },
+  { label: "H-rich", value: "H-rich" },
+];
 
 type AddCustomerProps = {
   onClose: () => void;
@@ -31,8 +58,31 @@ const initialFormData = {
   pressureTank: false,
 };
 
-const AddCustomer:React.FC<AddCustomerProps> = ({onClose}) => {
+const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   const [formData, setFormData] = useState(initialFormData);
+
+  const {
+    data: employees,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["employees"],
+    queryFn: getEmployees,
+  });
+
+  const TechincianOptions = employees?.data
+    ?.filter((d: Employee) => d.designation === "Technician")
+    .map((emp: Employee) => ({
+      label: emp.name, // assuming employee object has 'name' field
+      value: emp._id, // MongoDB ObjectId
+    }));
+
+  const MarkingMangerOptions = employees?.data
+    ?.filter((d: Employee) => d.designation === "Marketing Manager")
+    .map((emp: Employee) => ({
+      label: emp.name, // assuming employee object has 'name' field
+      value: emp._id, // MongoDB ObjectId
+    }));
 
   const queryClient = useQueryClient();
 
@@ -43,7 +93,7 @@ const AddCustomer:React.FC<AddCustomerProps> = ({onClose}) => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
 
       setFormData(initialFormData);
-     onClose();
+      onClose();
     },
     onError: (error: unknown) => {
       const Error = getErrorMessage(error);
@@ -83,6 +133,14 @@ const AddCustomer:React.FC<AddCustomerProps> = ({onClose}) => {
     mutation.mutate(preparedData);
   };
 
+
+  if(isLoading) {
+    return<p>Seeting Up</p>
+  }
+
+  if(isError){
+    return<p>unknow Error</p>
+  }
   return (
     <form
       onSubmit={handleSubmit}
@@ -119,13 +177,17 @@ const AddCustomer:React.FC<AddCustomerProps> = ({onClose}) => {
         value={formData.address}
         onChange={handleChange}
       />
-      <Input
-        name="installedModel"
+
+      <CustomDropdown
         label="Installed Model"
-        placeholder="Enter model"
-        value={formData.installedModel}
-        onChange={handleChange}
+        id="installedModel"
+        options={installedModelOptions}
+        selectedValue={formData.installedModel || ""}
+        onSelect={(value) =>
+          setFormData((prev) => ({ ...prev, installedModel: value }))
+        }
       />
+
       <Input
         name="price"
         label="Price"
@@ -148,20 +210,27 @@ const AddCustomer:React.FC<AddCustomerProps> = ({onClose}) => {
         value={formData.serialNumber}
         onChange={handleChange}
       />
-      <Input
-        name="warrantyYears"
+
+      <CustomDropdown
         label="Warranty (Years)"
-        placeholder="1 / 2 / 3"
-        value={formData.warrantyYears}
-        onChange={handleChange}
+        id="warrantyYears"
+        options={warrantyOptions}
+        selectedValue={formData.warrantyYears || ""}
+        onSelect={(value) =>
+          setFormData((prev) => ({ ...prev, warrantyYears: value }))
+        }
       />
-      <Input
-        name="amcRenewed"
+
+      <CustomDropdown
         label="AMC Renewed"
-        placeholder="YES / NO"
-        value={formData.amcRenewed}
-        onChange={handleChange}
+        id="amcRenewed"
+        options={amcOptions}
+        selectedValue={formData.amcRenewed || ""}
+        onSelect={(value) =>
+          setFormData((prev) => ({ ...prev, amcRenewed: value }))
+        }
       />
+
       <Input
         name="remarks"
         label="Remarks"
@@ -176,19 +245,25 @@ const AddCustomer:React.FC<AddCustomerProps> = ({onClose}) => {
         value={formData.DOB}
         onChange={handleChange}
       />
-      <Input
-        name="installedBy"
+
+      <CustomDropdown
         label="Installed By"
-        placeholder="Technician Name"
-        value={formData.installedBy}
-        onChange={handleChange}
+        id="installedBy"
+        options={TechincianOptions}
+        selectedValue={formData.installedBy || ""}
+        onSelect={(value) =>
+          setFormData((prev) => ({ ...prev, installedBy: value }))
+        }
       />
-      <Input
-        name="marketingManager"
+
+      <CustomDropdown
         label="Marketing Manager"
-        placeholder="Manager Name"
-        value={formData.marketingManager}
-        onChange={handleChange}
+        id="marketingManager"
+        options={MarkingMangerOptions}
+        selectedValue={formData.marketingManager || ""}
+        onSelect={(value) =>
+          setFormData((prev) => ({ ...prev, marketingManager: value }))
+        }
       />
 
       {/* ✅ Boolean Inputs */}

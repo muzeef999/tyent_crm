@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
 import { getEmployees } from "@/services/serviceApis";
+import 'react-quill/dist/quill.snow.css'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

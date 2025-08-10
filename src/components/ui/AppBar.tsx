@@ -38,7 +38,7 @@ const AppBar = () => {
           </div>
         </div>
 
-        <div className="absolute mt-8 flex justify-between w-full">
+        <div className="absolute mt-8 flex justify-between items-end w-full">
           <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">
             Need help?
           </h1>

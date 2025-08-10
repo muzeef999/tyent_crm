@@ -1,8 +1,19 @@
 import axiosInstance from "@/lib/axiosInstance";
 import { Account, Customer, Employee, Payment, Service } from "@/types/customer";
+import axios from "axios";
 
 //CUSTOMERS 
-export const getCustomers = () => axiosInstance.get("/customers").then((res) => res.data);
+
+export const getCustomers = async ({  page = 1,limit = 10,searchQuery = "",}: { page?: number;limit?: number; searchQuery?: string;}) => {
+  const queryString = new URLSearchParams({page: String(page),  limit: String(limit),
+    ...(searchQuery ? { q: searchQuery } : {}),
+  }).toString();
+
+  const res = await axiosInstance.get(`/customers?${queryString}`);
+  return res.data; // contains { data, pagination }
+};
+
+
 export const getCustomerInDetail = (id: string) => axiosInstance.get(`customers/${id}`).then((res) => res.data);
 export const createCustomer = (data: Customer) => axiosInstance.post("/customers", data).then((res) => res.data);
 export const updateCustomer = (id: string) =>axiosInstance.put(`/customers/${id}`).then((res) => res.data);
@@ -39,3 +50,8 @@ export const createEmployee = (employee: Employee) => axiosInstance.post("/emplo
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);
 export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
+
+
+
+//Leads
+export const getLeads = () => axios.get("https://www.tyent.co.in/api/lead").then((res) => res.data);

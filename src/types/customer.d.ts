@@ -23,34 +23,48 @@ export interface Customer {
   updatedAt?: string;
 }
 
-
 export interface Account {
   _id?: Types.ObjectId;
   customerId: Types.ObjectId;
   paymentIds?: Types.ObjectId[];
   dueAmount?: number;
-  paymentStatus?: 'PAID' | 'PENDING' | 'PARTIALLY';
+  paymentStatus?: "PAID" | "PENDING" | "PARTIALLY";
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 
 export interface Employee {
   _id?: Types.ObjectId;
   name: string;
   email?: string;
-  contactNumber?: string; // Changed to string for form compatibility
-  role?: 'Admin' | 'Manager' | 'Customer Service' | 'Leads Manager' | 'Accounts' | 'Employee' | 'Technician' | 'HR' | '';
-  department?: string;
-  status?: 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | '';
-  joiningDate?: string; // string for form inputs (convert to Date before sending to backend)
+  contactNumber?: string;
+  designation?:
+    | "Admin"
+    | "Super Admin"
+    | "Marketing Manager"
+    | "Technical Manager"
+    | "Telecall Manager"
+    | "Stock Manager"
+    | "Account Manager"
+    | "Technician"
+    | "Telecaller"
+    | "Stock Clerk"
+    | "Accountant"
+    | "Customer Support"
+    | "Intern"
+    | "HR Executive"
+    | "Sales Executive"
+    | "";
+  panNumber?: string;
+  aadharNumber?: string;
+  status?: "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "";
+  joiningDate?: string;
   lastWorkingDate?: string;
   address?: string;
   assignedServices?: Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 
 export interface Payment {
   _id?: Types.ObjectId;
@@ -59,13 +73,11 @@ export interface Payment {
   modeOfPayment?: string;
   receivedDate?: Date;
   pendingAmount?: string;
-  status?: 'PAID' | 'PARTIALLY' | 'PENDING';
+  status?: "PAID" | "PARTIALLY" | "PENDING";
   remarks?: string;
   invoiceNumber?: string;
   createDate?: Date; // since you renamed createdAt
 }
-
-
 
 export interface Service {
   _id?: Types.ObjectId;
@@ -78,26 +90,24 @@ export interface Service {
   assignedDate?: Date;
   closingDate?: Date;
   serviceType?: (
-    | 'GENERAL_SERVICE'
-    | 'PAID_SERVICE'
-    | 'IN_WARRANTY_BREAKDOWN'
-    | 'FILTER_REPLACEMENT'
-    | 'INSTALLATION'
-    | 'RE_INSTALLATION'
-    | 'FEASIBILITY'
-    | 'SPARE_PART_REPLACEMENT'
-    | 'DEEP_CLEANING'
-    | 'SPMS_PLUS_REPLACEMENT'
-    | 'JOGDIAL_REPLACEMENT'
-    | 'DISPLAY_REPLACEMENT'
+    | "GENERAL_SERVICE"
+    | "PAID_SERVICE"
+    | "IN_WARRANTY_BREAKDOWN"
+    | "FILTER_REPLACEMENT"
+    | "INSTALLATION"
+    | "RE_INSTALLATION"
+    | "FEASIBILITY"
+    | "SPARE_PART_REPLACEMENT"
+    | "DEEP_CLEANING"
+    | "SPMS_PLUS_REPLACEMENT"
+    | "JOGDIAL_REPLACEMENT"
+    | "DISPLAY_REPLACEMENT"
   )[];
   employeeId?: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
-  avgRating?:number
+  avgRating?: number;
 }
-
-
 
 export interface InputProps {
   label?: string;
@@ -108,4 +118,16 @@ export interface InputProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;
+}
+
+export interface Leads {
+  id:string
+  name: string;
+  email: string;
+  number: number;
+  location: string;
+  message: string;
+  assignedTo: string;
+  status: string;
+  createdAt: Date;
 }

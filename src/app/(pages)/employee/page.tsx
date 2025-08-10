@@ -2,10 +2,10 @@
 import AddEmployee from "@/components/AddEmployee";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
-import { createEmployee, getEmployees } from "@/services/serviceApis";
+import {  getEmployees } from "@/services/serviceApis";
 import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {  useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 
@@ -17,31 +17,6 @@ const Page = () => {
     isLoading,
     error,
   } = useQuery({ queryKey: ["employees"], queryFn: getEmployees });
-
-  const queryClient = useQueryClient();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: (employee: Employee) => createEmployee(employee),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
-      alert("Employee added successfully!");
-    },
-    onError: (error) => {
-      alert("Error adding employee: " + getErrorMessage(error));
-    },
-  });
-
-  const handleAddEmployee = () => {
-    const newEmployee: Employee = {
-      name: "Nelima Shaik",
-      // role: "Frontend Developer",
-      status: "ACTIVE",
-      // joiningDate: new Date(),
-      department: "Engineering",
-      contactNumber: "+91 9876543210",
-    };
-    mutate(newEmployee);
-  };
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -72,26 +47,34 @@ const Page = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Role</th>
               <th>Status</th>
+              <th>Desigination</th>
               <th>Joining Date</th>
-              <th>Department</th>
-              <th>Contact</th>
+              <th>Last Working Date</th>
+              <th>phone Contact</th>
+              <th>Gmail Contact</th>
+              <th>Address</th>
             </tr>
           </thead>
           <tbody>
             {employees?.data?.map((employee: Employee) => (
               <tr key={employee._id}>
                 <td>{employee.name}</td>
-                <td>{employee.role}</td>
                 <td>{employee.status}</td>
+                <td>{employee?.designation}</td>
                 <td>
                   {employee.joiningDate
                     ? new Date(employee.joiningDate).toLocaleDateString()
                     : "N/A"}
                 </td>
-                <td>{employee.department}</td>
+                <td>
+                  {employee.lastWorkingDate
+                    ? new Date(employee.lastWorkingDate).toLocaleDateString()
+                    : "continue"}
+                </td>
                 <td>{employee.contactNumber}</td>
+                <td>{employee.email}</td>
+                <td>{employee.address}</td>
               </tr>
             ))}
           </tbody>
