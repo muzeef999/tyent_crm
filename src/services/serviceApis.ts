@@ -45,20 +45,36 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 
 //EMPLOYEES
-export const getEmployees = async ({  page = 1,limit = 10,searchQuery = "",  getAll = false, // New parameter to fetch all
-}: { page?: number;limit?: number; searchQuery?: string;getAll?: boolean;}) => {
+
+export const getEmployees = async ({
+  page,
+  limit,
+  searchQuery = "",
+  getAll = false,
+}: {
+  page?: number;
+  limit?: number;
+  searchQuery?: string;
+  getAll?: boolean;
+}) => {
+  const params: Record<string, string> = {};
   
-    const params = {
-    ...(searchQuery ? { q: searchQuery } : {}),
-    ...(!getAll && { page: String(page || 1), limit: String(limit || 10) }),
-  };
+  // Add search query if provided
+  if (searchQuery) {
+    params.q = searchQuery;
+  }
 
+  // Only add pagination params if not fetching all records
+  if (!getAll) {
+    params.page = String(page);
+    params.limit = String(limit);
+  }
 
-    const queryString = new URLSearchParams(params).toString();
-   const res = await axiosInstance.get(`/employees?${queryString}`);
-     return res.data; // contains { data, pagination }getAll?: boolean;
+  const queryString = new URLSearchParams(params).toString();
+  const res = await axiosInstance.get(`/employees?${queryString}`);
+  return res.data; // contains { data, pagination }
+};
 
-} 
 export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);

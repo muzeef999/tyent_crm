@@ -47,12 +47,16 @@ export const GET = async (req: Request) => {
     // Get search query, fallback to empty string (no filter)
     const q = searchParams.get("q")?.trim() || "";
 
-    // Parse pagination params safely with defaults and limits
+    // Parse pagination params - no defaults for limit
     const pageStr = searchParams.get("page");
     const limitStr = searchParams.get("limit");
-    const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
-    const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 10;
-    const skip = (page - 1) * limit;
+    
+    // If limit is not provided, we'll return all records without pagination
+    const hasPagination = limitStr !== null;
+    
+    const page = hasPagination ? (pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1) : 1;
+    const limit = hasPagination ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 0;
+    const skip = hasPagination ? (page - 1) * limit : 0;
 
     // Build search filter for MongoDB
     let filter = {};
@@ -70,28 +74,31 @@ export const GET = async (req: Request) => {
       };
     }
 
-    // Fetch total count for pagination
+    // Fetch total count
     const total = await Employee.countDocuments(filter);
 
-    // Fetch employees with filter + pagination + sorting by newest
-    const employees = await Employee.find(filter)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean();
+    // Fetch employees with filter
+    let query = Employee.find(filter).sort({ createdAt: -1 });
+    
+    // Apply pagination only if limit was provided
+    if (hasPagination) {
+      query = query.skip(skip).limit(limit);
+    }
 
-    // Return paginated results
+    const employees = await query.lean();
+
+    // Return results
     return NextResponse.json(
       {
         success: true,
         message: "Employees fetched successfully",
         data: employees,
-        pagination: {
+        pagination: hasPagination ? {
           total,
           page,
           limit,
           totalPages: Math.ceil(total / limit),
-        },
+        } : null,
       },
       { status: 200 }
     );

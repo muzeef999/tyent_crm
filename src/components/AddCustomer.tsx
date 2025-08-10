@@ -71,7 +71,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     queryFn: () => getEmployees({ getAll: true }),
   });
 
-  console.log("ccccccc",response);
 
   const employees = response?.data; // Extract data property if it exists
 
