@@ -24,3 +24,4 @@ const customerSchema = new Schema({
 }, { timestamps: true });
 
 export default mongoose.models.Customer || mongoose.model('Customer', customerSchema);
+

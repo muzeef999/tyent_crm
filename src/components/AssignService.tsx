@@ -34,7 +34,7 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose }) => {
     isError,
   } = useQuery({
     queryKey: ["employees"],
-    queryFn: getEmployees,
+    queryFn:()=> getEmployees({getAll: true}),
   });
 
   const employeeOptions = employees?.data

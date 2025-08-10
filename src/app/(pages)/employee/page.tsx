@@ -1,43 +1,67 @@
 "use client";
 import AddEmployee from "@/components/AddEmployee";
+import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
+import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
+import useDebounce from "@/hooks/useDebounce";
 import { getEmployees } from "@/services/serviceApis";
 import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 
 const Page = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false); // fixed
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 500);
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   const {
     data: employees,
     isLoading,
     error,
-  } = useQuery({ queryKey: ["employees"], queryFn: getEmployees });
+  } = useQuery({
+    queryKey: ["employees"],
+    queryFn: () =>
+      getEmployees({ page, limit, searchQuery: debouncedSearchText }),
+  });
+
+  const customers: Employee[] = employees?.data || [];
+  const pagination = employees?.pagination;
+  const totalPages = pagination?.totalPages || 1;
+
+  const totalCustomers = pagination?.total || 0;
+  const newCustomers = 10;
+  const unsatisfiedCustomers = 5;
 
   if (error)
     return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;
 
   return (
     <>
-      <div className="flex flex-wrap justify-between items-center bg-background px-6 py-4 gap-4">
+      <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
         <div>
-          <p className="text-gray-600">Just ask me — I’ve got your back! 🚀</p>
+          <TypeSearch onSearch={setSearchText} />
         </div>
 
         <div>
           <p className="text-gray-600">
-            Great experiences begin with great customers.
+            Total customers:{" "}
+            <span className="font-medium">{totalCustomers}</span>, new customers
+            this month: <span className="font-medium">{newCustomers}</span>,{" "}
+            unsatisfied customers:{" "}
+            <span className="font-medium">{unsatisfiedCustomers}</span>
           </p>
         </div>
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
-          Add Employee
+          Add Customer
         </Button>
       </div>
 
@@ -83,6 +107,8 @@ const Page = () => {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       <Offcanvas
         show={showAddSidebar}

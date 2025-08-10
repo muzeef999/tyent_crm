@@ -47,7 +47,7 @@ export default function RootLayout({
 function PrefetchEmployees() {
   useQuery({
     queryKey: ["employees"],
-    queryFn: getEmployees,
+    queryFn: () => getEmployees({ getAll: true }),
     staleTime: 1000 * 60 * 5, // 5 min cache
   });
   return null; // nothing to render

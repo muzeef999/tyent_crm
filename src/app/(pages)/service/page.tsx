@@ -1,18 +1,20 @@
 "use client";
 import AddService from "@/components/AddService";
 import AssignService from "@/components/AssignService";
+import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
 import TableLoading from "@/components/ui/TableLoading";
-import useReactQuery from "@/hooks/useReactQueary";
 import { getServices } from "@/services/serviceApis";
 import { Service } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 
 const Page = () => {
+  const [searchText, setSearchText] = useState("");
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
   const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
 
@@ -20,7 +22,7 @@ const Page = () => {
     data: service,
     isLoading,
     error,
-  } = useReactQuery({
+  } = useQuery({
     queryKey: ["services"],
     queryFn: () => getServices(),
   });
@@ -32,20 +34,29 @@ const Page = () => {
 
   return (
     <>
-      <div className="flex flex-wrap justify-between items-center bg-background px-6 py-4 gap-4">
+       <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
         <div>
-          <p className="text-gray-600">Just ask me — I’ve got your back! 🚀</p>
+          <TypeSearch onSearch={setSearchText} />
         </div>
 
         <div>
           <p className="text-gray-600">
-            Great experiences begin with great customers.
+            Total services:{" "}
+            <span className="font-medium">{322300}</span>,  this month services
+            <span className="font-medium">{234}</span>,{" "}
+            unsatisfied customers:{" "}
+
+            <span className="font-medium">{3}</span>
+            not assigned services
+            <span className="font-medium">{3}</span>
+              pending services
+            <span className="font-medium">{3}</span>
           </p>
         </div>
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
-          Add Service
+          Add Servuce
         </Button>
       </div>
 
@@ -70,6 +81,7 @@ const Page = () => {
               service.data?.map((item: Service) => (
                 <tr
                   key={item._id?.toString()}
+                    className="transition hover:bg-gray-50 cursor-pointer border-t"
                   onClick={() => setShowupDateSidebar(true)}
                 >
                   <td>

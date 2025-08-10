@@ -15,8 +15,8 @@ export interface Customer {
   upcomingServices?: string[];
   remarks?: string;
   DOB?: string;
-  installedBy?: string;
-  marketingManager?: string;
+  installedBy?: string | Employee;
+  marketingManager?: string | Employee;
   R0?: boolean;
   pressureTank?: boolean;
   createdAt?: string;

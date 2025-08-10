@@ -55,19 +55,52 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
-export const GET = async () => {
+export const GET = async (req: Request) => {
   try {
     await connectDB();
 
-    
-   const Services  = await Service.find().populate("customerId", "name installedModel");
+    const { searchParams } = new URL(req.url);
 
-    
+    const q = searchParams.get("q")?.trim() || "";
+
+    const pageStr = searchParams.get("page");
+    const limitStr = searchParams.get("limit");
+
+    const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
+    const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 10;
+    const skip = (page - 1) * limit;
+
+    // Build filter object
+    let filter = {};
+    if (q) {
+      filter = {
+        $or: [
+          { mode: { $regex: q, $options: "i" } },
+          { serviceType: { $regex: q, $options: "i" } },
+        ],
+      };
+    }
+
+    const total = await Service.countDocuments(filter);
+
+    const services = await Service.find(filter)
+      .populate("customerId", "name installedModel")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
+
     return NextResponse.json(
       {
         success: true,
         message: "Filtered upcoming services fetched successfully",
-        data: Services,
+        data: services,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
       { status: 200 }
     );

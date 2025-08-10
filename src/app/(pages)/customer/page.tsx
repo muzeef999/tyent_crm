@@ -14,18 +14,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
 import { formatIndianRupees } from "@/utils/formatIndianRupees";
-
-// ✅ Debounce Hook
-function useDebounce<T>(value: T, delay = 500): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-
-  return debouncedValue;
-}
+import useDebounce from "@/hooks/useDebounce";
 
 const Page = () => {
   const [searchText, setSearchText] = useState("");
@@ -42,7 +31,7 @@ const Page = () => {
         limit,
         searchQuery: debouncedSearchText, // ✅ fixed param name
       }),
-    placeholderData: keepPreviousData,
+    
   });
 
   const [showAddSidebar, setShowAddSidebar] = useState(false);
@@ -70,8 +59,6 @@ const Page = () => {
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
     );
   }
-
-
 
   return (
     <>
@@ -124,11 +111,20 @@ const Page = () => {
                   onClick={() => handleRowClick(customer._id!)}
                 >
                   <td data-tooltip={customer.name}>{customer.name}</td>
-                  <td data-tooltip={customer.contactNumber}>{customer.contactNumber}</td>
-                  <td data-tooltip={customer.installedModel}>{customer.installedModel}</td>
-                  <td data-tooltip={customer.invoiceNumber}>{customer.invoiceNumber}</td>
-                  <td data-tooltip={customer.price}>{formatIndianRupees(customer.price)}</td>
-                  <td data-tooltip={customer.amcRenewed}
+                  <td data-tooltip={customer.contactNumber}>
+                    {customer.contactNumber}
+                  </td>
+                  <td data-tooltip={customer.installedModel}>
+                    {customer.installedModel}
+                  </td>
+                  <td data-tooltip={customer.invoiceNumber}>
+                    {customer.invoiceNumber}
+                  </td>
+                  <td data-tooltip={customer.price}>
+                    {formatIndianRupees(customer.price)}
+                  </td>
+                  <td
+                    data-tooltip={customer.amcRenewed}
                     className={
                       customer.amcRenewed === "YES"
                         ? "text-green-500"
@@ -137,7 +133,17 @@ const Page = () => {
                   >
                     {customer.amcRenewed}
                   </td>
-                  <td data-tooltip={customer.installedBy}>{customer.installedBy}</td>
+                  <td
+                    data-tooltip={
+                      typeof customer.installedBy === "object"
+                        ? customer.installedBy?.name
+                        : ""
+                    }
+                  >
+                    {typeof customer.installedBy === "object"
+                      ? customer.installedBy?.name
+                      : "Not assigned"}
+                  </td>
                   <td>
                     <button className="text-blue-600 hover:underline">
                       View

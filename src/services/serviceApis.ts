@@ -45,11 +45,25 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 
 //EMPLOYEES
-export const getEmployees = () => axiosInstance.get("/employees").then((res) => res.data);
+export const getEmployees = async ({  page = 1,limit = 10,searchQuery = "",  getAll = false, // New parameter to fetch all
+}: { page?: number;limit?: number; searchQuery?: string;getAll?: boolean;}) => {
+  
+    const params = {
+    ...(searchQuery ? { q: searchQuery } : {}),
+    ...(!getAll && { page: String(page || 1), limit: String(limit || 10) }),
+  };
+
+
+    const queryString = new URLSearchParams(params).toString();
+   const res = await axiosInstance.get(`/employees?${queryString}`);
+     return res.data; // contains { data, pagination }getAll?: boolean;
+
+} 
 export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);
 export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
+
 
 
 

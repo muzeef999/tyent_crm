@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import CustomDropdown from "./ui/CustomDropdown";
 import { Employee } from "@/types/customer";
+import Button from "./ui/Button";
 
 const warrantyOptions = [
   { label: "1 Year", value: "1" },
@@ -62,22 +63,26 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   const [formData, setFormData] = useState(initialFormData);
 
   const {
-    data: employees,
+    data: response,
     isLoading,
     isError,
   } = useQuery({
     queryKey: ["employees"],
-    queryFn: getEmployees,
+    queryFn: () => getEmployees({ getAll: true }),
   });
 
-  const TechincianOptions = employees?.data
+  console.log("ccccccc",response);
+
+  const employees = response?.data; // Extract data property if it exists
+
+  const TechincianOptions = employees
     ?.filter((d: Employee) => d.designation === "Technician")
     .map((emp: Employee) => ({
       label: emp.name, // assuming employee object has 'name' field
       value: emp._id, // MongoDB ObjectId
     }));
 
-  const MarkingMangerOptions = employees?.data
+  const MarkingMangerOptions = employees
     ?.filter((d: Employee) => d.designation === "Marketing Manager")
     .map((emp: Employee) => ({
       label: emp.name, // assuming employee object has 'name' field
@@ -91,7 +96,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     onSuccess: () => {
       toast.success("Customer added successfully!");
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-
       setFormData(initialFormData);
       onClose();
     },
@@ -133,13 +137,12 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     mutation.mutate(preparedData);
   };
 
-
-  if(isLoading) {
-    return<p>Seeting Up</p>
+  if (isLoading) {
+    return <p>Seeting Up</p>;
   }
 
-  if(isError){
-    return<p>unknow Error</p>
+  if (isError) {
+    return <p>unknow Error</p>;
   }
   return (
     <form
@@ -288,12 +291,9 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
       </div>
 
       <div className="col-span-full">
-        <button
-          type="submit"
-          className="bg-primary text-white py-2 px-6 rounded hover:bg-opacity-90 transition"
-        >
+        <Button variant="primary" type="submit">
           Save Customer
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -11,7 +11,7 @@ export const POST = async (req: NextRequest) => {
     const newCustomer = await Customer.create(body);
 
     const today = new Date();
-    const serviceList = [];
+    const serviceList = []; 
 
     for (let i = 1; i <= 3; i++) {
       const futureDate = new Date(today);
@@ -54,76 +54,99 @@ export const POST = async (req: NextRequest) => {
 export const GET = async (req: Request) => {
   try {
     await connectDB();
-
     const { searchParams } = new URL(req.url);
 
-    // Get search query from query param, fallback to empty string (no filter)
-    const q = searchParams.get("q")?.trim() || "";
-    const minPrice = searchParams.get("minPrice");
-    const maxPrice = searchParams.get("maxPrice");
+    // Parse parameters
+    const q = searchParams.get("q")?.trim() || ""; // string
+    const pageStr = searchParams.get("page"); // string | null
+    const limitStr = searchParams.get("limit"); // string | null
+    
+     const page = pageStr ? Math.max(1, parseInt(pageStr)) : 1;
+    const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr))) : 10;
+    const skip = (page - 1) * limit;
 
+    // Base match stage (for other filters like price)
+    const matchStage: any = {};
+    
+    // Price filters (if needed)
+    const minPrice = parseFloat(searchParams.get("minPrice") || "");
+    const maxPrice = parseFloat(searchParams.get("maxPrice") || "");
+    if (!isNaN(minPrice)) matchStage.price = { $gte: minPrice };
+    if (!isNaN(maxPrice)) matchStage.price = { $lte: maxPrice };
 
-      // 🔹 Pagination params
-      const page = parseInt(searchParams.get("page") || "1", 10);
-      const limit = parseInt(searchParams.get("limit") || "10", 10);
-      const skip = (page - 1) * limit;
+    // Aggregation pipeline
+    const pipeline: any[] = [
+      { $match: Object.keys(matchStage).length ? matchStage : {} },
+      // Join with Employee collection
+      {
+        $lookup: {
+          from: "employees", // Collection name (case-sensitive)
+          localField: "installedBy",
+          foreignField: "_id",
+          as: "installedByEmployee"
+        }
+      },
+      { $unwind: { path: "$installedByEmployee", preserveNullAndEmptyArrays: true } },
+    ];
 
-
-    // Build the filter object for MongoDB
-    const filters: any[] = [];
-
+    // Add text search if query exists
     if (q) {
-      // Search text in multiple fields with case-insensitive regex
-      filters.push({
-        $or: [
-          { name: { $regex: q, $options: "i" } },
-          { contactNumber: { $regex: q, $options: "i" } },
-          { installedModel: { $regex: q, $options: "i" } },
-          { invoiceNumber: { $regex: q, $options: "i" } },
-          { installedBy: { $regex: q, $options: "i" } },
-          // You can add more fields if needed
-        ],
+      pipeline.push({
+        $match: {
+          $or: [
+            { name: { $regex: q, $options: "i" } },
+            { contactNumber: { $regex: q, $options: "i" } },
+            { installedModel: { $regex: q, $options: "i" } },
+            { invoiceNumber: { $regex: q, $options: "i" } },
+            // Search in employee name
+            { "installedByEmployee.name": { $regex: q, $options: "i" } }
+          ]
+        }
       });
     }
 
-    // Price filters example
-    if (minPrice) filters.push({ price: { $gte: Number(minPrice) } });
-    if (maxPrice) filters.push({ price: { $lte: Number(maxPrice) } });
+    // Count total matching documents
+    const countPipeline = [...pipeline, { $count: "total" }];
+    const totalResult = await Customer.aggregate(countPipeline);
+    const total = totalResult[0]?.total || 0;
 
-    // If filters array has conditions, combine with $and, else empty filter = get all
-    const query = filters.length > 0 ? { $and: filters } : {};
-
-    const total = await Customer.countDocuments(query)
-
-    const customers = await Customer.find(query)
-      .select(
-        "name contactNumber installedModel invoiceNumber price amcRenewed installedBy"
-      )
-      .sort({ createdAt: -1 }).skip(skip).limit(limit)
-      .lean();
-
-    return NextResponse.json(
+    // Add pagination and projection
+    pipeline.push(
+      { $skip: skip },
+      { $limit: limit },
       {
-        success: true,
-        message: "Customer fetched successfully",
-        data: customers,
-        pagination : {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
+        $project: {
+          name: 1,
+          contactNumber: 1,
+          installedModel: 1,
+          invoiceNumber: 1,
+          price: 1,
+          amcRenewed: 1,
+          installedBy: {
+            _id: "$installedByEmployee._id",
+            name: "$installedByEmployee.name"
+          }
         }
-      },
-      { status: 200 }
+      }
     );
-  } catch (err: unknown) {
-    const errorMsg = getErrorMessage(err);
+
+    const customers = await Customer.aggregate(pipeline);
+
+    return NextResponse.json({
+      success: true,
+      data: customers,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (err) {
+    console.error("Search Error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal Server Error",
-        error: errorMsg,
-      },
+      { success: false, error: "Search failed" },
       { status: 500 }
     );
   }
