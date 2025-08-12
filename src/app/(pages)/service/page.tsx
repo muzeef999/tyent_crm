@@ -34,7 +34,7 @@ const Page = () => {
 
   return (
     <>
-       <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
+       <div className="flex  justify-between items-start bg-background px-6 py-4 gap-4">
         <div>
           <TypeSearch onSearch={setSearchText} />
         </div>

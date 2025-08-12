@@ -9,9 +9,10 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 import { Employee } from "@/types/customer";
 import { toast } from "sonner";
 import CustomDropdown from "./ui/CustomDropdown";
+import { useFieldValidator } from "@/hooks/useFieldValidator";
+import { employeeValidation } from "@/validations/employeeValidation";
 
-// Enum options from your schema
-
+// Dropdown options
 const designationTypeOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Super Admin", value: "Super Admin" },
@@ -38,6 +39,7 @@ const statusOptions = [
 
 const AddEmployeeForm = ({ onClose }: { onClose: () => void }) => {
   const queryClient = useQueryClient();
+  const { errors, validateField } = useFieldValidator(employeeValidation);
 
   const [formData, setFormData] = useState<Employee>({
     name: "",
@@ -52,6 +54,7 @@ const AddEmployeeForm = ({ onClose }: { onClose: () => void }) => {
     address: "",
   });
 
+  // React Query mutation
   const { mutate, isPending } = useMutation({
     mutationFn: (newEmployee: Employee) => createEmployee(newEmployee),
     onSuccess: () => {
@@ -64,11 +67,24 @@ const AddEmployeeForm = ({ onClose }: { onClose: () => void }) => {
     },
   });
 
+  // Handles both native input/select and custom dropdown events
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { name: string; value: string }
   ) => {
-    const { name, value } = e.target;
+    let name: string, value: string;
+
+    if ("target" in e) {
+      name = e.target.name;
+      value = e.target.value;
+    } else {
+      name = e.name;
+      value = e.value;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,87 +95,128 @@ const AddEmployeeForm = ({ onClose }: { onClose: () => void }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          placeholder="eg:- Muzeef Shaik"
-          label="Full Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+        {/* Name */}
+        <div className="h-25">
+          <Input
+            placeholder="eg:- Muzeef Shaik"
+            label="Full Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+          {errors.name && <p className="text-red-600 -mt-3">{errors.name}</p>}
+        </div>
 
-        <Input
-          label="Email"
-          placeholder="eg:- shaikmuzeef9999@gmail.com"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
+        {/* Email */}
+        <div className="h-25">
+          <Input
+            label="Email"
+            placeholder="eg:- shaikmuzeef9999@gmail.com"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          {errors.email && <p className="text-red-600 -mt-3">{errors.email}</p>}
+        </div>
 
-        <Input
-          label="Contact Number"
-          name="contactNumber"
-          type="tel" // Use type="tel" for phone numbers
-          value={formData.contactNumber || ""}
-          onChange={handleChange}
-          placeholder="Enter 10-digit phone number starting with 6-9"
-        />
+        {/* Contact Number */}
+        <div className="h-25">
+          <Input
+            label="Contact Number"
+            name="contactNumber"
+            type="tel"
+            value={formData.contactNumber || ""}
+            onChange={handleChange}
+            placeholder="Enter 10-digit phone number starting with 6-9"
+          />
+          {errors.contactNumber && (
+            <p className="text-red-600 -mt-3">{errors.contactNumber}</p>
+          )}
+        </div>
 
-        <Input
-          label="Aadhaar Number"
-          name="aadharNumber"
-          placeholder="Enter 12-digit Aadhaar number"
-          value={formData.aadharNumber}
-          onChange={handleChange}
-        />
+        {/* Aadhaar Number */}
+        <div className="h-25">
+          <Input
+            label="Aadhaar Number"
+            name="aadharNumber"
+            placeholder="Enter 12-digit Aadhaar number"
+            value={formData.aadharNumber}
+            onChange={handleChange}
+          />
+          {errors.aadharNumber && (
+            <p className="text-red-600 -mt-3">{errors.aadharNumber}</p>
+          )}
+        </div>
 
         {/* PAN Number */}
-        <Input
-          label="PAN Number"
-          name="panNumber"
-          placeholder="Enter PAN (ABCDE1234F)"
-          value={formData.panNumber}
-          onChange={handleChange}
-        />
+        <div className="h-25">
+          <Input
+            label="PAN Number"
+            name="panNumber"
+            placeholder="Enter PAN (ABCDE1234F)"
+            value={formData.panNumber}
+            onChange={handleChange}
+          />
+          {errors.panNumber && (
+            <p className="text-red-600 -mt-3">{errors.panNumber}</p>
+          )}
+        </div>
 
+        {/* Designation Dropdown */}
         <CustomDropdown
-          label="Desigination"
+          label="Designation"
           id="designation"
           options={designationTypeOptions}
           selectedValue={formData.designation || ""}
           onSelect={(value) =>
-            setFormData((prev) => ({ ...prev, designation: value }))
+            handleChange({ name: "designation", value })
           }
         />
+        {errors.designation && (
+          <p className="text-red-600 -mt-3">{errors.designation}</p>
+        )}
 
+        {/* Status Dropdown */}
         <CustomDropdown
           label="Status"
           id="status"
           options={statusOptions}
           selectedValue={formData.status || ""}
           onSelect={(value) =>
-            setFormData((prev) => ({ ...prev, status: value }))
+            handleChange({ name: "status", value })
           }
         />
+        {errors.status && (
+          <p className="text-red-600 -mt-3">{errors.status}</p>
+        )}
 
-        <Input
-          label="Joining Date"
-          name="joiningDate"
-          type="date"
-          value={formData.joiningDate || ""}
-          onChange={handleChange}
-        />
+        {/* Joining Date */}
+        <div className="h-25">
+          <Input
+            label="Joining Date"
+            name="joiningDate"
+            type="date"
+            value={formData.joiningDate || ""}
+            onChange={handleChange}
+          />
+          {errors.joiningDate && (
+            <p className="text-red-600 -mt-3">{errors.joiningDate}</p>
+          )}
+        </div>
       </div>
 
-      
-
-      <Input
-        label="Address"
-        name="address"
-        value={formData.address}
-        onChange={handleChange}
-      />
+      {/* Address */}
+      <div className="h-25">
+        <Input
+          label="Address"
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+        />
+        {errors.address && <p className="text-red-600 -mt-3">{errors.address}</p>}
+      </div>
 
       <Button type="submit" variant="primary" disabled={isPending}>
         {isPending ? "Saving..." : "Add Employee"}
