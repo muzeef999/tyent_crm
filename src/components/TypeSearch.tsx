@@ -19,7 +19,6 @@ export default function TypeSearch({
   typingSpeed = 80,
   deletingSpeed = 40,
   pauseAfterTyping = 1400,
-  className = "",
   inputName = "search",
 }: TypeSearchProps) {
   const [displayText, setDisplayText] = useState("");

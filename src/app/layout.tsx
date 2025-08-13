@@ -2,12 +2,15 @@
 import "./globals.css";
 import AppBar from "@/components/ui/AppBar";
 import Sidebar from "@/components/ui/Sidebar";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
 import { getEmployees } from "@/services/serviceApis";
-import 'react-quill/dist/quill.snow.css'
-
+import "react-quill/dist/quill.snow.css";
 
 const queryClient = new QueryClient();
 
@@ -17,12 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" >
+    <html lang="en">
       <QueryClientProvider client={queryClient}>
-        <PrefetchEmployees /> 
-        <body
-          className={` bg-background text-secondary`}
-        >
+        <PrefetchEmployees />
+        <body className={` bg-background text-secondary`}>
           <Toaster richColors position="top-center" />
 
           <ReactQueryDevtools />
@@ -32,9 +33,9 @@ export default function RootLayout({
               <Sidebar />
             </div>
 
-            <main className="flex-1 ml-64 mt-14  rounded-xl  bg-card-background h-screen">
+            <main className="flex flex-col flex-1 ml-64 mt-14 w-full rounded-xl bg-card-background h-screen">
               <AppBar />
-              {children}
+              <div className="flex-1  overflow-auto">{children}</div>
             </main>
           </div>
         </body>
@@ -42,7 +43,6 @@ export default function RootLayout({
     </html>
   );
 }
-
 
 function PrefetchEmployees() {
   useQuery({

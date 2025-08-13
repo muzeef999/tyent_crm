@@ -10,7 +10,7 @@ import { Employee } from "@/types/customer";
 import { toast } from "sonner";
 import CustomDropdown from "./ui/CustomDropdown";
 import { useFieldValidator } from "@/hooks/useFieldValidator";
-import { employeeValidation } from "@/validations/employeeValidation";
+import { employeeValidation } from "@/validations/Validation";
 
 // Dropdown options
 const designationTypeOptions = [

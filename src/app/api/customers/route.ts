@@ -2,16 +2,38 @@ import { connectDB } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
 import Service from "@/models/Service";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { customerValidation } from "@/validations/Validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
+
+    
+    const validationResult = customerValidation.safeParse(body);
+
+    // Correct validation check (Zod recommended way)
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Validation failed",
+          errors: validationResult.error.issues.map((issue) => ({
+            field: issue.path.join("."),
+            message: issue.message,
+            code: issue.code, // Include error code
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
-    const newCustomer = await Customer.create(body);
+
+    const newCustomer = await Customer.create(validationResult.data);
 
     const today = new Date();
-    const serviceList = []; 
+    const serviceList = [];
 
     for (let i = 1; i <= 3; i++) {
       const futureDate = new Date(today);
@@ -60,14 +82,14 @@ export const GET = async (req: Request) => {
     const q = searchParams.get("q")?.trim() || ""; // string
     const pageStr = searchParams.get("page"); // string | null
     const limitStr = searchParams.get("limit"); // string | null
-    
-     const page = pageStr ? Math.max(1, parseInt(pageStr)) : 1;
+
+    const page = pageStr ? Math.max(1, parseInt(pageStr)) : 1;
     const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr))) : 10;
     const skip = (page - 1) * limit;
 
     // Base match stage (for other filters like price)
     const matchStage: any = {};
-    
+
     // Price filters (if needed)
     const minPrice = parseFloat(searchParams.get("minPrice") || "");
     const maxPrice = parseFloat(searchParams.get("maxPrice") || "");
@@ -83,10 +105,15 @@ export const GET = async (req: Request) => {
           from: "employees", // Collection name (case-sensitive)
           localField: "installedBy",
           foreignField: "_id",
-          as: "installedByEmployee"
-        }
+          as: "installedByEmployee",
+        },
       },
-      { $unwind: { path: "$installedByEmployee", preserveNullAndEmptyArrays: true } },
+      {
+        $unwind: {
+          path: "$installedByEmployee",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ];
 
     // Add text search if query exists
@@ -99,9 +126,9 @@ export const GET = async (req: Request) => {
             { installedModel: { $regex: q, $options: "i" } },
             { invoiceNumber: { $regex: q, $options: "i" } },
             // Search in employee name
-            { "installedByEmployee.name": { $regex: q, $options: "i" } }
-          ]
-        }
+            { "installedByEmployee.name": { $regex: q, $options: "i" } },
+          ],
+        },
       });
     }
 
@@ -124,9 +151,9 @@ export const GET = async (req: Request) => {
           amcRenewed: 1,
           installedBy: {
             _id: "$installedByEmployee._id",
-            name: "$installedByEmployee.name"
-          }
-        }
+            name: "$installedByEmployee.name",
+          },
+        },
       }
     );
 
@@ -139,10 +166,9 @@ export const GET = async (req: Request) => {
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
-
   } catch (err) {
     console.error("Search Error:", err);
     return NextResponse.json(

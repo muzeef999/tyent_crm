@@ -19,6 +19,11 @@ const serviceTypeOptions = [
   { label: "SPMS Plus Replacement", value: "SPMS_PLUS_REPLACEMENT" },
   { label: "Jogdial Replacement", value: "JOGDIAL_REPLACEMENT" },
   { label: "Display Replacement", value: "DISPLAY_REPLACEMENT" },
+ { label: "PH Level Not Stable", value: "PH_LEVEL_NOT_STABLE" },
+  { label: "Unpleasant Water Taste", value: "UNPLEASANT_WATER_TASTE" },
+  { label: "Touch Panel Unresponsive", value: "TOUCH_PANEL_UNRESPONSIVE" },
+  { label: "RO System Malfunctioning", value: "RO_SYSTEM_MALFUNCTIONING" },
+  { label: "Pressure Tank Not Functioning Properly", value: "PRESSURE_TANK_NOT_FUNCTIONING" },
 ];
 
 type AssignedServiceProp = {

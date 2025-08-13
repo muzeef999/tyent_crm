@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import CustomDropdown from "./ui/CustomDropdown";
 import { Employee } from "@/types/customer";
 import Button from "./ui/Button";
+import { customerValidation } from "@/validations/Validation";
+import { useFieldValidator } from "@/hooks/useFieldValidator";
 
 const warrantyOptions = [
   { label: "1 Year", value: "1" },
@@ -61,32 +63,22 @@ const initialFormData = {
 
 const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   const [formData, setFormData] = useState(initialFormData);
+  const { errors, validateField } = useFieldValidator(customerValidation);
 
-  const {
-    data: response,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: response, isLoading, isError } = useQuery({
     queryKey: ["employees"],
     queryFn: () => getEmployees({ getAll: true }),
   });
 
-
-  const employees = response?.data; // Extract data property if it exists
+  const employees = response?.data;
 
   const TechincianOptions = employees
     ?.filter((d: Employee) => d.designation === "Technician")
-    .map((emp: Employee) => ({
-      label: emp.name, // assuming employee object has 'name' field
-      value: emp._id, // MongoDB ObjectId
-    }));
+    .map((emp: Employee) => ({ label: emp.name, value: emp._id }));
 
   const MarkingMangerOptions = employees
     ?.filter((d: Employee) => d.designation === "Marketing Manager")
-    .map((emp: Employee) => ({
-      label: emp.name, // assuming employee object has 'name' field
-      value: emp._id, // MongoDB ObjectId
-    }));
+    .map((emp: Employee) => ({ label: emp.name, value: emp._id }));
 
   const queryClient = useQueryClient();
 
@@ -99,8 +91,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
       onClose();
     },
     onError: (error: unknown) => {
-      const Error = getErrorMessage(error);
-      toast.error(Error || "Something went wrong");
+      toast.error(getErrorMessage(error) || "Something went wrong");
     },
   });
 
@@ -111,75 +102,66 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     const { name, value, type } = target;
 
     if (type === "checkbox") {
-      const checkbox = target as HTMLInputElement;
       setFormData((prev) => ({
         ...prev,
-        [name]: checkbox.checked,
+        [name]: (target as HTMLInputElement).checked,
       }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
+
+    validateField(name, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const preparedData = {
       ...formData,
       price: Number(formData.price),
       DOB: new Date(formData.DOB).toISOString(),
     };
-
     mutation.mutate(preparedData);
   };
 
-  if (isLoading) {
-    return <p>Seeting Up</p>;
-  }
+  if (isLoading) return <p>Setting Up...</p>;
+  if (isError) return <p>Unknown Error</p>;
 
-  if (isError) {
-    return <p>unknow Error</p>;
-  }
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
+      className="grid grid-cols-1 md:grid-cols-2 gap-x-6"
     >
-      <Input
-        name="name"
-        label="Full Name"
-        placeholder="Enter full name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-      />
-      <Input
-        name="contactNumber"
-        label="Contact Number"
-        placeholder="Enter phone number"
-        value={formData.contactNumber}
-        onChange={handleChange}
-        required
-      />
-      <Input
-        name="email"
-        label="Email"
-        type="email"
-        placeholder="example@mail.com"
-        value={formData.email}
-        onChange={handleChange}
-      />
-      <Input
-        name="address"
-        label="Address"
-        placeholder="Enter address"
-        value={formData.address}
-        onChange={handleChange}
-      />
+      {/* Input Fields */}
+      {[
+        { name: "name", label: "Full Name", placeholder: "Enter full name" },
+        {
+          name: "contactNumber",
+          label: "Contact Number",
+          placeholder: "Enter phone number",
+        },
+        {
+          name: "email",
+          label: "Email",
+          type: "email",
+          placeholder: "example@mail.com",
+        },
+        { name: "address", label: "Address", placeholder: "Enter address" },
+      ].map(({ name, label, placeholder, type = "text" }) => (
+        <div key={name} className="flex flex-col h-22">
+          <Input
+            name={name}
+            label={label}
+            placeholder={placeholder}
+            type={type}
+            value={formData[name as keyof typeof formData] as string}
+            onChange={handleChange}
+            required={name === "name" || name === "contactNumber"}
+          />
+          {errors[name] && <p className="text-red-600 -mt-4 text-sm">{errors[name]}</p>}
+        </div>
+      ))}
 
+      {/* Dropdowns */}
       <CustomDropdown
         label="Installed Model"
         id="installedModel"
@@ -198,6 +180,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
         value={formData.price}
         onChange={handleChange}
       />
+
       <Input
         name="invoiceNumber"
         label="Invoice Number"
@@ -205,6 +188,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
         value={formData.invoiceNumber}
         onChange={handleChange}
       />
+
       <Input
         name="serialNumber"
         label="Serial Number"
@@ -240,6 +224,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
         value={formData.remarks}
         onChange={handleChange}
       />
+
       <Input
         name="DOB"
         label="Date of Birth"
@@ -268,29 +253,34 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
         }
       />
 
-      {/* ✅ Boolean Inputs */}
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          name="R0"
-          checked={formData.R0}
-          onChange={handleChange}
-        />
-        <label htmlFor="R0">RO Installed</label>
+      {/* Checkboxes */}
+      <div className="flex flex-col gap-2 col-span-full md:col-span-1">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="R0"
+            checked={formData.R0}
+            onChange={handleChange}
+          />
+          RO Installed
+        </label>
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          name="pressureTank"
-          checked={formData.pressureTank}
-          onChange={handleChange}
-        />
-        <label htmlFor="pressureTank">Pressure Tank Included</label>
+      <div className="flex flex-col gap-2 col-span-full md:col-span-1">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="pressureTank"
+            checked={formData.pressureTank}
+            onChange={handleChange}
+          />
+          Pressure Tank Included
+        </label>
       </div>
 
+      {/* Submit Button */}
       <div className="col-span-full">
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" >
           Save Customer
         </Button>
       </div>

@@ -36,7 +36,6 @@ const employeeSchema = new Schema(
       type: String,
       unique: true,
       match: [/^[2-9]{1}[0-9]{11}$/, "Invalid Aadhaar number format"],
-
       required: true,
     },
     panNumber: {
