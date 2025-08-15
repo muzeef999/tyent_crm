@@ -6,9 +6,9 @@ import ThemeToggle from "./ThemeToggle";
 import { IoNotificationsOutline } from "react-icons/io5";
 
 const AppBar = () => {
-  const [scrolling, setScrolling] = useState(false);
-  
 
+
+  const [scrolling, setScrolling] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -40,11 +40,8 @@ const AppBar = () => {
 
         <div className="absolute mt-8 flex justify-between items-end w-full">
           <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">
-            Need help?
+            Hi Muzeef 👋 Need a hand?
           </h1>
-
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">Hello, Muzeef 👋</h1>
-          <div></div>
         </div>
       </div>
     </div>

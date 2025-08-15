@@ -15,7 +15,7 @@ type TypeSearchProps = {
 
 export default function TypeSearch({
   onSearch,
-  texts = ["Just ask me - I’ve got your back!"],
+  texts = ["Ask me anything — I’m here to help."],
   typingSpeed = 80,
   deletingSpeed = 40,
   pauseAfterTyping = 1400,

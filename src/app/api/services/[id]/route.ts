@@ -62,7 +62,7 @@ export const GET = async (
 ) => {
   try {
     const { id } = await params;
-    const service = Service.findById(id);
+    const service = await Service.findById(id).populate("customerId").populate("employeeId").lean();
 
     return NextResponse.json(
       { success: true, message: service },

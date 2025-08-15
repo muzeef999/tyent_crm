@@ -118,10 +118,11 @@ export interface InputProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;
+  onBlur?: () => void; // ⬅ optional
 }
 
 export interface Leads {
-  id:string
+  id: string;
   name: string;
   email: string;
   number: number;

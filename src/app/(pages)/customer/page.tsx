@@ -1,5 +1,4 @@
 "use client";
-
 import { getCustomers } from "@/services/serviceApis";
 import { Customer } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -15,6 +14,7 @@ import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
 import { formatIndianRupees } from "@/utils/formatIndianRupees";
 import useDebounce from "@/hooks/useDebounce";
+import CustomerAnalytics from "@/components/analytics/CustomerAnalytics";
 
 const Page = () => {
   const [searchText, setSearchText] = useState("");
@@ -31,7 +31,6 @@ const Page = () => {
         limit,
         searchQuery: debouncedSearchText, // ✅ fixed param name
       }),
-    
   });
 
   const [showAddSidebar, setShowAddSidebar] = useState(false);
@@ -50,10 +49,11 @@ const Page = () => {
   const pagination = data?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
-  const totalCustomers = pagination?.total || 0;
-  const newCustomers = 10;
-  const unsatisfiedCustomers = 5;
-
+  const customerStats = {
+    totalCustomers: pagination?.total || 0,
+    newCustomers: 10,
+    unsatisfiedCustomers: 5,
+  };
   if (error) {
     return (
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
@@ -68,24 +68,18 @@ const Page = () => {
           <TypeSearch onSearch={setSearchText} />
         </div>
 
-        <div>
-          <p className="text-gray-600">
-            Total customers:{" "}
-            <span className="font-medium">{totalCustomers}</span>, new customers
-            this month: <span className="font-medium">{newCustomers}</span>,{" "}
-            unsatisfied customers:{" "}
-            <span className="font-medium">{unsatisfiedCustomers}</span>
-          </p>
-        </div>
-
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
           Add Customer
         </Button>
       </div>
-
+      
+      
       {/* 🔹 Table Section */}
       <div className="p-6 overflow-x-auto">
+        <CustomerAnalytics {...customerStats} />
+      <br/>
+
         <table className="min-w-[1000px] w-full customtable">
           <thead>
             <tr>

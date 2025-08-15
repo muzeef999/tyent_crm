@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Input from "./ui/Input";
 import Button from "./ui/Button";
-import CustomDropdown from "./ui/CustomDropdown"; // import your dropdown
-import { getEmployees } from "@/services/serviceApis";
-import { useQuery } from "@tanstack/react-query";
+import CustomDropdown from "./ui/CustomDropdown";
+import { IoIosAdd } from "react-icons/io";
+import {
+  getEmployees,
+  getServiceById,
+  updateService,
+} from "@/services/serviceApis";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Employee } from "@/types/customer";
+import { CiEdit } from "react-icons/ci";
+import { toast } from "sonner";
 
 const serviceTypeOptions = [
   { label: "General Service", value: "GENERAL_SERVICE" },
@@ -19,19 +26,25 @@ const serviceTypeOptions = [
   { label: "SPMS Plus Replacement", value: "SPMS_PLUS_REPLACEMENT" },
   { label: "Jogdial Replacement", value: "JOGDIAL_REPLACEMENT" },
   { label: "Display Replacement", value: "DISPLAY_REPLACEMENT" },
- { label: "PH Level Not Stable", value: "PH_LEVEL_NOT_STABLE" },
+  { label: "PH Level Not Stable", value: "PH_LEVEL_NOT_STABLE" },
   { label: "Unpleasant Water Taste", value: "UNPLEASANT_WATER_TASTE" },
   { label: "Touch Panel Unresponsive", value: "TOUCH_PANEL_UNRESPONSIVE" },
   { label: "RO System Malfunctioning", value: "RO_SYSTEM_MALFUNCTIONING" },
-  { label: "Pressure Tank Not Functioning Properly", value: "PRESSURE_TANK_NOT_FUNCTIONING" },
+  {
+    label: "Pressure Tank Not Functioning Properly",
+    value: "PRESSURE_TANK_NOT_FUNCTIONING",
+  },
 ];
 
 type AssignedServiceProp = {
   onClose: () => void;
+  id: string;
 };
 
-const AssignService: React.FC<AssignedServiceProp> = ({ onClose }) => {
+const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
   const [employeeId, setEmployeeId] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const editRef = useRef<HTMLDivElement>(null);
 
   const {
     data: employees,
@@ -39,17 +52,38 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose }) => {
     isError,
   } = useQuery({
     queryKey: ["employees"],
-    queryFn:()=> getEmployees({getAll: true}),
+    queryFn: () => getEmployees({ getAll: true }),
+  });
+
+  const { data: getEmployeesDataId } = useQuery({
+    queryKey: ["Assingdata", id],
+    queryFn: () => getServiceById(id),
+  });
+
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({
+      id,
+      updatedFields,
+    }: {
+      id: string;
+      updatedFields: Record<string, any>;
+    }) => updateService(id, updatedFields),
+    onSuccess: () => {
+      
+      toast.success("Updated Sucessfully");
+      queryClient.invalidateQueries({ queryKey: ["Assingdata", id] });
+    },
   });
 
   const employeeOptions = employees?.data
     ?.filter((d: Employee) => d.designation === "Technician")
     .map((emp: Employee) => ({
-      label: emp.name, // assuming employee object has 'name' field
-      value: emp._id, // MongoDB ObjectId
+      label: emp.name,
+      value: emp._id,
     }));
-
-
 
   const [formData, setFormData] = useState({
     visitNo: "",
@@ -59,7 +93,7 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose }) => {
     paymentIds: "",
     assignedDate: "",
     closingDate: "",
-    serviceType: "", // single select now
+    serviceType: "",
     employeeId: "",
   });
 
@@ -70,117 +104,217 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Close editor if clicked outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (editRef.current && !editRef.current.contains(e.target as Node)) {
+        setIsEditing(false);
+      }
+    }
 
-    const payload = {
-      ...formData,
-      visitNo: formData.visitNo ? Number(formData.visitNo) : undefined,
-      paymentIds: formData.paymentIds
-        ? formData.paymentIds.split(",").map((id) => id.trim())
-        : [],
+    if (isEditing) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-
-    console.log("Submitting payload:", payload);
-  };
-
+  }, [isEditing]);
   if (isLoading) return <p>Loading employees...</p>;
   if (isError) return <p>Error loading employees</p>;
 
+  const serviceData = getEmployeesDataId?.message;
+
   return (
-    <form onSubmit={handleSubmit}>
-      {/* Other inputs */}
+    <div className="space-y-6">
+      {/* Service Details Card */}
+      {serviceData && (
+        <div className="bg-background ">
+          <div className="flex flex-col">
+            {/* Customer Information */}
+            <div className="rounded-lg shadow-md p-6 mb-6 space-y-2">
+              <h3 className="font-semibold text-lg text-primary border-b pb-1">
+                Customer Information
+              </h3>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="font-medium">{serviceData?.customerId.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-medium">{serviceData?.customerId.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Contact Number</p>
+                  <p className="font-medium">
+                    {serviceData?.customerId.contactNumber}
+                  </p>
+                </div>
+              </div>
 
-      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          placeholder=""
-          label="Visit No"
-          type="number"
-          name="visitNo"
-          value={formData.visitNo}
-          onChange={handleChange}
-          required
-        />
+              <div>
+                <p className="text-sm text-gray-600">Address</p>
+                <p className="font-medium">{serviceData?.customerId.address}</p>
+              </div>
+            </div>
 
-        <Input
-          label="Service Date"
-          type="date"
-          name="serviceDate"
-          value={formData.serviceDate}
-          onChange={handleChange}
-        />
+            {/* Product Information */}
+            <div className="rounded-lg shadow-md p-6 mb-6 space-y-2">
+              <h3 className="font-semibold text-lg text-primary border-b pb-1">
+                Product Information
+              </h3>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Installed Model</p>
+                  <p className="font-medium">
+                    {serviceData?.customerId.installedModel}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Price</p>
+                  <p className="font-medium">{serviceData?.customerId.price}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Warranty Years</p>
+                  <p className="font-medium">
+                    {serviceData.customerId.warrantyYears}
+                  </p>
+                </div>
 
-        <Input
-          label="Next Due Date"
-          type="date"
-          name="nextDueDate"
-          value={formData.nextDueDate}
-          onChange={handleChange}
-        />
+                <div>
+                  <p className="text-sm text-gray-600">AMC Renewed</p>
+                  <p className="font-medium">
+                    {serviceData?.customerId.amcRenewed}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Remarks</p>
+                <p className="font-medium">
+                  {serviceData?.customerId.remarks || "N/A"}
+                </p>
+              </div>
+            </div>
 
-        <Input
-          label="Assigned Date"
-          type="date"
-          name="assignedDate"
-          value={formData.assignedDate}
-          onChange={handleChange}
-        />
+            {/* Service Information */}
+            <div className="rounded-lg shadow-md p-6 mb-6 space-y-2">
+              <h3 className="font-semibold text-lg text-primary border-b pb-1">
+                Service Information
+              </h3>
+              <div className="flex justify-between">
+                <div>
+                  {isEditing ? (
+                    <div>
+                      <Input
+                        placeholder=""
+                        label="Visit No"
+                        type="number"
+                        name="visitNo"
+                        value={formData.visitNo}
+                        onChange={handleChange}
+                        onBlur={() => {
+                          mutation.mutate({
+                            id: serviceData._id,
+                            updatedFields: { visitNo: formData.visitNo },
+                          });
+                          setIsEditing(false);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-gray-600">Visit No:</p>
+                      <p className="font-medium">
+                        {serviceData?.visitNo || "N/A"}
+                      </p>
+                      <CiEdit
+                        size={24}
+                        className="cursor-pointer text-blue-500 hover:text-blue-700"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            visitNo: serviceData?.visitNo || "",
+                          }));
+                          setIsEditing(true);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
 
-        <Input
-          label="Closing Date"
-          type="date"
-          name="closingDate"
-          value={formData.closingDate}
-          onChange={handleChange}
-        />
+                <div>
+                  <p className="text-sm text-gray-600">Service Date</p>
+                  <p className="font-medium">
+                    {new Date(serviceData?.serviceDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Assigned Date</p>
+                  <p className="font-medium">
+                    {new Date(serviceData?.assignedDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Closing Date</p>
+                  <p className="font-medium">
+                    {new Date(serviceData?.closingDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Service Type</p>
+                <p className="font-medium">
+                  {serviceData.serviceType.map((type: string) => (
+                    <span
+                      key={type}
+                      className="mr-2 px-2 py-1 bg-gray-100 rounded"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </p>
+              </div>
+            </div>
 
-        <CustomDropdown
-          label="Service Type"
-          id="serviceType"
-          options={serviceTypeOptions}
-          selectedValue={formData.serviceType}
-          onSelect={(value) =>
-            setFormData((prev) => ({ ...prev, serviceType: value }))
-          }
-        />
+            {/* Employee Information */}
+            <div className="rounded-lg shadow-md p-6 mb-6 space-y-2">
+              <div className="w-full flex justify-between items-center border-b">
+                <h3 className="font-semibold text-lg text-primary pb-1">
+                  Assigned Technician
+                </h3>
+                <Button variant="primary">
+                  <IoIosAdd /> Another Technician
+                </Button>
+              </div>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="font-medium">{serviceData?.employeeId.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Contact Number</p>
+                  <p className="font-medium">
+                    {serviceData?.employeeId.contactNumber}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Designation</p>
+                  <p className="font-medium">
+                    {serviceData?.employeeId.designation}
+                  </p>
+                </div>
+              </div>
 
-        <Input
-          label="Payment Attach (comma separated IDs)"
-          type="text"
-          name="paymentIds"
-          placeholder="id1,id2,id3"
-          value={formData.paymentIds}
-          onChange={handleChange}
-        />
-
-        <CustomDropdown
-          label="Assign Technician"
-          options={employeeOptions}
-          selectedValue={employeeId}
-          onSelect={setEmployeeId} // sets employeeId on selection
-          id="employeeId"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="notes" className="block mb-1 font-medium">
-          Notes
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          value={formData.notes}
-          onChange={handleChange}
-          className="w-full rounded-md border px-3 py-2"
-        />
-      </div>
-
-      <div className="flex gap-2">
-        <Button variant="primary" type="submit">
-          Assign / Update Service
-        </Button>
-      </div>
-    </form>
+              <div>
+                <p className="text-sm text-gray-600">Notes</p>
+                <p className="font-medium">{serviceData?.notes || "N/A"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

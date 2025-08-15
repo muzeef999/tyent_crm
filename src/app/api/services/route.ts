@@ -58,14 +58,10 @@ export const POST = async (req: NextRequest) => {
 export const GET = async (req: Request) => {
   try {
     await connectDB();
-
     const { searchParams } = new URL(req.url);
-
     const q = searchParams.get("q")?.trim() || "";
-
     const pageStr = searchParams.get("page");
     const limitStr = searchParams.get("limit");
-
     const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
     const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 10;
     const skip = (page - 1) * limit;
@@ -90,6 +86,11 @@ export const GET = async (req: Request) => {
       .sort({ createdAt: -1 })
       .lean();
 
+     const  thisMonthCount = 10
+     const unsatistfiedCustomerCount = 20
+     const notAssignedServicesCount = 30
+     const pendingServicesCount =40
+
     return NextResponse.json(
       {
         success: true,
@@ -100,6 +101,10 @@ export const GET = async (req: Request) => {
           page,
           limit,
           totalPages: Math.ceil(total / limit),
+          thisMonthCount,
+          unsatistfiedCustomerCount,
+          notAssignedServicesCount,
+         pendingServicesCount,
         },
       },
       { status: 200 }

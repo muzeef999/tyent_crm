@@ -1,11 +1,12 @@
 "use client";
 import AddService from "@/components/AddService";
+import ServiceAnalytics from "@/components/analytics/ServiceAnalytics";
 import AssignService from "@/components/AssignService";
 import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
 import TableLoading from "@/components/ui/TableLoading";
-import { getServices } from "@/services/serviceApis";
+import { getServiceById, getServices } from "@/services/serviceApis";
 import { Service } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +18,13 @@ const Page = () => {
   const [searchText, setSearchText] = useState("");
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
   const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
+  const [employeeId, setEmployeeId] = useState(" ");
+
+  const { data: getEmployeesDataId } = useQuery({
+    queryKey: ["Assingdata", employeeId],
+    queryFn: () => getServiceById(employeeId),
+    enabled: !!employeeId,
+  });
 
   const {
     data: service,
@@ -32,26 +40,20 @@ const Page = () => {
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
     );
 
+    const serviceStats = {
+    totalService: 10,
+  thisMonth: 20,
+  unSatisfedCustomer: 30,
+  notAssignedService: 40,
+  PendingServices: 50,
+
+  };
+
   return (
     <>
-       <div className="flex  justify-between items-start bg-background px-6 py-4 gap-4">
+      <div className="flex  justify-between items-start bg-background px-6 py-4 gap-4">
         <div>
           <TypeSearch onSearch={setSearchText} />
-        </div>
-
-        <div>
-          <p className="text-gray-600">
-            Total services:{" "}
-            <span className="font-medium">{322300}</span>,  this month services
-            <span className="font-medium">{234}</span>,{" "}
-            unsatisfied customers:{" "}
-
-            <span className="font-medium">{3}</span>
-            not assigned services
-            <span className="font-medium">{3}</span>
-              pending services
-            <span className="font-medium">{3}</span>
-          </p>
         </div>
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
@@ -59,8 +61,12 @@ const Page = () => {
           Add Servuce
         </Button>
       </div>
+      
 
       <div className="p-6 overflow-x-auto">
+        
+      <ServiceAnalytics {...serviceStats} />
+      <br/>
         <table className="w-full min-w-[1000px]  customtable">
           <thead>
             <tr>
@@ -81,8 +87,10 @@ const Page = () => {
               service.data?.map((item: Service) => (
                 <tr
                   key={item._id?.toString()}
-                    className="transition hover:bg-gray-50 cursor-pointer border-t"
-                  onClick={() => setShowupDateSidebar(true)}
+                  className="transition hover:bg-gray-50 cursor-pointer border-t"
+                  onClick={() => {
+                    setEmployeeId(item._id), setShowupDateSidebar(true);
+                  }}
                 >
                   <td>
                     {item.serviceDate
@@ -166,7 +174,10 @@ const Page = () => {
         title="Update Service"
       >
         <div className="p-4">
-          <AssignService onClose={() => setShowupDateSidebar(false)} />
+          <AssignService
+            onClose={() => setShowupDateSidebar(false)}
+            id={employeeId}
+          />
         </div>
       </Offcanvas>
     </>
