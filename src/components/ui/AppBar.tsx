@@ -2,13 +2,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
-
 import { IoNotificationsOutline } from "react-icons/io5";
+import { usePathname } from "next/navigation";
 
 const AppBar = () => {
-
-
   const [scrolling, setScrolling] = useState(false);
+
+  const pathname = usePathname();
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -39,9 +40,15 @@ const AppBar = () => {
         </div>
 
         <div className="absolute mt-8 flex justify-between items-end w-full">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">
-            Hi Muzeef 👋 Need a hand?
-          </h1>
+          {pathname == "/" ? (
+            <></>
+          ) : (
+            <>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">
+                Hi Muzeef 👋 Need a hand?
+              </h1>
+            </>
+          )}
         </div>
       </div>
     </div>

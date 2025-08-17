@@ -1,6 +1,6 @@
-
 import { connectDB } from "@/lib/mongodb";
-import Employee from "@/models/Employee";
+import Product from "@/models/Product";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 import fs from "fs";
 import path from "path";
 
@@ -8,25 +8,32 @@ export async function POST() {
   try {
     await connectDB();
 
-    // Read employees.json
-        const filePath = path.join(process.cwd(), "src", "fakeData", "employees.json");
+    const filePath = path.join(
+      process.cwd(),
+      "src",
+      "fakeData",
+      "products.json"
+    );
 
     const employees = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
     // Clear existing data (optional)
-    await Employee.deleteMany();
+    await Product.deleteMany();
 
     // Insert new data
-    await Employee.insertMany(employees);
+    await Product.insertMany(employees);
 
     return new Response(
-      JSON.stringify({ success: true, message: "Employees seeded successfully!" }),
+      JSON.stringify({
+        success: true,
+        message: "Product seeded successfully!",
+      }),
       { status: 200 }
     );
   } catch (err) {
-    console.error("❌ Error seeding employees:", err);
+    const error  =  getErrorMessage(err);
     return new Response(
-      JSON.stringify({ success: false, message: "Error seeding employees" }),
+      JSON.stringify({ success: false, error: error }),
       { status: 500 }
     );
   }

@@ -19,6 +19,9 @@ export interface Customer {
   marketingManager?: string | Employee;
   R0?: boolean;
   pressureTank?: boolean;
+  tdsValue: string,
+  phValue: string,
+  inputWaterFlow: string,
   createdAt?: string;
   updatedAt?: string;
 }
@@ -64,6 +67,7 @@ export interface Employee {
   assignedServices?: Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
+  
 }
 
 export interface Payment {
@@ -118,6 +122,7 @@ export interface InputProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;
+  onKeyDown?:React.KeyboardEventHandler<HTMLInputElement>;
   onBlur?: () => void; // ⬅ optional
 }
 
@@ -131,4 +136,86 @@ export interface Leads {
   assignedTo: string;
   status: string;
   createdAt: Date;
+}
+
+
+export interface Product {
+  _id: ObjectId;
+  name: string;
+  stock: number;
+  status :"In Stock" | "Out of Stock" ;
+  assignedTo :Types.ObjectId;            
+  createdAt:Date;
+  serialNumber:string
+}
+
+
+// Location.ts
+export interface Location {
+  _id: ObjectId;
+  employeeId: Types.ObjectId;            // "Main Warehouse" | "Office Delhi" | "Employee: Vamsi"
+  type: "WAREHOUSE" | "OFFICE" | "EMPLOYEE";
+  city?: string;
+  active: boolean;
+  createdAt:Date;
+}
+
+
+// Serial.ts
+export interface Serial {
+  _id: ObjectId;
+  productId: ObjectId;
+  serialNo: string;          // e.g., 000081
+  status: "IN_STOCK" | "DEMO" | "INSTALLED" | "SCRAP";
+  locationId: ObjectId;      // where it physically is
+  holderId?: ObjectId;       // employee if DEMO
+  notes?: string;
+  history: Array<{
+    date: Date;
+    fromLocationId?: ObjectId;
+    toLocationId?: ObjectId;
+    action: "RECEIVE"|"DISPATCH"|"TRANSFER"|"DEMO_ASSIGN"|"DEMO_RETURN"|"INSTALL"|"SCRAP";
+    ref?: string;
+    userId?: ObjectId;
+  }>
+}
+
+
+// Movement.ts
+export interface Movement {
+  _id: ObjectId;
+  date: Date;
+  type: "IN" | "OUT" | "TRANSFER" | "ADJUST";
+  reason: "PURCHASE"|"SALE"|"INSTALL"|"REPLACEMENT"|"DEMO_ASSIGN"|"DEMO_RETURN"|"SCRAP"|"PART_HARVEST"|"OPENING";
+  productId: ObjectId;
+  qty: number;                   // negative for OUT (or use type to sign)
+  serialIds?: ObjectId[];        // required for trackSerial products
+  fromLocationId?: ObjectId;
+  toLocationId?: ObjectId;
+  refDoc?: string;               // invoice/job number
+  notes?: string;
+  userId?: ObjectId;
+  createdAt: Date;
+}
+
+ 
+// Balance.ts
+export interface Balance {
+  _id: ObjectId;
+  productId: ObjectId;
+  locationId: ObjectId;
+  qty: number;              // current balance
+  updatedAt: Date;
+}
+
+
+// PartHarvest.ts
+export interface PartHarvest {
+  _id: ObjectId;
+  sourceProductId: ObjectId;
+  sourceSerialId?: ObjectId;
+  partProductId: ObjectId;   // e.g., "Motherboard"
+  qty: number;
+  date: Date;
+  notes?: string;
 }

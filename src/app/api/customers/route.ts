@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
+import Product from "@/models/Product";
 import Service from "@/models/Service";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { customerValidation } from "@/validations/Validation";
@@ -8,8 +9,8 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
+    const { serialNumber } = body;
 
-    
     const validationResult = customerValidation.safeParse(body);
 
     // Correct validation check (Zod recommended way)
@@ -51,6 +52,20 @@ export const POST = async (req: NextRequest) => {
 
     newCustomer.upcomingServices = createdServices.map((s) => s._id);
     await newCustomer.save();
+
+    const updatedProduct  = await Product.findOneAndUpdate({ serialNumber }, {
+       status: "Out of Stock",
+        assignedTo: newCustomer._id,
+        stock: 0, 
+    });
+
+    if (!updatedProduct) {
+      return NextResponse.json(
+        { success: false, message: "Product not found" },
+        { status: 404 }
+      );
+    }
+
 
     return NextResponse.json(
       {

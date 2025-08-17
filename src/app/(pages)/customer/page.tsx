@@ -4,17 +4,17 @@ import { Customer } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import React, { useEffect, useState } from "react";
 import Offcanvas from "@/components/ui/Offcanvas";
-import CustomerDetails from "@/components/CustomerDetails";
+import CustomerDetails from "@/app/(pages)/customer/CustomerDetails";
 import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
-import AddCustomer from "@/components/AddCustomer";
 import TypeSearch from "@/components/TypeSearch";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
 import { formatIndianRupees } from "@/utils/formatIndianRupees";
 import useDebounce from "@/hooks/useDebounce";
-import CustomerAnalytics from "@/components/analytics/CustomerAnalytics";
+import CustomerAnalytics from "@/app/(pages)/customer/CustomerAnalytics";
+import AddCustomer from "@/app/(pages)/customer/AddCustomer";
 
 const Page = () => {
   const [searchText, setSearchText] = useState("");
@@ -88,7 +88,6 @@ const Page = () => {
               <th>Model</th>
               <th>Invoice</th>
               <th>Price</th>
-              <th>AMC</th>
               <th>Installed By</th>
               <th>Upcoming Services</th>
               <th>Avg Rating /5</th>
@@ -117,16 +116,7 @@ const Page = () => {
                   <td data-tooltip={customer.price}>
                     {formatIndianRupees(customer.price)}
                   </td>
-                  <td
-                    data-tooltip={customer.amcRenewed}
-                    className={
-                      customer.amcRenewed === "YES"
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }
-                  >
-                    {customer.amcRenewed}
-                  </td>
+            
                   <td
                     data-tooltip={
                       typeof customer.installedBy === "object"

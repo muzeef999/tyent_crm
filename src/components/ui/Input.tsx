@@ -9,6 +9,7 @@ const Input: React.FC<InputProps> = ({
   name,
   type = 'text',
   placeholder,
+  onKeyDown,
   value,
   onBlur,
   onChange,
@@ -31,6 +32,7 @@ const Input: React.FC<InputProps> = ({
         value={value}
         onChange={onChange}
         onBlur={onBlur}
+        onKeyDown={onKeyDown}
         required={required}
         disabled={disabled}
       />

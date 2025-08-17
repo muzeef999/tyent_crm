@@ -35,7 +35,7 @@ const Page = () => {
         <tbody>
           {accountsData.data?.map((accounts:Account) => (
             <tr key={accounts._id}>
-              <td>{accounts.customerId.name}</td>
+              <td>{accounts?.customerId?.name}</td>
               </tr>
           ))}
         </tbody>

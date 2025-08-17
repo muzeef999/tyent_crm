@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
-import { getEmployees } from "@/services/serviceApis";
+import { getEmployees, getProducts } from "@/services/serviceApis";
 import "react-quill/dist/quill.snow.css";
 
 const queryClient = new QueryClient();
@@ -23,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <QueryClientProvider client={queryClient}>
         <PrefetchEmployees />
+        
         <body className={` bg-background text-secondary`}>
           <Toaster richColors position="top-center" />
 
@@ -52,3 +53,4 @@ function PrefetchEmployees() {
   });
   return null; // nothing to render
 }
+

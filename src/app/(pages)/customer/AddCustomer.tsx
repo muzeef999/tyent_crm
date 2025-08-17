@@ -1,41 +1,33 @@
 "use client";
 
 import Input from "@/components/ui/Input";
-import { createCustomer, getEmployees } from "@/services/serviceApis";
+import {
+  createCustomer,
+  getEmployees,
+  getProducts,
+  getProductsIndetail,
+} from "@/services/serviceApis";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import CustomDropdown from "./ui/CustomDropdown";
+import CustomDropdown from "@/components/ui/CustomDropdown";
 import { Employee } from "@/types/customer";
-import Button from "./ui/Button";
 import { customerValidation } from "@/validations/Validation";
 import { useFieldValidator } from "@/hooks/useFieldValidator";
+import debounce from "lodash.debounce";
+import Button from "@/components/ui/Button";
 
 const warrantyOptions = [
   { label: "1 Year", value: "1" },
   { label: "2 Years", value: "2" },
   { label: "3 Years", value: "3" },
-  { label: "4 Years", value: "4" },
-  { label: "5 Years", value: "5" },
-  { label: "6 Years", value: "6" },
 ];
 
 const amcOptions = [
-  { label: "Yes", value: "YES" },
-  { label: "No", value: "NO" },
-];
-
-const installedModelOptions = [
-  { label: "NMP-5", value: "NMP-5" },
-  { label: "NMP-7", value: "NMP-7" },
-  { label: "NMP-9", value: "NMP-9" },
-  { label: "NMP-11", value: "NMP-11" },
-  { label: "UCE-9", value: "UCE-9" },
-  { label: "UCE-11", value: "UCE-11" },
-  { label: "UCE-13", value: "UCE-13" },
-  { label: "Hbride-H2", value: "Hbride-H2" },
-  { label: "H-rich", value: "H-rich" },
+  { label: "Service AMC", value: "SERVICE_AMC" },
+  { label: "Service + Filter AMC", value: "SERVICE_FILTER_AMC" },
+  { label: "Comprehensive AMC", value: "COMPREHENSIVE_AMC" },
 ];
 
 type AddCustomerProps = {
@@ -59,18 +51,61 @@ const initialFormData = {
   marketingManager: "",
   R0: false,
   pressureTank: false,
+  tdsValue: "",
+  phValue: "",
+  inputWaterFlow: "",
 };
 
 const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   const [formData, setFormData] = useState(initialFormData);
   const { errors, validateField } = useFieldValidator(customerValidation);
 
-  const { data: response, isLoading, isError } = useQuery({
+  const [serial, setSerial] = useState("");
+
+  // 🔍 Auto search for product by serial
+  const {
+    data: productData,
+    error: productError,
+    isFetching: isSearching,
+  } = useQuery({
+    queryKey: ["product", serial],
+    queryFn: () => getProductsIndetail(serial),
+    enabled: Boolean(serial), // only fetch if serial is not empty
+    staleTime: 1000 * 30,
+  });
+
+  useEffect(() => {
+    if (productError) {
+      toast.error("❌ Serial number not found!");
+    }
+    if (productData?.message) {
+      toast.success("✅ Product found: " + productData.message.name);
+      setFormData((prev) => ({
+        ...prev,
+        installedModel: productData.message.name,
+      }));
+    }
+  }, [productError, productData]);
+
+  // debounce user typing
+  const handleSerialChange = debounce((value: string) => {
+    setSerial(value);
+    setFormData((prev) => ({ ...prev, serialNumber: value }));
+  }, 400);
+
+  // employees list
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["employees"],
     queryFn: () => getEmployees({ getAll: true }),
   });
 
   const employees = response?.data;
+
+  console.log(employees);
 
   const TechincianOptions = employees
     ?.filter((d: Employee) => d.designation === "Technician")
@@ -146,6 +181,38 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           placeholder: "example@mail.com",
         },
         { name: "address", label: "Address", placeholder: "Enter address" },
+        {
+          name: "price",
+          label: "Price",
+          placeholder: "₹",
+        },
+        {
+          name: "invoiceNumber",
+          label: "Invoice Number",
+          placeholder: "INV-2025-...",
+        },
+        
+        {
+          name: "remarks",
+          label: "Remarks",
+          placeholder: "Any notes...",
+        },
+
+        {
+          name: "tdsValue",
+          label: "Input TDS",
+          placeholder: "350",
+        },
+        {
+          name: "phValue",
+          label: "Input Ph values",
+          placeholder: "7.5pH",
+        },
+        {
+          name: "inputWaterFlow",
+          label: "Input Water Flow",
+          placeholder: "350",
+        },
       ].map(({ name, label, placeholder, type = "text" }) => (
         <div key={name} className="flex flex-col h-22">
           <Input
@@ -157,58 +224,33 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             onChange={handleChange}
             required={name === "name" || name === "contactNumber"}
           />
-          {errors[name] && <p className="text-red-600 -mt-4 text-sm">{errors[name]}</p>}
+          {errors[name] && (
+            <p className="text-red-600 -mt-4 text-sm">{errors[name]}</p>
+          )}
         </div>
       ))}
 
-      {/* Dropdowns */}
-      <CustomDropdown
-        label="Installed Model"
-        id="installedModel"
-        options={installedModelOptions}
-        selectedValue={formData.installedModel || ""}
-        onSelect={(value) =>
-          setFormData((prev) => ({ ...prev, installedModel: value }))
-        }
-      />
-
-      <Input
-        name="price"
-        label="Price"
-        type="number"
-        placeholder="₹"
-        value={formData.price}
-        onChange={handleChange}
-      />
-
-      <Input
-        name="invoiceNumber"
-        label="Invoice Number"
-        placeholder="INV-2025-..."
-        value={formData.invoiceNumber}
-        onChange={handleChange}
-      />
-
-      <Input
-        name="serialNumber"
-        label="Serial Number"
-        placeholder="SN..."
-        value={formData.serialNumber}
-        onChange={handleChange}
-      />
+      {/* 🔍 Serial Search */}
+      <div>
+        <Input
+          name="serialNumber"
+          label="Serial Number"
+          placeholder="SN..."
+          value={formData.serialNumber}
+          onChange={(e) => handleSerialChange(e.target.value)}
+        />
+        {productData?.message?.name ? (
+          <p className="text-green-600 -mt-4 text-sm">
+            {productData.message?.name}
+          </p>
+        ) : (
+          <p className="text-red-500 -mt-4 text-sm">Not found</p>
+        )}
+        {isSearching && <p>Searching...</p>}
+      </div>
 
       <CustomDropdown
-        label="Warranty (Years)"
-        id="warrantyYears"
-        options={warrantyOptions}
-        selectedValue={formData.warrantyYears || ""}
-        onSelect={(value) =>
-          setFormData((prev) => ({ ...prev, warrantyYears: value }))
-        }
-      />
-
-      <CustomDropdown
-        label="AMC Renewed"
+        label="AMC Package"
         id="amcRenewed"
         options={amcOptions}
         selectedValue={formData.amcRenewed || ""}
@@ -216,13 +258,14 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           setFormData((prev) => ({ ...prev, amcRenewed: value }))
         }
       />
-
-      <Input
-        name="remarks"
-        label="Remarks"
-        placeholder="Any notes..."
-        value={formData.remarks}
-        onChange={handleChange}
+      <CustomDropdown
+        label="AMC (Years)"
+        id="warrantyYears"
+        options={warrantyOptions}
+        selectedValue={formData.warrantyYears || ""}
+        onSelect={(value) =>
+          setFormData((prev) => ({ ...prev, warrantyYears: value }))
+        }
       />
 
       <Input
@@ -254,7 +297,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
       />
 
       {/* Checkboxes */}
-      <div className="flex flex-col gap-2 col-span-full md:col-span-1">
+      <div className="flex mt-2 gap-2 col-span-full md:col-span-1">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -264,9 +307,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           />
           RO Installed
         </label>
-      </div>
 
-      <div className="flex flex-col gap-2 col-span-full md:col-span-1">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -280,7 +321,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
 
       {/* Submit Button */}
       <div className="col-span-full">
-        <Button variant="primary" type="submit" >
+        <Button variant="primary" type="submit">
           Save Customer
         </Button>
       </div>

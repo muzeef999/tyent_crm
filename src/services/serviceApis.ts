@@ -24,7 +24,7 @@ export const getCustomerById = (id: string) => axiosInstance.get(`/customers/${i
 //SERVICES
 export const getServices = () => axiosInstance.get("/services").then((res) => res.data);
 export const createService = (data: Omit<Service, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/services", data).then((res) => res.data);
-export const updateService = (id: string, data: Record<string, any>) => axiosInstance.patch(`/services/${id}`,{data}).then((res) => res.data);
+export const updateService = (id: string, updatedFields: Record<string, any>) => axiosInstance.patch(`/services/${id}`,updatedFields).then((res) => res.data);
 export const deleteService = (id: string) => axiosInstance.delete(`/services/${id}`).then((res) => res.data);
 export const getServiceById = (id: string) => axiosInstance.get(`/services/${id}`).then((res) => res.data);
 
@@ -85,3 +85,23 @@ export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${i
 
 //Leads
 export const getLeads = () => axios.get("https://www.tyent.co.in/api/lead").then((res) => res.data);
+
+
+//products
+export const getProducts = () => axiosInstance.get(`/products`).then(res => res.data).catch(err => err.message);
+export const getProductsIndetail = (serialNumber:string) => axiosInstance.get(`/products/${serialNumber}`).then(res => res.data).catch(err => err.message);
+
+//location
+export const getLocation = () => axiosInstance.get("/stock/locations").then(res => res.data);
+
+//serials
+export const getSerials = () => axiosInstance.get("/stock/serials").then(res => res.data);
+
+//movements
+export const getmovements = () => axiosInstance.get("/stock/movements").then(res => res.data);
+
+//balances
+export const getBalances = () => axiosInstance.get("/stock/balances").then(res => res.data);
+
+//part  harvests
+export const getPartharvests = () => axiosInstance.get("/stock/partharvests").then(res => res.data);

@@ -3,7 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MdOutlineLeaderboard } from "react-icons/md";
 import logo from "@/asserts/logo.png";
-
+import { AiOutlineStock } from "react-icons/ai";
+import { TbAutomation } from "react-icons/tb";
 
 import {
   IoPeopleOutline,
@@ -22,34 +23,36 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  // Core data
   { label: "Customer", icon: <IoPeopleOutline />, href: "/customer" },
-  { label: "Service", icon: <IoBuildOutline />, href: "/service" },
   { label: "Leads", icon: <MdOutlineLeaderboard />, href: "/leads" },
-  { label: "Account", icon: <IoSettingsOutline />, href: "/account" },
-  { label: "Payment", icon: <IoWalletOutline />, href: "/payment" },
   { label: "Employee", icon: <IoPersonOutline />, href: "/employee" },
+
+  // Operations
+  { label: "Service", icon: <IoBuildOutline />, href: "/service" },
+  { label: "Stocks", icon: <AiOutlineStock />, href: "/stocks" },
+  { label: "Payment", icon: <IoWalletOutline />, href: "/payment" },
+
+  // Automation & Settings
+  { label: "Automations", icon: <TbAutomation />, href: "/automations" },
+
 ];
 
 const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-
     <div className="hidden  lg:flex flex-col w-64 h-screen  pl-6 space-y-6 fixed overflow-y-auto ">
-      
-
-
-        <div className="flex items-center  justify-center">
-          <Image
-            src={logo}
-            alt="logo"
-            width={120}
-            height={40}
-            priority
-            className="object-contain"
-          />
-        </div>
-
+      <div className="flex items-center  justify-center">
+        <Image
+          src={logo}
+          alt="logo"
+          width={120}
+          height={40}
+          priority
+          className="object-contain"
+        />
+      </div>
 
       <ul className="space-y-4 mt-4">
         {navItems.map((item, idx) => {

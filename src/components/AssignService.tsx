@@ -60,7 +60,6 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
     queryFn: () => getServiceById(id),
   });
 
-
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -72,7 +71,6 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
       updatedFields: Record<string, any>;
     }) => updateService(id, updatedFields),
     onSuccess: () => {
-      
       toast.success("Updated Sucessfully");
       queryClient.invalidateQueries({ queryKey: ["Assingdata", id] });
     },
@@ -114,10 +112,12 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
 
     if (isEditing) {
       document.addEventListener("mousedown", handleClickOutside);
+      setIsEditing(true);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      setIsEditing(false);
     };
   }, [isEditing]);
   if (isLoading) return <p>Loading employees...</p>;
@@ -139,23 +139,27 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Name</p>
-                  <p className="font-medium">{serviceData?.customerId.name}</p>
+                  <p className="font-medium">{serviceData?.customerId?.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-medium">{serviceData?.customerId.email}</p>
+                  <p className="font-medium">
+                    {serviceData?.customerId?.email}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Contact Number</p>
                   <p className="font-medium">
-                    {serviceData?.customerId.contactNumber}
+                    {serviceData?.customerId?.contactNumber}
                   </p>
                 </div>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600">Address</p>
-                <p className="font-medium">{serviceData?.customerId.address}</p>
+                <p className="font-medium">
+                  {serviceData?.customerId?.address}
+                </p>
               </div>
             </div>
 
@@ -168,31 +172,33 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
                 <div>
                   <p className="text-sm text-gray-600">Installed Model</p>
                   <p className="font-medium">
-                    {serviceData?.customerId.installedModel}
+                    {serviceData?.customerId?.installedModel}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Price</p>
-                  <p className="font-medium">{serviceData?.customerId.price}</p>
+                  <p className="font-medium">
+                    {serviceData?.customerId?.price}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Warranty Years</p>
                   <p className="font-medium">
-                    {serviceData.customerId.warrantyYears}
+                    {serviceData?.customerId?.warrantyYears}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600">AMC Renewed</p>
                   <p className="font-medium">
-                    {serviceData?.customerId.amcRenewed}
+                    {serviceData?.customerId?.amcRenewed}
                   </p>
                 </div>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Remarks</p>
                 <p className="font-medium">
-                  {serviceData?.customerId.remarks || "N/A"}
+                  {serviceData?.customerId?.remarks || "N/A"}
                 </p>
               </div>
             </div>
@@ -213,12 +219,16 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
                         name="visitNo"
                         value={formData.visitNo}
                         onChange={handleChange}
-                        onBlur={() => {
-                          mutation.mutate({
-                            id: serviceData._id,
-                            updatedFields: { visitNo: formData.visitNo },
-                          });
-                          setIsEditing(false);
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            mutation.mutate({
+                              id: serviceData._id,
+                              updatedFields: {
+                                visitNo: Number(formData.visitNo),
+                              },
+                            });
+                            setIsEditing(false);
+                          }
                         }}
                       />
                     </div>
@@ -245,9 +255,36 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
 
                 <div>
                   <p className="text-sm text-gray-600">Service Date</p>
-                  <p className="font-medium">
-                    {new Date(serviceData?.serviceDate).toLocaleDateString()}
-                  </p>
+                  {isEditing ? (
+                    <>
+                      <Input
+                        name="DOB"
+                        label="Date of Birth"
+                        type="date"
+                        value={formData?.serviceDate}
+                        onChange={handleChange}
+                      />
+                    </>
+                  ) : (
+                    <div>
+                      <p className="font-medium">
+                        {new Date(
+                          serviceData?.serviceDate
+                        ).toLocaleDateString()}
+                      </p>
+                      <CiEdit
+                        size={24}
+                        className="cursor-pointer text-blue-500 hover:text-blue-700"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            serviceDate: serviceData?.serviceDate || "",
+                          }));
+                          setIsEditing(true);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Assigned Date</p>
@@ -265,7 +302,7 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
               <div>
                 <p className="text-sm text-gray-600">Service Type</p>
                 <p className="font-medium">
-                  {serviceData.serviceType.map((type: string) => (
+                  {serviceData?.serviceType?.map((type: string) => (
                     <span
                       key={type}
                       className="mr-2 px-2 py-1 bg-gray-100 rounded"
@@ -290,18 +327,18 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Name</p>
-                  <p className="font-medium">{serviceData?.employeeId.name}</p>
+                  <p className="font-medium">{serviceData?.employeeId?.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Contact Number</p>
                   <p className="font-medium">
-                    {serviceData?.employeeId.contactNumber}
+                    {serviceData?.employeeId?.contactNumber}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Designation</p>
                   <p className="font-medium">
-                    {serviceData?.employeeId.designation}
+                    {serviceData?.employeeId?.designation}
                   </p>
                 </div>
               </div>
