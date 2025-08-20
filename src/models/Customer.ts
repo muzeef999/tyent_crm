@@ -10,7 +10,7 @@ const customerSchema = new Schema(
     price: { type: Number, required: true },
     payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
     invoiceNumber: { type: String, required: true },
-    serialNumber: { type: String, required: true    },
+    serialNumber: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
     warrantyYears: { type: String },
     amcRenewed: {
       type: String,

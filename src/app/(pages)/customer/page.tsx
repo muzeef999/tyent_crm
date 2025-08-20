@@ -2,13 +2,13 @@
 import { getCustomers } from "@/services/serviceApis";
 import { Customer } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Offcanvas from "@/components/ui/Offcanvas";
 import CustomerDetails from "@/app/(pages)/customer/CustomerDetails";
 import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
 import TypeSearch from "@/components/TypeSearch";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
 import { formatIndianRupees } from "@/utils/formatIndianRupees";
@@ -73,24 +73,20 @@ const Page = () => {
           Add Customer
         </Button>
       </div>
-      
-      
+
       {/* 🔹 Table Section */}
       <div className="p-6 overflow-x-auto">
         <CustomerAnalytics {...customerStats} />
-      <br/>
+        <br />
 
         <table className="min-w-[1000px] w-full customtable">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Contact</th>
-              <th>Model</th>
-              <th>Invoice</th>
-              <th>Price</th>
-              <th>Installed By</th>
-              <th>Upcoming Services</th>
-              <th>Avg Rating /5</th>
+              <th>Email ID</th>
+              <th>Contact Number</th>
+              <th>Date of Birth (DOB)</th>
+              <th colSpan={2}>Address</th>
             </tr>
           </thead>
           <tbody>
@@ -104,36 +100,14 @@ const Page = () => {
                   onClick={() => handleRowClick(customer._id!)}
                 >
                   <td data-tooltip={customer.name}>{customer.name}</td>
+                  <td data-tooltip={customer.email}>{customer.email}</td>
                   <td data-tooltip={customer.contactNumber}>
-                    {customer.contactNumber}
+                    {customer.contactNumber}{" "}
                   </td>
-                  <td data-tooltip={customer.installedModel}>
-                    {customer.installedModel}
+                  <td data-tooltip={customer.DOB}>{customer?.DOB}</td>
+                  <td colSpan={2} data-tooltip={customer.address}>
+                    {customer.address}
                   </td>
-                  <td data-tooltip={customer.invoiceNumber}>
-                    {customer.invoiceNumber}
-                  </td>
-                  <td data-tooltip={customer.price}>
-                    {formatIndianRupees(customer.price)}
-                  </td>
-            
-                  <td
-                    data-tooltip={
-                      typeof customer.installedBy === "object"
-                        ? customer.installedBy?.name
-                        : ""
-                    }
-                  >
-                    {typeof customer.installedBy === "object"
-                      ? customer.installedBy?.name
-                      : "Not assigned"}
-                  </td>
-                  <td>
-                    <button className="text-blue-600 hover:underline">
-                      View
-                    </button>
-                  </td>
-                  <td>5/5</td>
                 </tr>
               ))
             )}

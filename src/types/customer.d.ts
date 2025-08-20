@@ -4,7 +4,6 @@ export interface Customer {
   contactNumber: string;
   email?: string;
   address?: string;
-  installedModel?: MachineModel;
   price?: number;
   payments?: string[];
   invoiceNumber?: string;

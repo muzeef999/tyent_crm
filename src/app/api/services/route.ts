@@ -63,7 +63,9 @@ export const GET = async (req: Request) => {
     const pageStr = searchParams.get("page");
     const limitStr = searchParams.get("limit");
     const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
-    const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 10;
+    const limit = limitStr
+      ? Math.min(50, Math.max(1, parseInt(limitStr, 10)))
+      : 10;
     const skip = (page - 1) * limit;
 
     // Build filter object
@@ -83,13 +85,50 @@ export const GET = async (req: Request) => {
       .populate("customerId", "name installedModel")
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort({ serviceDate: 1 })
       .lean();
 
-     const  thisMonthCount = 10
-     const unsatistfiedCustomerCount = 20
-     const notAssignedServicesCount = 30
-     const pendingServicesCount =40
+    //status calculating logic
+
+    const now = new Date();
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+
+
+     const [
+      totalTicketsThisMonth,
+      ticketsToday,
+      ticketsResolved,
+      ticketsIncomplete,
+      generalServiceDue,
+    ] = await Promise.all([
+      // 1. All tickets in this month
+      Service.countDocuments({
+        serviceDate: { $gte: startOfMonth, $lte: endOfMonth },
+      }),
+      // 2. Tickets today
+      Service.countDocuments({
+        serviceDate: { $gte: startOfDay, $lte: endOfDay },
+      }),
+      // 3. Resolved tickets (closingDate exists)
+      Service.countDocuments({
+        closingDate: { $exists: true, $ne: null },
+      }),
+      // 4. Incomplete tickets this month (no closingDate)
+      Service.countDocuments({
+        serviceDate: { $gte: startOfMonth, $lte: endOfMonth },
+        $or: [{ closingDate: { $exists: false } }, { closingDate: null }],
+      }),
+      // 5. General services due this month
+      Service.countDocuments({
+        serviceDate: { $gte: startOfMonth, $lte: endOfMonth },
+        serviceType: "GENERAL_SERVICE",
+      }),
+    ]);
 
     return NextResponse.json(
       {
@@ -101,11 +140,13 @@ export const GET = async (req: Request) => {
           page,
           limit,
           totalPages: Math.ceil(total / limit),
-          thisMonthCount,
-          unsatistfiedCustomerCount,
-          notAssignedServicesCount,
-         pendingServicesCount,
         },
+        totalTicketsThisMonth,
+          ticketsToday,
+          // ticketsProgress,
+          ticketsResolved,
+          ticketsIncomplete,
+          generalServiceDue,
       },
       { status: 200 }
     );

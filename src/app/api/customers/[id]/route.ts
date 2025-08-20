@@ -12,8 +12,16 @@ export const GET = async (
 
     await connectDB();
 
-    const customer = await Customer.findById(id).populate("upcomingServices").lean();
-    return NextResponse.json({ sucess: true, message:customer }, { status: 200 });
+    const customer = await Customer.findById(id)
+      .populate("upcomingServices")
+      .populate("serialNumber", "serialNumber")
+      .populate("installedBy", "name")
+      .populate("marketingManager", "name")
+      .lean();
+    return NextResponse.json(
+      { sucess: true, message: customer },
+      { status: 200 }
+    );
   } catch (err) {
     const Error = getErrorMessage(err);
     return NextResponse.json({ sucess: false, error: Error }, { status: 500 });

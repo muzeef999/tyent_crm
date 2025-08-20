@@ -74,21 +74,9 @@ export const customerValidation = z
     serialNumber: z.string().optional(),
     warrantyYears: z.string().optional(),
     remarks: z.string().optional(),
-
-    // Enum fields
-    installedModel: z
-      .enum([
-        "NMP-5",
-        "NMP-7",
-        "NMP-9",
-        "NMP-11",
-        "UCE-9",
-        "UCE-11",
-        "UCE-13",
-        "Hbride-H2",
-        "H-rich",
-      ])
-      .optional(),
+    tdsValue: z.string().optional(),
+    phValue: z.string().optional(),
+    inputWaterFlow: z.string().optional(),
     amcRenewed: z
       .enum(["SERVICE_AMC", "SERVICE_FILTER_AMC", "COMPREHENSIVE_AMC"])
       .optional(),

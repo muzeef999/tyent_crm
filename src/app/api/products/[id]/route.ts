@@ -18,7 +18,7 @@ export const GET = async (
 
     if (!product) {
       return NextResponse.json(
-        { success: false, message: "Product not found" },
+        { success: false, error: "Product not found" },
         { status: 404 }
       );
     }

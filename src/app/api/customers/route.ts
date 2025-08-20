@@ -53,11 +53,14 @@ export const POST = async (req: NextRequest) => {
     newCustomer.upcomingServices = createdServices.map((s) => s._id);
     await newCustomer.save();
 
-    const updatedProduct  = await Product.findOneAndUpdate({ serialNumber }, {
-       status: "Out of Stock",
+    const updatedProduct = await Product.findOneAndUpdate(
+      { serialNumber },
+      {
+        status: "Out of Stock",
         assignedTo: newCustomer._id,
-        stock: 0, 
-    });
+        stock: 0,
+      }
+    );
 
     if (!updatedProduct) {
       return NextResponse.json(
@@ -65,7 +68,6 @@ export const POST = async (req: NextRequest) => {
         { status: 404 }
       );
     }
-
 
     return NextResponse.json(
       {
@@ -137,9 +139,10 @@ export const GET = async (req: Request) => {
         $match: {
           $or: [
             { name: { $regex: q, $options: "i" } },
+            { email: { $regex: q, $options: "i" } },
             { contactNumber: { $regex: q, $options: "i" } },
-            { installedModel: { $regex: q, $options: "i" } },
-            { invoiceNumber: { $regex: q, $options: "i" } },
+            { DOB: { $regex: q, $options: "i" } },
+            { address: { $regex: q, $options: "i" } },
             // Search in employee name
             { "installedByEmployee.name": { $regex: q, $options: "i" } },
           ],
@@ -159,8 +162,12 @@ export const GET = async (req: Request) => {
       {
         $project: {
           name: 1,
+          email: 1,
           contactNumber: 1,
+          DOB: 1,
+          address: 1,
           installedModel: 1,
+
           invoiceNumber: 1,
           price: 1,
           amcRenewed: 1,

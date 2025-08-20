@@ -35,8 +35,8 @@ const CustomerDetails = ({ customerId }: { customerId: string }) => {
           <p><strong>Price:</strong> ₹{customer.price}</p>
           <p><strong>AMC:</strong> <span className={customer.amcRenewed === "YES" ? "text-green-600" : "text-red-500"}>{customer.amcRenewed}</span></p>
           <p><strong>Warranty:</strong> {customer.warrantyYears} year(s)</p>
-          <p><strong>Installed By:</strong> {customer.installedBy}</p>
-          <p><strong>Sales Manager:</strong> {customer.marketingManager}</p>
+          <p><strong>Installed By:</strong> {customer.installedBy?.name}</p>
+          <p><strong>Sales Manager:</strong> {customer.marketingManager?.name}</p>
           <p><strong>DOB:</strong> {format(new Date(customer.DOB), "dd MMM yyyy")}</p>
         </div>
         <p className="mt-2"><strong>Address:</strong> {customer.address || "—"}</p>

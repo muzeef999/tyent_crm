@@ -4,7 +4,6 @@ import Input from "@/components/ui/Input";
 import {
   createCustomer,
   getEmployees,
-  getProducts,
   getProductsIndetail,
 } from "@/services/serviceApis";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -39,7 +38,6 @@ const initialFormData = {
   contactNumber: "",
   email: "",
   address: "",
-  installedModel: "",
   price: "",
   invoiceNumber: "",
   serialNumber: "",
@@ -83,15 +81,25 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
       setFormData((prev) => ({
         ...prev,
         installedModel: productData.message.name,
+        serialNumber: productData.message._id
       }));
     }
   }, [productError, productData]);
 
-  // debounce user typing
-  const handleSerialChange = debounce((value: string) => {
-    setSerial(value);
-    setFormData((prev) => ({ ...prev, serialNumber: value }));
-  }, 400);
+  // ✅ remove debounce from updating formData
+  const handleSerialChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, serialNumber: value })); // always update formData
+    debouncedSearch(value); // only search is debounced
+  };
+
+  // ✅ create debounced function just for searching
+  const debouncedSearch = React.useMemo(
+    () =>
+      debounce((value: string) => {
+        setSerial(value);
+      }, 400),
+    []
+  );
 
   // employees list
   const {
@@ -191,7 +199,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           label: "Invoice Number",
           placeholder: "INV-2025-...",
         },
-        
+
         {
           name: "remarks",
           label: "Remarks",
@@ -239,9 +247,9 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           value={formData.serialNumber}
           onChange={(e) => handleSerialChange(e.target.value)}
         />
-        {productData?.message?.name ? (
+        {productData?.data ? (
           <p className="text-green-600 -mt-4 text-sm">
-            {productData.message?.name}
+            {productData?.data?.name}
           </p>
         ) : (
           <p className="text-red-500 -mt-4 text-sm">Not found</p>

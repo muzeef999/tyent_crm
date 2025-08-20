@@ -9,6 +9,9 @@ export async function GET() {
 
     const groupedProducts = await Product.aggregate([
       {
+        $match: { status: "In Stock" } // ✅ filter only stock items
+      },
+      {
         $group: {
           _id: "$name",
           count: { $sum: 1 }
@@ -32,6 +35,7 @@ export async function GET() {
     return NextResponse.json({ success: false, error: Error }, { status: 500 });
   }
 }
+
 
 
 export async function POST(req: Request) {

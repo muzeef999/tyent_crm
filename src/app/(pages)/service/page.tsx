@@ -1,6 +1,6 @@
 "use client";
 import AddService from "@/components/AddService";
-import ServiceAnalytics from "@/components/analytics/ServiceAnalytics";
+import ServiceAnalytics from "@/app/(pages)/service/ServiceAnalytics";
 import AssignService from "@/components/AssignService";
 import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
@@ -40,13 +40,14 @@ const Page = () => {
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
     );
 
-    const serviceStats = {
-    totalService: 10,
-  thisMonth: 20,
-  unSatisfedCustomer: 30,
-  notAssignedService: 40,
-  PendingServices: 50,
 
+  const serviceStats = {
+    totalTicketsThisMonth: service?.totalTicketsThisMonth,
+    ticketsToday: service?.ticketsToday,
+    ticketsProgress: 30,
+    ticketsResolved: service?.ticketsResolved,
+    ticketsIncomplete: service?.ticketsIncomplete,
+    generalServiceDue: service?.generalServiceDue,
   };
 
   return (
@@ -61,17 +62,14 @@ const Page = () => {
           Add Servuce
         </Button>
       </div>
-      
 
       <div className="p-6 overflow-x-auto">
-        
-      <ServiceAnalytics {...serviceStats} />
-      <br/>
+        <ServiceAnalytics {...serviceStats} />
+        <br />
         <table className="w-full min-w-[1000px]  customtable">
           <thead>
             <tr>
-              <th>Scheduled On</th>
-              <th>Model</th>
+              <th colSpan={2}>Scheduled On</th>
               <th>assignedDate</th>
               <th>closingDate</th>
               <th>serviceType</th>
@@ -86,13 +84,13 @@ const Page = () => {
             ) : (
               service.data?.map((item: Service) => (
                 <tr
-                  key={item._id?.toString()}
+                  key={item._id}
                   className="transition hover:bg-gray-50 cursor-pointer border-t"
                   onClick={() => {
                     setEmployeeId(item._id), setShowupDateSidebar(true);
                   }}
                 >
-                  <td>
+                  <td colSpan={2} className="flex-1">
                     {item.serviceDate
                       ? (() => {
                           const serviceDate = dayjs(item.serviceDate);
@@ -133,7 +131,6 @@ const Page = () => {
                         })()
                       : "N/A"}
                   </td>
-                  <td>{item.customerId.installedModel}</td>
 
                   <td>
                     {item.assignedDate
