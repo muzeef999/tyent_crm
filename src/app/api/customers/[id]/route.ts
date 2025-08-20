@@ -14,7 +14,7 @@ export const GET = async (
 
     const customer = await Customer.findById(id)
       .populate("upcomingServices")
-      .populate("serialNumber", "serialNumber")
+      .populate("serialNumber", "name")
       .populate("installedBy", "name")
       .populate("marketingManager", "name")
       .lean();

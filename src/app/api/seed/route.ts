@@ -21,20 +21,21 @@ export async function POST() {
     await Product.deleteMany();
 
     // Insert new data
-    await Product.insertMany(employees);
+    const data = await Product.insertMany(employees);
 
     return new Response(
       JSON.stringify({
         success: true,
+
         message: "Product seeded successfully!",
+        data,
       }),
       { status: 200 }
     );
   } catch (err) {
-    const error  =  getErrorMessage(err);
-    return new Response(
-      JSON.stringify({ success: false, error: error }),
-      { status: 500 }
-    );
+    const error = getErrorMessage(err);
+    return new Response(JSON.stringify({ success: false, error: error }), {
+      status: 500,
+    });
   }
 }

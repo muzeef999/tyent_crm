@@ -2,6 +2,7 @@ export interface Customer {
   _id?: string;
   name: string;
   contactNumber: string;
+  alternativeNumber: string;
   email?: string;
   address?: string;
   price?: number;

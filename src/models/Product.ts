@@ -1,29 +1,46 @@
 // models/Product.ts
 import { Product } from "@/types/customer";
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const ProductSchema = new Schema<Product>(
   {
-    serialNumber: { type: String, unique: true, required: true },
+    _id: {
+      type: String,
+    },
+    serialNumber: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     name: { type: String, required: true },
     stock: {
       type: Number,
-      default: 1, // initial stock
+      default: 1,
     },
     status: {
       type: String,
       enum: ["In Stock", "Out of Stock"],
       default: "In Stock",
-      required:true
+      required: true,
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer", // product can be assigned to a customer
+      ref: "Customer",
       default: null,
     },
   },
-  { _id: false, timestamps: true }
+  {
+    timestamps: true,
+  }
 );
+
+// ✅ Before validation, sync _id with serialNumber
+ProductSchema.pre("validate", function (next) {
+  if (this.isNew && !this._id) {
+    this._id = this.serialNumber;
+  }
+  next();
+});
 
 export default mongoose.models.Product ||
   mongoose.model<Product>("Product", ProductSchema);

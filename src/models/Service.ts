@@ -14,6 +14,11 @@ const serviceSchema = new Schema(
     notes: { type: String },
     paymentIds: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
     assignedDate: { type: Date },
+    status: {
+      type: String,
+      enum: ["PENDING", "ONGOING", "COMPLETED", "CANCELLED", "CLOSED"],
+      default: "PENDING", // optional, sets default status
+    },
     closingDate: { type: Date },
     serviceType: [
       {

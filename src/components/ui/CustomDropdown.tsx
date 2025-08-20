@@ -54,9 +54,9 @@ export default function CustomDropdown({
         id={id}
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="w-full border rounded-md px-4 py-2 text-left bg-white flex justify-between items-center"
+        className="w-full  rounded-md border-1 border-[#d2d6dd] px-4 py-2 text-left bg-white flex justify-between items-center"
       >
-        <span>{selectedLabel}</span>
+        <span className="text-[#afafaf]">{selectedLabel}</span>
         <svg
           className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"

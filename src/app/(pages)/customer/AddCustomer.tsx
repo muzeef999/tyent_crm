@@ -29,6 +29,18 @@ const amcOptions = [
   { label: "Comprehensive AMC", value: "COMPREHENSIVE_AMC" },
 ];
 
+const WaterType = [
+  { label: "RO", value: "RO" },
+  { label: "Bore", value: "Bore" },
+  { label: "Municipal", value: "Municipal" },
+];
+
+const WaterMethod = [
+  { label: "Direct", value: "Direct" },
+  { label: "Booster Pump", value: "Booster Pump" },
+  { label: "Pressure Tank", value: "Pressure Tank" },
+];
+
 type AddCustomerProps = {
   onClose: () => void;
 };
@@ -39,6 +51,7 @@ const initialFormData = {
   email: "",
   address: "",
   price: "",
+  alternativeNumber: "",
   invoiceNumber: "",
   serialNumber: "",
   warrantyYears: "",
@@ -52,6 +65,8 @@ const initialFormData = {
   tdsValue: "",
   phValue: "",
   inputWaterFlow: "",
+  waterType: "",
+  waterMethod: "",
 };
 
 const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
@@ -76,12 +91,13 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     if (productError) {
       toast.error("❌ Serial number not found!");
     }
-    if (productData?.message) {
-      toast.success("✅ Product found: " + productData.message.name);
+
+    if (productData?.data) {
+      toast.success("✅ Product found: " + productData.data.name);
+
       setFormData((prev) => ({
         ...prev,
-        installedModel: productData.message.name,
-        serialNumber: productData.message._id
+        serialNumber: productData.data.serialNumber, // ✅ save ID
       }));
     }
   }, [productError, productData]);
@@ -112,8 +128,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   });
 
   const employees = response?.data;
-
-  console.log(employees);
 
   const TechincianOptions = employees
     ?.filter((d: Employee) => d.designation === "Technician")
@@ -170,162 +184,221 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   if (isError) return <p>Unknown Error</p>;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-1 md:grid-cols-2 gap-x-6"
-    >
-      {/* Input Fields */}
-      {[
-        { name: "name", label: "Full Name", placeholder: "Enter full name" },
-        {
-          name: "contactNumber",
-          label: "Contact Number",
-          placeholder: "Enter phone number",
-        },
-        {
-          name: "email",
-          label: "Email",
-          type: "email",
-          placeholder: "example@mail.com",
-        },
-        { name: "address", label: "Address", placeholder: "Enter address" },
-        {
-          name: "price",
-          label: "Price",
-          placeholder: "₹",
-        },
-        {
-          name: "invoiceNumber",
-          label: "Invoice Number",
-          placeholder: "INV-2025-...",
-        },
+    <form onSubmit={handleSubmit}>
+      <section className="border-b pb-3">
+        <h2 className="text-xl font-semibold text-gray-800 mb-6">
+          Customer Details
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+          {/* Input Fields */}
+          {[
+            {
+              name: "name",
+              label: "Full Name",
+              placeholder: "Enter full name",
+            },
+            {
+              name: "email",
+              label: "Email",
+              type: "email",
+              placeholder: "example@mail.com",
+            },
+            {
+              name: "contactNumber",
+              label: "Contact Number",
+              placeholder: "Enter phone number",
+            },
+            {
+              name: "alternativeNumber",
+              label: "Alternative Number",
+              placeholder: "Enter alternative phone number",
+            },
 
-        {
-          name: "remarks",
-          label: "Remarks",
-          placeholder: "Any notes...",
-        },
+            { name: "address", label: "Address", placeholder: "Enter address" },
 
-        {
-          name: "tdsValue",
-          label: "Input TDS",
-          placeholder: "350",
-        },
-        {
-          name: "phValue",
-          label: "Input Ph values",
-          placeholder: "7.5pH",
-        },
-        {
-          name: "inputWaterFlow",
-          label: "Input Water Flow",
-          placeholder: "350",
-        },
-      ].map(({ name, label, placeholder, type = "text" }) => (
-        <div key={name} className="flex flex-col h-22">
+            {
+              name: "remarks",
+              label: "Remarks",
+              placeholder: "Any notes...",
+            },
+          ].map(({ name, label, placeholder, type = "text" }) => (
+            <div key={name} className="flex flex-col h-22">
+              <Input
+                name={name}
+                label={label}
+                placeholder={placeholder}
+                type={type}
+                value={formData[name as keyof typeof formData] as string}
+                onChange={handleChange}
+                required={name === "name" || name === "contactNumber"}
+              />
+              {errors[name] && (
+                <p className="text-red-600 -mt-4 text-sm">{errors[name]}</p>
+              )}
+            </div>
+          ))}
+
           <Input
-            name={name}
-            label={label}
-            placeholder={placeholder}
-            type={type}
-            value={formData[name as keyof typeof formData] as string}
+            name="DOB"
+            label="Date of Birth"
+            type="date"
+            value={formData.DOB}
             onChange={handleChange}
-            required={name === "name" || name === "contactNumber"}
           />
-          {errors[name] && (
-            <p className="text-red-600 -mt-4 text-sm">{errors[name]}</p>
-          )}
         </div>
-      ))}
+      </section>
 
-      {/* 🔍 Serial Search */}
-      <div>
-        <Input
-          name="serialNumber"
-          label="Serial Number"
-          placeholder="SN..."
-          value={formData.serialNumber}
-          onChange={(e) => handleSerialChange(e.target.value)}
-        />
-        {productData?.data ? (
-          <p className="text-green-600 -mt-4 text-sm">
-            {productData?.data?.name}
-          </p>
-        ) : (
-          <p className="text-red-500 -mt-4 text-sm">Not found</p>
-        )}
-        {isSearching && <p>Searching...</p>}
-      </div>
+      <section className="border-b pb-3">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2 mt-2">
+          Machine Details:
+        </h2>
 
-      <CustomDropdown
-        label="AMC Package"
-        id="amcRenewed"
-        options={amcOptions}
-        selectedValue={formData.amcRenewed || ""}
-        onSelect={(value) =>
-          setFormData((prev) => ({ ...prev, amcRenewed: value }))
-        }
-      />
-      <CustomDropdown
-        label="AMC (Years)"
-        id="warrantyYears"
-        options={warrantyOptions}
-        selectedValue={formData.warrantyYears || ""}
-        onSelect={(value) =>
-          setFormData((prev) => ({ ...prev, warrantyYears: value }))
-        }
-      />
+        {/* 🔍 Serial Search */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+          <div>
+            <Input
+              name="serialNumber"
+              label="Serial Number"
+              placeholder="SN..."
+              value={formData.serialNumber}
+              onChange={(e) => handleSerialChange(e.target.value)}
+            />
+            {productData?.data ? (
+              <p className="text-green-600 -mt-4 text-sm">
+                {productData?.data?.name}
+              </p>
+            ) : (
+              <p className="text-red-500 -mt-4 text-sm">Not found</p>
+            )}
+            {isSearching && <p>Searching...</p>}
+          </div>
 
-      <Input
-        name="DOB"
-        label="Date of Birth"
-        type="date"
-        value={formData.DOB}
-        onChange={handleChange}
-      />
+          <div className="flex flex-col h-22">
+            <Input
+              name={"invoiceNumber"}
+              label={"Invoice Number"}
+              placeholder={"INV-2025-..."}
+              type={"text"}
+              value={formData.invoiceNumber}
+              onChange={handleChange}
+            />
+            {errors.invoiceNumber && (
+              <p className="text-red-600 -mt-4 text-sm">
+                {errors.invoiceNumber}
+              </p>
+            )}
+          </div>
 
-      <CustomDropdown
-        label="Installed By"
-        id="installedBy"
-        options={TechincianOptions}
-        selectedValue={formData.installedBy || ""}
-        onSelect={(value) =>
-          setFormData((prev) => ({ ...prev, installedBy: value }))
-        }
-      />
+          <div className="flex flex-col h-22">
+            <Input
+              name={"price"}
+              label={"Price"}
+              placeholder={"₹"}
+              type={"text"}
+              value={formData.price}
+              onChange={handleChange}
+            />
+            {errors.price && (
+              <p className="text-red-600 -mt-4 text-sm">{errors.price}</p>
+            )}
+          </div>
 
-      <CustomDropdown
-        label="Marketing Manager"
-        id="marketingManager"
-        options={MarkingMangerOptions}
-        selectedValue={formData.marketingManager || ""}
-        onSelect={(value) =>
-          setFormData((prev) => ({ ...prev, marketingManager: value }))
-        }
-      />
-
-      {/* Checkboxes */}
-      <div className="flex mt-2 gap-2 col-span-full md:col-span-1">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="R0"
-            checked={formData.R0}
-            onChange={handleChange}
+          <CustomDropdown
+            label="Marketing Manager"
+            id="marketingManager"
+            options={MarkingMangerOptions}
+            selectedValue={formData.marketingManager || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, marketingManager: value }))
+            }
           />
-          RO Installed
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="pressureTank"
-            checked={formData.pressureTank}
-            onChange={handleChange}
+          <CustomDropdown
+            label="Installed By"
+            id="installedBy"
+            options={TechincianOptions}
+            selectedValue={formData.installedBy || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, installedBy: value }))
+            }
           />
-          Pressure Tank Included
-        </label>
-      </div>
+
+          <CustomDropdown
+            label="AMC Package"
+            id="amcRenewed"
+            options={amcOptions}
+            selectedValue={formData.amcRenewed || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, amcRenewed: value }))
+            }
+          />
+
+          <CustomDropdown
+            label="AMC (Years)"
+            id="warrantyYears"
+            options={warrantyOptions}
+            selectedValue={formData.warrantyYears || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, warrantyYears: value }))
+            }
+          />
+        </div>
+      </section>
+
+      <section className="pb-3">
+        <h1 className="text-xl font-semibold text-gray-800 mb-2 mt-2">
+          Installation Parameters:
+        </h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+          <div className="flex flex-col h-22">
+            <Input
+              name={"phValue"}
+              label={"Input Water pH"}
+              placeholder={"7.5pH"}
+              type={"text"}
+              value={formData.phValue}
+              onChange={handleChange}
+            />
+            {errors.phValue && (
+              <p className="text-red-600 -mt-4 text-sm">{errors.phValue}</p>
+            )}
+          </div>
+          <div className="flex flex-col h-22">
+            <Input
+              name={"tdsValue"}
+              label={"Input Water TDS (ppm)"}
+              placeholder={"350"}
+              type={"text"}
+              value={formData.tdsValue}
+              onChange={handleChange}
+            />
+            {errors.tdsValue && (
+              <p className="text-red-600 -mt-4 text-sm">{errors.tdsValue}</p>
+            )}
+          </div>
+
+          <CustomDropdown
+            label="Water Type"
+            id="waterType"
+            options={WaterType}
+            selectedValue={formData.waterType || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, waterType: value }))
+            }
+          />
+
+          <CustomDropdown
+            label="Water Method"
+            id="waterMethod"
+            options={WaterMethod}
+            selectedValue={formData.waterMethod || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, waterMethod: value }))
+            }
+          />
+
+        </div>
+      </section>
 
       {/* Submit Button */}
       <div className="col-span-full">

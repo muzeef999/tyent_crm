@@ -5,12 +5,13 @@ const customerSchema = new Schema(
   {
     name: { type: String, required: true },
     contactNumber: { type: String, required: true },
+    alternativeNumber: { type: String },
     email: { type: String },
     address: { type: String },
     price: { type: Number, required: true },
     payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
     invoiceNumber: { type: String, required: true },
-    serialNumber: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    serialNumber: { type: String, ref: "Product", required: true },
     warrantyYears: { type: String },
     amcRenewed: {
       type: String,
