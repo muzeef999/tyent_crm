@@ -13,7 +13,6 @@ const Input: React.FC<InputProps> = ({
   value,
   onBlur,
   onChange,
-  required = false,
   disabled = false,
 }) => {
   return (
@@ -33,7 +32,6 @@ const Input: React.FC<InputProps> = ({
         onChange={onChange}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        required={required}
         disabled={disabled}
       />
     </div>

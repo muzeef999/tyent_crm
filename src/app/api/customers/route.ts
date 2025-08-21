@@ -164,6 +164,7 @@ export const GET = async (req: Request) => {
           name: 1,
           email: 1,
           contactNumber: 1,
+          alternativeNumber: 1,
           DOB: 1,
           address: 1,
           installedModel: 1,

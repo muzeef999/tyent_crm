@@ -17,8 +17,8 @@ export interface Customer {
   DOB?: string;
   installedBy?: string | Employee;
   marketingManager?: string | Employee;
-  R0?: boolean;
-  pressureTank?: boolean;
+  waterType?: string;
+  waterMethod?: string;
   tdsValue: string,
   phValue: string,
   inputWaterFlow: string,

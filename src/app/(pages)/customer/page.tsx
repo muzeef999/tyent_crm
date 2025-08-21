@@ -11,7 +11,6 @@ import TypeSearch from "@/components/TypeSearch";
 import { useQuery } from "@tanstack/react-query";
 import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
-import { formatIndianRupees } from "@/utils/formatIndianRupees";
 import useDebounce from "@/hooks/useDebounce";
 import CustomerAnalytics from "@/app/(pages)/customer/CustomerAnalytics";
 import AddCustomer from "@/app/(pages)/customer/AddCustomer";
@@ -85,6 +84,7 @@ const Page = () => {
               <th>Name</th>
               <th>Email ID</th>
               <th>Contact Number</th>
+              <th>Alternative Number</th>
               <th>Date of Birth (DOB)</th>
               <th colSpan={2}>Address</th>
             </tr>
@@ -104,7 +104,15 @@ const Page = () => {
                   <td data-tooltip={customer.contactNumber}>
                     {customer.contactNumber}{" "}
                   </td>
-                  <td data-tooltip={customer.DOB}>{customer?.DOB}</td>
+                  <td data-tooltip={customer.alternativeNumber}>
+                    {customer.alternativeNumber}
+                  </td>
+                  <td data-tooltip={customer?.DOB}>
+                    {customer?.DOB
+                      ? new Date(customer.DOB).toLocaleDateString("en-GB")
+                      : ""}
+                  </td>
+
                   <td colSpan={2} data-tooltip={customer.address}>
                     {customer.address}
                   </td>

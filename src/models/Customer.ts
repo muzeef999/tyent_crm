@@ -23,8 +23,29 @@ const customerSchema = new Schema(
     DOB: { type: Date },
     installedBy: { type: Schema.Types.ObjectId, ref: "Employee" },
     marketingManager: { type: Schema.Types.ObjectId, ref: "Employee" },
-    R0: { type: Boolean },
-    pressureTank: { type: Boolean },
+    waterType: {
+      type: String,
+      enum: [
+        "RO_company",
+        "RO_third-party",
+        "Bore_company",
+        "Bore_third-party",
+        "Municipal_company",
+        "Municipal_third-party",
+      ],
+      required: true,
+    },
+    waterMethod: {
+      type: String,
+      enum: [
+        "Direct",
+        "Booster_company",
+        "Booster_third-party",
+        "Pressure_company",
+        "Pressure_third-party",
+      ],
+      required: true,
+    },
   },
   { timestamps: true }
 );

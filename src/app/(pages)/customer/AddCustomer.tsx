@@ -30,15 +30,48 @@ const amcOptions = [
 ];
 
 const WaterType = [
-  { label: "RO", value: "RO" },
-  { label: "Bore", value: "Bore" },
-  { label: "Municipal", value: "Municipal" },
+  {
+    label: "RO",
+    options: [
+      { label: "Company Installed", value: "RO_company" },
+      { label: "Third-Party Installed", value: "RO_third-party" },
+    ],
+  },
+  {
+    label: "Bore",
+    options: [
+      { label: "Company Installed", value: "Bore_company" },
+      { label: "Third-Party Installed", value: "Bore_third-party" },
+    ],
+  },
+  {
+    label: "Municipal",
+    options: [
+      { label: "Company Installed", value: "Municipal_company" },
+      { label: "Third-Party Installed", value: "Municipal_third-party" },
+    ],
+  },
 ];
 
 const WaterMethod = [
-  { label: "Direct", value: "Direct" },
-  { label: "Booster Pump", value: "Booster Pump" },
-  { label: "Pressure Tank", value: "Pressure Tank" },
+  {
+    label: "Direct",
+    options: [{ label: "Direct", value: "Direct" }],
+  },
+  {
+    label: "Booster Pump",
+    options: [
+      { label: "Company Installed", value: "Booster_company" },
+      { label: "Third-Party Installed", value: "Booster_third-party" },
+    ],
+  },
+  {
+    label: "Pressure Tank",
+    options: [
+      { label: "Company Installed", value: "Pressure_company" },
+      { label: "Third-Party Installed", value: "Pressure_third-party" },
+    ],
+  },
 ];
 
 type AddCustomerProps = {
@@ -60,8 +93,6 @@ const initialFormData = {
   DOB: "",
   installedBy: "",
   marketingManager: "",
-  R0: false,
-  pressureTank: false,
   tdsValue: "",
   phValue: "",
   inputWaterFlow: "",
@@ -152,29 +183,45 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     },
   });
 
+  const formatIndianPrice = (value: string) => {
+    if (!value) return "";
+    const numericValue = value.replace(/\D/g, ""); // keep only digits
+    return new Intl.NumberFormat("en-IN").format(Number(numericValue));
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
     const { name, value, type } = target;
 
+    validateField(name, value);
+
     if (type === "checkbox") {
       setFormData((prev) => ({
         ...prev,
         [name]: (target as HTMLInputElement).checked,
       }));
+    } else if (name === "price") {
+      const rawValue = value.replace(/\D/g, ""); // only digits
+      setFormData((prev) => ({
+        ...prev,
+        [name]: formatIndianPrice(rawValue), // formatted for UI
+      }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
-
-    validateField(name, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const preparedData = {
       ...formData,
-      price: Number(formData.price),
+      price: Number(formData.price.replace(/,/g, "")),
+
       DOB: new Date(formData.DOB).toISOString(),
     };
     mutation.mutate(preparedData);
@@ -230,7 +277,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
                 type={type}
                 value={formData[name as keyof typeof formData] as string}
                 onChange={handleChange}
-                required={name === "name" || name === "contactNumber"}
               />
               {errors[name] && (
                 <p className="text-red-600 -mt-4 text-sm">{errors[name]}</p>
@@ -302,45 +348,51 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               <p className="text-red-600 -mt-4 text-sm">{errors.price}</p>
             )}
           </div>
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="Marketing Manager"
+              id="marketingManager"
+              options={MarkingMangerOptions}
+              selectedValue={formData.marketingManager || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, marketingManager: value }))
+              }
+            />
+          </div>
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="Installed By"
+              id="installedBy"
+              options={TechincianOptions}
+              selectedValue={formData.installedBy || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, installedBy: value }))
+              }
+            />
+          </div>
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="AMC Package"
+              id="amcRenewed"
+              options={amcOptions}
+              selectedValue={formData.amcRenewed || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, amcRenewed: value }))
+              }
+            />
+          </div>
 
-          <CustomDropdown
-            label="Marketing Manager"
-            id="marketingManager"
-            options={MarkingMangerOptions}
-            selectedValue={formData.marketingManager || ""}
-            onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, marketingManager: value }))
-            }
-          />
-          <CustomDropdown
-            label="Installed By"
-            id="installedBy"
-            options={TechincianOptions}
-            selectedValue={formData.installedBy || ""}
-            onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, installedBy: value }))
-            }
-          />
-
-          <CustomDropdown
-            label="AMC Package"
-            id="amcRenewed"
-            options={amcOptions}
-            selectedValue={formData.amcRenewed || ""}
-            onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, amcRenewed: value }))
-            }
-          />
-
-          <CustomDropdown
-            label="AMC (Years)"
-            id="warrantyYears"
-            options={warrantyOptions}
-            selectedValue={formData.warrantyYears || ""}
-            onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, warrantyYears: value }))
-            }
-          />
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="AMC (Years)"
+              id="warrantyYears"
+              options={warrantyOptions}
+              selectedValue={formData.warrantyYears || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, warrantyYears: value }))
+              }
+            />
+          </div>
         </div>
       </section>
 
@@ -349,7 +401,27 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           Installation Parameters:
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-6">
+          <CustomDropdown
+            label="Water Type"
+            id="waterType"
+            options={WaterType}
+            selectedValue={formData.waterType || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, waterType: value }))
+            }
+          />
+
+          <CustomDropdown
+            label="Water Method"
+            id="waterMethod"
+            options={WaterMethod}
+            selectedValue={formData.waterMethod || ""}
+            onSelect={(value) =>
+              setFormData((prev) => ({ ...prev, waterMethod: value }))
+            }
+          />
+
           <div className="flex flex-col h-22">
             <Input
               name={"phValue"}
@@ -376,27 +448,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               <p className="text-red-600 -mt-4 text-sm">{errors.tdsValue}</p>
             )}
           </div>
-
-          <CustomDropdown
-            label="Water Type"
-            id="waterType"
-            options={WaterType}
-            selectedValue={formData.waterType || ""}
-            onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, waterType: value }))
-            }
-          />
-
-          <CustomDropdown
-            label="Water Method"
-            id="waterMethod"
-            options={WaterMethod}
-            selectedValue={formData.waterMethod || ""}
-            onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, waterMethod: value }))
-            }
-          />
-
         </div>
       </section>
 
