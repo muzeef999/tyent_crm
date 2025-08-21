@@ -216,6 +216,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     }
   };
 
+  console.log();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const preparedData = {
