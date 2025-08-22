@@ -24,7 +24,7 @@ export interface Customer {
   createdAt?: string;
   updatedAt?: string;
   warrantyMachineYears: string;
-  warrantyPlatesYears: String;
+  warrantyPlatesYears: string;
 }
 
 export interface Account {
