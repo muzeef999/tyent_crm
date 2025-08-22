@@ -49,10 +49,28 @@ const Page = () => {
   const totalPages = pagination?.totalPages || 1;
 
   const customerStats = {
-    totalCustomers: pagination?.total || 0,
-    newCustomers: 10,
-    unsatisfiedCustomers: 5,
+    totalCustomers: pagination?.total || 0, // ✅ from backend pagination count
+    activeCustomers: customers.filter((c) => !!c.serialNumber).length, // installed machines
+    amcCustomers: customers.filter((c) => !!c.amcRenewed).length,
+
+    warranty: {
+      "In-Warranty": 10,
+      "Out-of-Warranty": 20,
+    },
+
+    machineAgeBuckets: {
+      "0-1": 10,
+      "2-3": 15,
+      "3+": 20,
+    },
+
+    waterType: {
+      RO: 10,
+      Bore: 5,
+      Municipal: 8,
+    },
   };
+
   if (error) {
     return (
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>

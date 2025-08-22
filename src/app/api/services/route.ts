@@ -83,6 +83,7 @@ export const GET = async (req: Request) => {
 
     const services = await Service.find(filter)
       .populate("customerId", "name installedModel")
+      
       .skip(skip)
       .limit(limit)
       .sort({ serviceDate: 1 })

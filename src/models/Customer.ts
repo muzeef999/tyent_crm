@@ -11,7 +11,7 @@ const customerSchema = new Schema(
     price: { type: Number, required: true },
     payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
     invoiceNumber: { type: String, required: true },
-    serialNumber: { type: String, ref: "Product", required: true },
+    serialNumber: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     warrantyYears: { type: String },
     amcRenewed: {
       type: String,
@@ -28,10 +28,8 @@ const customerSchema = new Schema(
       enum: [
         "RO_company",
         "RO_third-party",
-        "Bore_company",
-        "Bore_third-party",
-        "Municipal_company",
-        "Municipal_third-party",
+        "Bore",
+        "Municipal",
       ],
       required: true,
     },

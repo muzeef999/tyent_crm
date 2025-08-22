@@ -56,7 +56,6 @@ export const employeeValidation = z.object({
     ),
 });
 
-
 export const customerValidation = z
   .object({
     // Required fields with clear error messages for empty values
@@ -71,7 +70,10 @@ export const customerValidation = z
       .trim()
       .min(8, { message: "Contact number must be at least 8 digits" })
       .max(15, { message: "Contact number must be less than 15 characters" })
-      .regex(/^[0-9+\-\s()]+$/, { message: "Contact number must contain only numbers and valid phone characters" }),
+      .regex(/^[0-9+\-\s()]+$/, {
+        message:
+          "Contact number must contain only numbers and valid phone characters",
+      }),
 
     email: z
       .string()
@@ -104,7 +106,9 @@ export const customerValidation = z
 
     warrantyYears: z
       .string()
-      .regex(/^\d*\.?\d+$/, { message: "Warranty years must be a valid number" })
+      .regex(/^\d*\.?\d+$/, {
+        message: "Warranty years must be a valid number",
+      })
       .optional()
       .or(z.literal("")),
 
@@ -129,7 +133,9 @@ export const customerValidation = z
 
     inputWaterFlow: z
       .string()
-      .regex(/^\d*\.?\d+$/, { message: "Input water flow must be a valid number" })
+      .regex(/^\d*\.?\d+$/, {
+        message: "Input water flow must be a valid number",
+      })
       .optional()
       .or(z.literal("")),
 
@@ -156,8 +162,7 @@ export const customerValidation = z
       .optional(),
 
     // Date field with validation
-    DOB: z
-      .coerce
+    DOB: z.coerce
       .date()
       .max(new Date(), { message: "Date of birth cannot be in the future" })
       .optional()
@@ -167,22 +172,29 @@ export const customerValidation = z
       .string()
       .trim()
       .min(8, { message: "Alternative number must be at least 8 digits" })
-      .max(15, { message: "Alternative number must be less than 15 characters" })
-      .regex(/^[0-9+\-\s()]*$/, { message: "Alternative number must contain only numbers and valid phone characters" })
+      .max(15, {
+        message: "Alternative number must be less than 15 characters",
+      })
+      .regex(/^[0-9+\-\s()]*$/, {
+        message:
+          "Alternative number must contain only numbers and valid phone characters",
+      })
       .optional()
       .or(z.literal("")),
 
     // Enum fields with proper error handling
     waterType: z
-      .enum(
-        ["RO_company", "RO_third-party", "Bore_company", "Bore_third-party", "Municipal_company", "Municipal_third-party"],
-      )
+      .enum(["RO_company", "RO_third-party", "Bore", "Municipal"])
       .optional(),
 
     waterMethod: z
-      .enum(
-        ["Direct", "Booster_company", "Booster_third-party", "Pressure_company", "Pressure_third-party"],
-      )
+      .enum([
+        "Direct",
+        "Booster_company",
+        "Booster_third-party",
+        "Pressure_company",
+        "Pressure_third-party",
+      ])
       .optional(),
 
     // Reference fields with validation
@@ -204,12 +216,32 @@ export const customerValidation = z
       .optional(),
 
     serviceHistory: z
-      .array(z.string().min(1, { message: "Service history ID cannot be empty" }))
+      .array(
+        z.string().min(1, { message: "Service history ID cannot be empty" })
+      )
       .optional(),
 
     upcomingServices: z
-      .array(z.string().min(1, { message: "Upcoming service ID cannot be empty" }))
+      .array(
+        z.string().min(1, { message: "Upcoming service ID cannot be empty" })
+      )
       .optional(),
+
+    warrantyMachineYears: z
+      .string()
+      .regex(/^\d*\.?\d+$/, {
+        message: "Warranty years must be a valid number",
+      })
+      .optional()
+      .or(z.literal("")),
+
+    warrantyPlatesYears: z
+      .string()
+      .regex(/^\d*\.?\d+$/, {
+        message: "Warranty years must be a valid number",
+      })
+      .optional()
+      .or(z.literal("")),
   })
   .refine(
     (data) => {

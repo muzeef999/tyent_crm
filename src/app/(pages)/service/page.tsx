@@ -40,7 +40,6 @@ const Page = () => {
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
     );
 
-
   const serviceStats = {
     totalTicketsThisMonth: service?.totalTicketsThisMonth,
     ticketsToday: service?.ticketsToday,
@@ -70,12 +69,11 @@ const Page = () => {
           <thead>
             <tr>
               <th colSpan={2}>Scheduled On</th>
-              <th>assignedDate</th>
-              <th>closingDate</th>
-              <th>serviceType</th>
-              <th>Avg-rating /5</th>
+              <th>Assigned Date</th>
+              <th>Closing Date</th>
+              <th>Service Type</th>
               <th>Status</th>
-              <th>notes</th>
+              <th>Avg Rating /5</th>
             </tr>
           </thead>
           <tbody>
@@ -145,9 +143,9 @@ const Page = () => {
                   </td>
 
                   <td>{item.serviceType?.join(", ")}</td>
+                  <td>{item.status}</td>
+              
                   <td>5/5</td>
-                  <td>ongoing</td>
-                  <td>{item.notes}</td>
                 </tr>
               ))
             )}

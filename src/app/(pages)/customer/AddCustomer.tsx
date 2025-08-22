@@ -23,6 +23,18 @@ const warrantyOptions = [
   { label: "3 Years", value: "3" },
 ];
 
+const warrantyMachiene = [
+  { label: "1 Year", value: "1" },
+  { label: "2 Years", value: "2" },
+  { label: "3 Years", value: "3" },
+];
+
+const warrantyPlates = [
+  { label: "1 Year", value: "1" },
+  { label: "2 Years", value: "2" },
+  { label: "3 Years", value: "3" },
+];
+
 const amcOptions = [
   { label: "Service AMC", value: "SERVICE_AMC" },
   { label: "Service + Filter AMC", value: "SERVICE_FILTER_AMC" },
@@ -33,23 +45,21 @@ const WaterType = [
   {
     label: "RO",
     options: [
-      { label: "Company Installed", value: "RO_company" },
+      { label: "Company Installed No-warranty", value: "RO_company" },
+      {
+        label: "Company Installed 1-year warranty",
+        value: "RO_third-party",
+      },
       { label: "Third-Party Installed", value: "RO_third-party" },
     ],
   },
   {
     label: "Bore",
-    options: [
-      { label: "Company Installed", value: "Bore_company" },
-      { label: "Third-Party Installed", value: "Bore_third-party" },
-    ],
+    options: [{ label: "Bore", value: "Bore" }],
   },
   {
     label: "Municipal",
-    options: [
-      { label: "Company Installed", value: "Municipal_company" },
-      { label: "Third-Party Installed", value: "Municipal_third-party" },
-    ],
+    options: [{ label: "Municipal", value: "Municipal" }],
   },
 ];
 
@@ -95,9 +105,10 @@ const initialFormData = {
   marketingManager: "",
   tdsValue: "",
   phValue: "",
-  inputWaterFlow: "",
   waterType: "",
   waterMethod: "",
+  warrantyMachineYears: "",
+  warrantyPlatesYears: "",
 };
 
 const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
@@ -124,18 +135,16 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     }
 
     if (productData?.data) {
-      toast.success("✅ Product found: " + productData.data.name);
-
       setFormData((prev) => ({
         ...prev,
-        serialNumber: productData.data.serialNumber, // ✅ save ID
+        serialNumber: productData?.data._id, // ✅ save ID
       }));
     }
   }, [productError, productData]);
 
   // ✅ remove debounce from updating formData
   const handleSerialChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, serialNumber: value })); // always update formData
+    setFormData((prev) => ({ ...prev, serialNumber: productData?.data._id })); // always update formData
     debouncedSearch(value); // only search is debounced
   };
 
@@ -216,14 +225,13 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     }
   };
 
-  console.log();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const preparedData = {
       ...formData,
       price: Number(formData.price.replace(/,/g, "")),
 
-      DOB: new Date(formData.DOB).toISOString(),
+      DOB: formData.DOB && new Date(formData.DOB).toISOString(),
     };
     mutation.mutate(preparedData);
   };
@@ -263,12 +271,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             },
 
             { name: "address", label: "Address", placeholder: "Enter address" },
-
-            {
-              name: "remarks",
-              label: "Remarks",
-              placeholder: "Any notes...",
-            },
           ].map(({ name, label, placeholder, type = "text" }) => (
             <div key={name} className="flex flex-col h-22">
               <Input
@@ -319,7 +321,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             )}
             {isSearching && <p>Searching...</p>}
           </div>
-
           <div className="flex flex-col h-22">
             <Input
               name={"invoiceNumber"}
@@ -335,7 +336,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               </p>
             )}
           </div>
-
           <div className="flex flex-col h-22">
             <Input
               name={"price"}
@@ -382,7 +382,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               }
             />
           </div>
-
           <div className="flex flex-col h-22">
             <CustomDropdown
               label="AMC (Years)"
@@ -391,6 +390,32 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               selectedValue={formData.warrantyYears || ""}
               onSelect={(value) =>
                 setFormData((prev) => ({ ...prev, warrantyYears: value }))
+              }
+            />
+          </div>
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="Warranty (Years) on Machine"
+              id="warrantyMachineYears"
+              options={warrantyMachiene}
+              selectedValue={formData.warrantyMachineYears || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  warrantyMachineYears: value,
+                }))
+              }
+            />
+          </div>
+
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="Warranty (Years) on Plates"
+              id="warrantyPlatesYears"
+              options={warrantyPlates}
+              selectedValue={formData.warrantyPlatesYears || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, warrantyPlatesYears: value }))
               }
             />
           </div>
@@ -404,7 +429,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-6">
           <CustomDropdown
-            label="Water Type"
+            label="Input Water Source"
             id="waterType"
             options={WaterType}
             selectedValue={formData.waterType || ""}
@@ -414,7 +439,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
           />
 
           <CustomDropdown
-            label="Water Method"
+            label="Input Water Method"
             id="waterMethod"
             options={WaterMethod}
             selectedValue={formData.waterMethod || ""}
@@ -436,6 +461,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               <p className="text-red-600 -mt-4 text-sm">{errors.phValue}</p>
             )}
           </div>
+
           <div className="flex flex-col h-22">
             <Input
               name={"tdsValue"}
@@ -447,6 +473,20 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             />
             {errors.tdsValue && (
               <p className="text-red-600 -mt-4 text-sm">{errors.tdsValue}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col -mt-6 h-22">
+            <Input
+              name={"remarks"}
+              label={"Remarks"}
+              placeholder={"Any notes..."}
+              type={"text"}
+              value={formData.remarks}
+              onChange={handleChange}
+            />
+            {errors.remarks && (
+              <p className="text-red-600 -mt-4 text-sm">{errors.remarks}</p>
             )}
           </div>
         </div>
