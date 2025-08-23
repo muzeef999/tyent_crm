@@ -1,14 +1,9 @@
 import CustomDropdown from "@/components/ui/CustomDropdown";
 import React, { useState } from "react";
-import {
-  FaUsers,
-  FaUserCheck,
-  FaShieldAlt,
-  FaExclamationTriangle,
-  FaHandshake,
-  FaHourglassHalf,
-  FaTint,
-} from "react-icons/fa";
+import { FaUsers, FaShieldAlt, FaHourglassHalf, FaTint } from "react-icons/fa";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
 
 type CustomerAnalyticsProps = {
   totalCustomers: number;
@@ -48,6 +43,12 @@ const machineAgeOptions = [
   { label: "3+ Years", value: "3+" },
 ];
 
+const amcOption = [
+  { label: "Service amc", value: "SERVICE_AMC" },
+  { label: "Service Filter Amc", value: "SERVICE_FILTER_AMC" },
+  { label: "Comprehesive amc", value: "COMPREHENSIVE_AMC" },
+];
+
 const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   totalCustomers,
   warranty,
@@ -55,6 +56,13 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   machineAgeBuckets,
   waterType,
 }) => {
+  const [filteredCustomers, setFilteredCustomers] = useState(totalCustomers);
+
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [selectedAmc, setSelecteAmc] = useState<
+    "SERVICE_AMC" | "SERVICE_FILTER_AMC" | "COMPREHENSIVE_AMC"
+  >("SERVICE_AMC");
   const [selectedAge, setSelectedAge] = useState<"0-1" | "2-3" | "3+">("0-1");
   const [selectedWater, setSelectedWater] = useState<
     "RO" | "Bore" | "Municipal"
@@ -67,34 +75,42 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const valueStyle = "text-2xl font-bold mt-2";
   const labelStyle = "text-md text-gray-600 mt-2 font-semibold";
 
-  const cards = [
-    {
-      label: "Total Customers",
-      value: totalCustomers,
-      icon: <FaUsers size={28} className="text-blue-500" />,
-      bg: "bg-blue-50",
-    },
-    {
-      label: "AMC Customers",
-      value: amcCustomers,
-      icon: <FaHandshake size={28} className="text-purple-500" />,
-      bg: "bg-purple-50",
-    },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Cards */}
       <div className="grid lg:grid-cols-5 gap-4">
-        {cards.map((card, index) => (
-          <div key={index} className={`${cardStyle} ${card.bg}`}>
-            <div className="flex justify-around items-center p-2">
-              <div>{card.icon}</div>
-              <p className={valueStyle}>{card.value}</p>
-            </div>
-            <p className={labelStyle}>{card.label}</p>
+        <div className={`${cardStyle} bg-blue-50`}>
+          <div className="flex justify-around items-center p-2">
+            <FaUsers size={28} className="text-blue-500" />
           </div>
-        ))}
+          <CustomDateDropdown
+            label="Customer Date Range"
+            onDateChange={(start, end) => {
+              console.log("Selected Range:", start, end);
+              // 🔥 Call API or filter customers based on start & end
+            }}
+          />
+        </div>
+        <div className={`${cardStyle} bg-purple-50`}>
+          <div className="flex justify-around items-center p-2">
+            <FaShieldAlt size={28} className="text-purple-500" />
+            <p className={valueStyle}>{warranty[selectedWarranty]}</p>
+          </div>
+          <CustomDropdown
+            id="amc"
+            label="Amc"
+            options={amcOption}
+            selectedValue={selectedAmc}
+            onSelect={(value) =>
+              setSelecteAmc(
+                value as
+                  | "SERVICE_AMC"
+                  | "SERVICE_FILTER_AMC"
+                  | "COMPREHENSIVE_AMC"
+              )
+            }
+          />
+        </div>
 
         <div className={`${cardStyle} bg-green-50`}>
           <div className="flex justify-around items-center p-2">
@@ -106,7 +122,9 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             label="Warranty"
             options={warrantyOptions}
             selectedValue={selectedWarranty}
-            onSelect={(value) => setSelectedWarranty(value as "In-Warranty" | "Out-of-Warranty")}
+            onSelect={(value) =>
+              setSelectedWarranty(value as "In-Warranty" | "Out-of-Warranty")
+            }
           />
         </div>
         {/* Machine Age Card with Dropdown */}

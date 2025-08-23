@@ -24,8 +24,8 @@ const AppBar = () => {
 
   return (
     <div
-      className={`fixed left-60 right-0 top-0 z-50 transition-shadow px-8 ${
-        scrolling ? "shadow-md" : ""
+      className={`fixed left-60 right-0 top-0 z-50 transition-shadow px-8 bg-background ${
+        scrolling ? "shadow-md" : "" 
       }`}
     >
       <div className="flex relative justify-between items-center p-2 px-t">

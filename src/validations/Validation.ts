@@ -1,4 +1,5 @@
 // validations/employeeValidation.js
+import mongoose from "mongoose";
 import { z } from "zod";
 
 export const employeeValidation = z.object({
@@ -96,13 +97,7 @@ export const customerValidation = z
       .optional()
       .or(z.literal("")),
 
-    serialNumber: z
-      .string()
-      .trim()
-      .min(1, { message: "Serial number cannot be empty" })
-      .max(100, { message: "Serial number must be less than 100 characters" })
-      .optional()
-      .or(z.literal("")),
+    serialNumber: z.string().optional().or(z.literal("")), // Allow empty in form
 
     warrantyYears: z
       .string()

@@ -30,7 +30,7 @@ export default function RootLayout({
           <ReactQueryDevtools />
 
           <div className="flex">
-            <div className="fixed top-14 left-0 w-64 h-screen z-20">
+            <div className="fixed top-14 left-0 sm:[5%] md:w-[15%] h-screen z-20">
               <Sidebar />
             </div>
 

@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
-    const { serialNumber } = body;
+    const { serialNumber } = body; // This is the ObjectId, not the serial number string
 
     const validationResult = customerValidation.safeParse(body);
 
@@ -53,13 +53,17 @@ export const POST = async (req: NextRequest) => {
     newCustomer.upcomingServices = createdServices.map((s) => s._id);
     await newCustomer.save();
 
-    const updatedProduct = await Product.findOneAndUpdate(
-      { serialNumber },
+    // FIX: Find the product by its ID (which is what we're sending as serialNumber)
+    const productId = body.serialNumber; // This is actually the product's ObjectId
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId, // Find by ID, not by serialNumber field
       {
         status: "Out of Stock",
         assignedTo: newCustomer._id,
         stock: 0,
-      }
+      },
+      { new: true }
     );
 
     if (!updatedProduct) {

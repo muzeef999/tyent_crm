@@ -80,8 +80,8 @@ const Page = () => {
   return (
     <>
       {/* 🔹 Top Section */}
-      <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
-        <div>
+      <div className="flex z-9 w-[85%]  fixed right-0  flex-wrap justify-between items-center bg-background  px-6 py-4 gap-4">
+        <div className="flex-1 min-w-[200px]">
           <TypeSearch onSearch={setSearchText} />
         </div>
 
@@ -92,7 +92,7 @@ const Page = () => {
       </div>
 
       {/* 🔹 Table Section */}
-      <div className="p-6 overflow-x-auto">
+      <div className="p-6 overflow-x-auto mt-26">
         <CustomerAnalytics {...customerStats} />
         <br />
 
@@ -141,8 +141,13 @@ const Page = () => {
         </table>
       </div>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-
+      <div className="mb-26">
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      </div>
       {/* 🔹 Offcanvas for Add Customer */}
       <Offcanvas
         show={showAddSidebar}

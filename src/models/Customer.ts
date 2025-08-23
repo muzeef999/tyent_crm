@@ -11,7 +11,7 @@ const customerSchema = new Schema(
     price: { type: Number, required: true },
     payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
     invoiceNumber: { type: String, required: true },
-    serialNumber: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    serialNumber: { type: String, ref: "Product",},
     warrantyYears: { type: String },
     amcRenewed: {
       type: String,

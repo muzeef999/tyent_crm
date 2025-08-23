@@ -96,7 +96,6 @@ const initialFormData = {
   price: "",
   alternativeNumber: "",
   invoiceNumber: "",
-  serialNumber: "",
   warrantyYears: "",
   amcRenewed: "",
   remarks: "",
@@ -113,6 +112,8 @@ const initialFormData = {
 
 const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   const [formData, setFormData] = useState(initialFormData);
+  const [productId, setProductId] = useState(""); // Store the product ObjectId
+  const [serialInput, setSerialInput] = useState(""); // Store the serial number input
   const { errors, validateField } = useFieldValidator(customerValidation);
 
   const [serial, setSerial] = useState("");
@@ -132,21 +133,13 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   useEffect(() => {
     if (productError) {
       toast.error("❌ Serial number not found!");
+      setProductId(""); // Clear product ID on error
     }
 
     if (productData?.data) {
-      setFormData((prev) => ({
-        ...prev,
-        serialNumber: productData?.data._id, // ✅ save ID
-      }));
+      setProductId(productData.data._id); // Store the product ObjectId
     }
   }, [productError, productData]);
-
-  // ✅ remove debounce from updating formData
-  const handleSerialChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, serialNumber: productData?.data._id })); // always update formData
-    debouncedSearch(value); // only search is debounced
-  };
 
   // ✅ create debounced function just for searching
   const debouncedSearch = React.useMemo(
@@ -156,6 +149,11 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
       }, 400),
     []
   );
+
+  const handleSerialChange = (value: string) => {
+    setSerialInput(value); // Store the input value for display
+    debouncedSearch(value); // only search is debounced
+  };
 
   // employees list
   const {
@@ -185,6 +183,8 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
       toast.success("Customer added successfully!");
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       setFormData(initialFormData);
+      setSerialInput(""); // Clear serial input
+      setProductId(""); // Clear product ID
       onClose();
     },
     onError: (error: unknown) => {
@@ -227,12 +227,22 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate that we have a product ID
+    if (!productId) {
+      toast.error(
+        "Please select a valid product by searching with a serial number"
+      );
+      return;
+    }
+
     const preparedData = {
       ...formData,
+      serialNumber: productId, // Use the product ObjectId, not the input text
       price: Number(formData.price.replace(/,/g, "")),
-
       DOB: formData.DOB && new Date(formData.DOB).toISOString(),
     };
+
     mutation.mutate(preparedData);
   };
 
@@ -309,17 +319,19 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               name="serialNumber"
               label="Serial Number"
               placeholder="SN..."
-              value={formData.serialNumber}
+              value={serialInput} // Use the separate state for input value
               onChange={(e) => handleSerialChange(e.target.value)}
             />
             {productData?.data ? (
               <p className="text-green-600 -mt-4 text-sm">
-                {productData?.data?.name}
+                ✓ {productData?.data?.name} - Found
               </p>
-            ) : (
-              <p className="text-red-500 -mt-4 text-sm">Not found</p>
+            ) : serialInput && !isSearching ? (
+              <p className="text-red-500 -mt-4 text-sm">Product not found</p>
+            ) : null}
+            {isSearching && (
+              <p className="text-blue-500 -mt-4 text-sm">Searching...</p>
             )}
-            {isSearching && <p>Searching...</p>}
           </div>
           <div className="flex flex-col h-22">
             <Input
@@ -494,7 +506,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
 
       {/* Submit Button */}
       <div className="col-span-full">
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" disabled={!productId}>
           Save Customer
         </Button>
       </div>
