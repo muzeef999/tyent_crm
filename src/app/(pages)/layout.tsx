@@ -1,5 +1,5 @@
 "use client";
-import "./globals.css";
+import "@/app/globals.css";
 import AppBar from "@/components/ui/AppBar";
 import Sidebar from "@/components/ui/Sidebar";
 import {

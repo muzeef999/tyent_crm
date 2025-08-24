@@ -2,6 +2,12 @@ import axiosInstance from "@/lib/axiosInstance";
 import { Account, Customer, Employee, Payment, Service } from "@/types/customer";
 import axios from "axios";
 
+
+
+//Auth
+
+export const login = (contactNumber: string) => axiosInstance.get(`/auth/login?contactNumber=${contactNumber}`).then((res) => res.data);
+
 //CUSTOMERS 
 
 export const getCustomers = async ({  page = 1,limit = 10,searchQuery = "",}: { page?: number;limit?: number; searchQuery?: string;}) => {

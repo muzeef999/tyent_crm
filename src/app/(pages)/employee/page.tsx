@@ -12,6 +12,7 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 import {  useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
+import EmployeeAnalytics from "./EmployeeAnalytics";
 
 const Page = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false); // fixed
@@ -39,6 +40,10 @@ const Page = () => {
   const newCustomers = 10;
   const unsatisfiedCustomers = 5;
 
+
+  const dateToDate = 7;
+  const Desiginations = "Software Engineer";
+
   if (error)
     return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;
 
@@ -49,21 +54,15 @@ const Page = () => {
           <TypeSearch onSearch={setSearchText} />
         </div>
 
-        <div>
-          <p className="text-gray-600">
-            Total customers:{" "}
-            <span className="font-medium">{totalCustomers}</span>, new customers
-            this month: <span className="font-medium">{newCustomers}</span>,{" "}
-            unsatisfied customers:{" "}
-            <span className="font-medium">{unsatisfiedCustomers}</span>
-          </p>
-        </div>
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
           Add Customer
         </Button>
       </div>
+
+
+      <EmployeeAnalytics active={newCustomers} inactive={unsatisfiedCustomers} dateToDate={dateToDate} Desiginations={Desiginations} />
 
       <div className="p-6 overflow-x-auto">
         <table className="w-full min-w-[1000px] customtable">

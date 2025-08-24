@@ -5,7 +5,7 @@ const employeeSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, requred: true, unique: true },
-    contactNumber: { type: String, requred: true, unique: true },
+    contactNumber: { type: String, requred: true, unique: true, index:true },
     designation: {
       type: String,
       enum: [

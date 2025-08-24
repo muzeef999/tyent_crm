@@ -12,14 +12,26 @@ type PaginationProps = {
   setLimit: (limit: number) => void;
 };
 
-const generatePageLimits = (maxLimit: number, steps: number[]) => {
-  return steps
-    .filter((val) => val <= maxLimit)
-    .map((val) => ({
-      label: `${val} / page`,
-      value: val,
-    }));
+const generatePageLimits = (totalCustomers: number, step: number = 10) => {
+  const limits = [];
+  for (let i = 10; i <= totalCustomers; i += step) {
+    limits.push({
+      label: `${i} / page`,
+      value: i,
+    });
+  }
+
+  // make sure last option is exactly totalCustomers (show all customers in one page if needed)
+  if (limits[limits.length - 1]?.value !== totalCustomers) {
+    limits.push({
+      label: `${totalCustomers} / page`,
+      value: totalCustomers,
+    });
+  }
+
+  return limits;
 };
+
 
 const Pagination: React.FC<PaginationProps> = ({
   page,
@@ -31,8 +43,7 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
 
 
-    const pagesLimit = generatePageLimits(totalCustomers, [10, 20, 30, 40, 50, 100]);
-
+const pagesLimit = generatePageLimits(totalCustomers);
 
   useEffect(() => {
     if (!limit) {

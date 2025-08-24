@@ -73,6 +73,7 @@ const ServiceAnalytics: React.FC<ServiceAnalyticsProps> = ({
 
   return (
     <div className="grid lg:grid-cols-6 gap-2">
+
       {cards.map((card, index) => (
         <div key={index} className={`${cardStyle} ${card.bg}`}>
           <div className="flex justify-around items-center p-2">
@@ -84,6 +85,9 @@ const ServiceAnalytics: React.FC<ServiceAnalyticsProps> = ({
           <p className={labelStyle}>{card.label}</p>
         </div>
       ))}
+
+
+      
     </div>
   );
 };
