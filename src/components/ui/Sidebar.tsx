@@ -9,7 +9,6 @@ import { TbAutomation } from "react-icons/tb";
 import {
   IoPeopleOutline,
   IoBuildOutline,
-  IoSettingsOutline,
   IoWalletOutline,
   IoPersonOutline,
 } from "react-icons/io5";

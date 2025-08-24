@@ -20,7 +20,7 @@ const Page = () => {
   const debouncedSearchText = useDebounce(searchText, 500);
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState<number>(10);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["customers", page, limit, debouncedSearchText],
@@ -47,6 +47,7 @@ const Page = () => {
   const customers: Customer[] = data?.data || [];
   const pagination = data?.pagination;
   const totalPages = pagination?.totalPages || 1;
+  const totalCustomers = pagination?.total || 0;
 
   const customerStats = {
     totalCustomers: pagination?.total || 0, // ✅ from backend pagination count
@@ -143,9 +144,12 @@ const Page = () => {
 
       <div className="mb-26">
         <Pagination
+          totalCustomers={totalCustomers}
           page={page}
+          limit={limit}
           totalPages={totalPages}
           onPageChange={setPage}
+          setLimit={setLimit} // ✅ correct prop name
         />
       </div>
       {/* 🔹 Offcanvas for Add Customer */}

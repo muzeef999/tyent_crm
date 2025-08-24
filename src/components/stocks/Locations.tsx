@@ -5,7 +5,7 @@ import React from "react";
 import TableLoading from "../ui/TableLoading";
 
 const Locations = () => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, } = useQuery({
     queryKey: ["location"],
     queryFn: getLocation,
   });

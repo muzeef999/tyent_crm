@@ -1,5 +1,4 @@
 // validations/employeeValidation.js
-import mongoose from "mongoose";
 import { z } from "zod";
 
 export const employeeValidation = z.object({

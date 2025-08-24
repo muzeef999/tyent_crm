@@ -1,19 +1,46 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { IoIosArrowRoundBack, IoIosArrowRoundForward } from "react-icons/io";
 import { motion } from "framer-motion";
+import CustomDropdown from "./CustomDropdown";
 
 type PaginationProps = {
+  totalCustomers: number;
   page: number;
   totalPages: number;
+  limit: number;
   onPageChange: (page: number) => void;
+  setLimit: (limit: number) => void;
+};
+
+const generatePageLimits = (maxLimit: number, steps: number[]) => {
+  return steps
+    .filter((val) => val <= maxLimit)
+    .map((val) => ({
+      label: `${val} / page`,
+      value: val,
+    }));
 };
 
 const Pagination: React.FC<PaginationProps> = ({
   page,
   totalPages,
+  totalCustomers,
+  limit,
   onPageChange,
+  setLimit,
 }) => {
-  if (totalPages <= 1) return null;
+
+
+    const pagesLimit = generatePageLimits(totalCustomers, [10, 20, 30, 40, 50, 100]);
+
+
+  useEffect(() => {
+    if (!limit) {
+      setLimit(10);
+    }
+  }, [limit, setLimit]);
+
+
 
   return (
     <motion.div
@@ -65,6 +92,16 @@ const Pagination: React.FC<PaginationProps> = ({
           Next
           <IoIosArrowRoundForward size={20} />
         </button>
+
+        <CustomDropdown
+          id="pages"
+          options={pagesLimit}
+          selectedValue={limit ?? 10}
+          onSelect={(newLimit) => {
+            setLimit(newLimit as number);
+            onPageChange(1); // ✅ reset to first page when limit changes
+          }}
+        />
       </div>
     </motion.div>
   );

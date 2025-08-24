@@ -1,6 +1,5 @@
 import { connectDB } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
-import Product from "@/models/Product";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import fs from "fs";
 import path from "path";

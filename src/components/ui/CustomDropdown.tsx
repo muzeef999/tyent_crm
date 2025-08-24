@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 
 type Option = {
   label: string;
-  value: string;
+  value: string | number;
 };
 
 type GroupedOption = {
@@ -13,8 +13,8 @@ type GroupedOption = {
 type SimpleDropdownProps = {
   options: (Option | GroupedOption)[];
   placeholder?: string;
-  selectedValue: string; // controlled selected value
-  onSelect: (value: string) => void;
+  selectedValue: string | number; // controlled selected value
+  onSelect: (value: string | number) => void;
   label?: string; // optional label
   id?: string; // optional id for accessibility
 };

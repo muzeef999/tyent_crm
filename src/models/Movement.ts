@@ -1,6 +1,6 @@
 // models/Movement.ts
 import { Movement } from "@/types/customer";
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema,  } from "mongoose";
 
 
 const MovementSchema = new Schema<Movement>({

@@ -2,7 +2,6 @@ import CustomDropdown from "@/components/ui/CustomDropdown";
 import React, { useState } from "react";
 import { FaUsers, FaShieldAlt, FaHourglassHalf, FaTint } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
-import DatePicker from "react-datepicker";
 import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
 
 type CustomerAnalyticsProps = {
@@ -52,7 +51,6 @@ const amcOption = [
 const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   totalCustomers,
   warranty,
-  amcCustomers,
   machineAgeBuckets,
   waterType,
 }) => {

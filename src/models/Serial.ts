@@ -1,6 +1,6 @@
 // models/Serial.ts
 import { Serial } from "@/types/customer";
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, } from "mongoose";
 
 
 

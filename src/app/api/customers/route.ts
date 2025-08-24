@@ -9,7 +9,6 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
-    const { serialNumber } = body; // This is the ObjectId, not the serial number string
 
     const validationResult = customerValidation.safeParse(body);
 

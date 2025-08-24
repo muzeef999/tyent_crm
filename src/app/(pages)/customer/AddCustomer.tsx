@@ -368,7 +368,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={MarkingMangerOptions}
               selectedValue={formData.marketingManager || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, marketingManager: value }))
+                setFormData((prev) => ({ ...prev, marketingManager: String(value) }))
               }
             />
           </div>
@@ -379,7 +379,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={TechincianOptions}
               selectedValue={formData.installedBy || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, installedBy: value }))
+                setFormData((prev) => ({ ...prev, installedBy: String(value) }))
               }
             />
           </div>
@@ -390,7 +390,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={amcOptions}
               selectedValue={formData.amcRenewed || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, amcRenewed: value }))
+                setFormData((prev) => ({ ...prev, amcRenewed:String( value) }))
               }
             />
           </div>
@@ -400,9 +400,9 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               id="warrantyYears"
               options={warrantyOptions}
               selectedValue={formData.warrantyYears || ""}
-              onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, warrantyYears: value }))
-              }
+              onSelect={(value) => {
+                setFormData((prev) => ({ ...prev, warrantyYears: String(value) }))
+              }}
             />
           </div>
           <div className="flex flex-col h-22">
@@ -414,7 +414,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               onSelect={(value) =>
                 setFormData((prev) => ({
                   ...prev,
-                  warrantyMachineYears: value,
+                  warrantyMachineYears: String(value),
                 }))
               }
             />
@@ -427,7 +427,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={warrantyPlates}
               selectedValue={formData.warrantyPlatesYears || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, warrantyPlatesYears: value }))
+                setFormData((prev) => ({ ...prev, warrantyPlatesYears: String(value) }))
               }
             />
           </div>
@@ -446,7 +446,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             options={WaterType}
             selectedValue={formData.waterType || ""}
             onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, waterType: value }))
+              setFormData((prev) => ({ ...prev, waterType: String(value) }))
             }
           />
 
@@ -456,7 +456,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             options={WaterMethod}
             selectedValue={formData.waterMethod || ""}
             onSelect={(value) =>
-              setFormData((prev) => ({ ...prev, waterMethod: value }))
+              setFormData((prev) => ({ ...prev, waterMethod: String(value) }))
             }
           />
 

@@ -1,6 +1,6 @@
 // models/Balance.ts
 import { Balance } from "@/types/customer";
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 
 

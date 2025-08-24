@@ -6,7 +6,6 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaTools,
-  FaClipboardCheck,
 } from "react-icons/fa";
 
 type ServiceAnalyticsProps = {

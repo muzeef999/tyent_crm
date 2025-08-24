@@ -9,7 +9,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { getEmployees } from "@/services/serviceApis";
 import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {  useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 
@@ -19,7 +19,7 @@ const Page = () => {
   const debouncedSearchText = useDebounce(searchText, 500);
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState<number>(10);
 
   const {
     data: employees,
@@ -31,7 +31,7 @@ const Page = () => {
       getEmployees({ page, limit, searchQuery: debouncedSearchText }),
   });
 
-  const customers: Employee[] = employees?.data || [];
+ 
   const pagination = employees?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
@@ -108,7 +108,17 @@ const Page = () => {
         </table>
       </div>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <div className="mb-26">
+        <Pagination
+          totalCustomers={totalCustomers}
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          setLimit={setLimit} // ✅ correct prop name
+        />
+      </div>
 
       <Offcanvas
         show={showAddSidebar}

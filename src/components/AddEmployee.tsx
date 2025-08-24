@@ -171,7 +171,7 @@ const AddEmployeeForm = ({ onClose }: { onClose: () => void }) => {
           options={designationTypeOptions}
           selectedValue={formData.designation || ""}
           onSelect={(value) =>
-            handleChange({ name: "designation", value })
+            handleChange({ name: "designation", value: String(value) })
           }
         />
         {errors.designation && (
@@ -185,7 +185,7 @@ const AddEmployeeForm = ({ onClose }: { onClose: () => void }) => {
           options={statusOptions}
           selectedValue={formData.status || ""}
           onSelect={(value) =>
-            handleChange({ name: "status", value })
+            handleChange({ name: "status", value: String(value) })
           }
         />
         {errors.status && (
