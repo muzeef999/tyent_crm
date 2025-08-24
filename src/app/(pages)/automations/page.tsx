@@ -1,9 +1,13 @@
-import React from 'react'
+import React from "react";
+import Analytics from "./Analytics";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <Analytics />
+      <p>page</p>
+    </div>
+  );
+};
 
-export default page
+export default page;

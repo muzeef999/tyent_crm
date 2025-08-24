@@ -1,8 +1,10 @@
 "use client";
 import Input from "@/components/ui/Input";
-import { login } from "@/services/serviceApis";
-import { useQuery } from "@tanstack/react-query";
+import { login, verifyOtp } from "@/services/serviceApis";
+import { getErrorMessage } from "@/utils/getErrorMessage";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useRef, useState } from "react";
+import { toast } from "sonner";
 
 export default function EmployeeLogin() {
   const [phone, setPhone] = useState("");
@@ -18,6 +20,18 @@ export default function EmployeeLogin() {
     queryKey: ["login", phone],
     queryFn: () => login(phone),
     enabled: phone.replace(/\D/g, "").length === 10, // only fetch when 10 digits
+  });
+
+
+  const {mutate} = useMutation({
+    mutationKey: ["verifyOtp"],
+    mutationFn: () => verifyOtp(phone, otp.join("")),
+    onSuccess: (data) => {
+      toast.success("OTP verified successfully:", data);
+    },
+    onError: (error) => {
+      toast.error("Error verifying OTP:");
+    },
   });
 
   // Handle OTP input change
@@ -37,6 +51,10 @@ export default function EmployeeLogin() {
       if (value && index < otp.length - 1) {
         inputRefs.current[index + 1]?.focus();
       }
+
+      if (newOtp.every((digit) => digit !== "")) {
+      mutate(); // call your API when all 6 digits are filled
+    }
     }
   };
 
@@ -83,9 +101,9 @@ export default function EmployeeLogin() {
         </label>
         <div className="flex gap-2">
           {otp.map((digit, index) => (
-            <>
+            <div key={index}>
               <input
-                key={index}
+                
                 type="text"
                 maxLength={1}
                 value={digit}
@@ -97,7 +115,7 @@ export default function EmployeeLogin() {
                 className="w-12 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white dark:border-gray-600"
               />
               {index === 2 && <span className="mx-1 text-2xl">-</span>}
-            </>
+            </div>
           ))}
         </div>
 

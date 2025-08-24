@@ -21,7 +21,6 @@ export function generateAndSetToken(user: { _id: string }) {
     maxAge: 24 * 60 * 60, // 24 hours in seconds
     path: "/",
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
   });
 
   // 4️⃣ Return both token and response

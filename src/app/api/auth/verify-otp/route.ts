@@ -38,7 +38,7 @@ export const POST = async (req: Request) => {
 
     // ✅ Use the phone number as the key
     const otpKey = `phone:${contactNumber}`;
-    const storedOtp = await getOtpFromRedis(otpKey) as string | null;
+    const storedOtp = (await getOtpFromRedis(otpKey)) as string | null;
 
     console.log("Stored OTP:", storedOtp);
     console.log("Received OTP:", trimmedOtp);
@@ -57,17 +57,15 @@ export const POST = async (req: Request) => {
       );
     }
 
-if (storedOtpString !== receivedOtpString) {
-  return NextResponse.json(
-    { success: false, error: "Invalid OTP" },
-    { status: 400 }
-  );
-}
+    if (storedOtpString !== receivedOtpString) {
+      return NextResponse.json(
+        { success: false, error: "Invalid OTP" },
+        { status: 400 }
+      );
+    }
 
     // Generate token and set cookie
-    const { token, response } = await generateAndSetToken(employee);
-
-    return response; // Cookie is already set; you can also include token in JSON if needed
+    return generateAndSetToken(employee);
   } catch (error) {
     const Error = getErrorMessage(error);
     return NextResponse.json({ success: false, error: Error }, { status: 500 });

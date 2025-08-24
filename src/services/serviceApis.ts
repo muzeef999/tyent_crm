@@ -7,7 +7,7 @@ import axios from "axios";
 //Auth
 
 export const login = (contactNumber: string) => axiosInstance.get(`/auth/login?contactNumber=${contactNumber}`).then((res) => res.data);
-
+export const verifyOtp = (contactNumber: string, otp: string) => axiosInstance.post("/auth/verify-otp", { contactNumber, otp }).then((res) => res.data);
 //CUSTOMERS 
 
 export const getCustomers = async ({  page = 1,limit = 10,searchQuery = "",}: { page?: number;limit?: number; searchQuery?: string;}) => {
