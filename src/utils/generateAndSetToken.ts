@@ -11,7 +11,7 @@ export function generateAndSetToken(user: { _id: string }) {
   );
 
   // 2️⃣ Create a NextResponse to set the cookie
-  const response = NextResponse.json({ success: true, message: "Logged in" });
+  const response = NextResponse.json({ success: true, message: "Logged in", token });
 
   // 3️⃣ Set the cookie using Next.js cookie API
   response.cookies.set({

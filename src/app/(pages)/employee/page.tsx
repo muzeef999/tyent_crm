@@ -9,7 +9,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { getEmployees } from "@/services/serviceApis";
 import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import {  useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 import EmployeeAnalytics from "./EmployeeAnalytics";
@@ -32,14 +32,12 @@ const Page = () => {
       getEmployees({ page, limit, searchQuery: debouncedSearchText }),
   });
 
- 
   const pagination = employees?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
   const totalCustomers = pagination?.total || 0;
   const newCustomers = 10;
   const unsatisfiedCustomers = 5;
-
 
   const dateToDate = 7;
   const Desiginations = "Software Engineer";
@@ -54,16 +52,20 @@ const Page = () => {
           <TypeSearch onSearch={setSearchText} />
         </div>
 
-
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
           Add Customer
         </Button>
       </div>
 
-
-      <EmployeeAnalytics active={newCustomers} inactive={unsatisfiedCustomers} dateToDate={dateToDate} Desiginations={Desiginations} />
-
+      <div className="p-6 overflow-x-auto">
+        <EmployeeAnalytics
+          active={newCustomers}
+          inactive={unsatisfiedCustomers}
+          dateToDate={dateToDate}
+          Desiginations={Desiginations}
+        />
+      </div>
       <div className="p-6 overflow-x-auto">
         <table className="w-full min-w-[1000px] customtable">
           <thead>
@@ -106,7 +108,6 @@ const Page = () => {
           </tbody>
         </table>
       </div>
-
 
       <div className="mb-26">
         <Pagination

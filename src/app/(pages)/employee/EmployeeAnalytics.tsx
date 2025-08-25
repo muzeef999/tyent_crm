@@ -50,9 +50,10 @@ const EmployeeAnalytics: React.FC<EmployeeAnalyticsProps> = ({
       bg: "bg-green-50",
     },
   ];
-
+  
   return (
-    <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+    <div className="space-y-6">
+    <div className="grid lg:grid-cols-4 gap-4">
       {/* Ticket Cards */}
       {cards.map((card, index) => (
         <div key={index} className={`${cardStyle} ${card.bg}`}>
@@ -100,6 +101,7 @@ const EmployeeAnalytics: React.FC<EmployeeAnalyticsProps> = ({
           />
         </div>
       </div>
+    </div>
     </div>
   );
 };

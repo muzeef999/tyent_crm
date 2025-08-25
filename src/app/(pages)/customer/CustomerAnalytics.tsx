@@ -68,18 +68,20 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [selectedWarranty, setSelectedWarranty] = useState<
     "In-Warranty" | "Out-of-Warranty"
   >("In-Warranty");
+
   const cardStyle =
-    "flex flex-col items-center justify-center rounded-2xl shadow-lg p-6 w-full";
-  const valueStyle = "text-2xl font-bold mt-2";
-  const labelStyle = "text-md text-gray-600 mt-2 font-semibold";
+    "flex flex-col items-center justify-between rounded-2xl p-4 w-full bg-background border border-gray-200 cursor-pointer hover:border-primary";
+  const valueStyle = "text-2xl font-bold mt-2 flex items-center justify-center";
+  const labelStyle = "text-md text-gray-600  font-semibold -mt-2";
 
   return (
     <div className="space-y-6">
       {/* Cards */}
       <div className="grid lg:grid-cols-5 gap-4">
-        <div className={`${cardStyle} bg-blue-50`}>
-          <div className="flex justify-around items-center p-2">
-            <FaUsers size={28} className="text-blue-500" />
+        <div className={`${cardStyle}`}>
+          <div className="flex justify-between w-full items-center">
+            <p className={labelStyle}>Total Customers</p>
+            <FaUsers size={24} className="text-blue-500" />
           </div>
           <CustomDateDropdown
             label="Customer Date Range"
@@ -89,14 +91,15 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             }}
           />
         </div>
-        <div className={`${cardStyle} bg-purple-50`}>
-          <div className="flex justify-around items-center p-2">
-            <FaShieldAlt size={28} className="text-purple-500" />
-            <p className={valueStyle}>{warranty[selectedWarranty]}</p>
+        <div className={`${cardStyle}`}>
+          <div className="flex justify-between w-full items-center ">
+            <p className={labelStyle}>Amc</p>
+            <FaShieldAlt size={24} className="text-purple-500" />
           </div>
+          <p className={valueStyle}>{warranty[selectedWarranty]}</p>
+
           <CustomDropdown
             id="amc"
-            label="Amc"
             options={amcOption}
             selectedValue={selectedAmc}
             onSelect={(value) =>
@@ -110,14 +113,14 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           />
         </div>
 
-        <div className={`${cardStyle} bg-green-50`}>
-          <div className="flex justify-around items-center p-2">
-            <FaShieldAlt size={28} className="text-green-500" />
-            <p className={valueStyle}>{warranty[selectedWarranty]}</p>
+        <div className={`${cardStyle}`}>
+          <div className="flex justify-between w-full items-center">
+            <p className={`${labelStyle}`}>Warranty</p>
+            <FaShieldAlt size={24} className="text-green-500" />
           </div>
+          <p className={valueStyle}>{warranty[selectedWarranty]}</p>
           <CustomDropdown
             id="warranty"
-            label="Warranty"
             options={warrantyOptions}
             selectedValue={selectedWarranty}
             onSelect={(value) =>
@@ -126,14 +129,15 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           />
         </div>
         {/* Machine Age Card with Dropdown */}
-        <div className={`${cardStyle} bg-yellow-50`}>
-          <div className="flex justify-around items-center p-2">
-            <FaHourglassHalf size={28} className="text-yellow-500" />
-            <p className={valueStyle}>{machineAgeBuckets[selectedAge]}</p>
+        <div className={`${cardStyle}`}>
+          <div className="flex justify-between w-full items-center">
+            <p className={`${labelStyle}`}>Machine Age</p>
+            <FaHourglassHalf size={24} className="text-yellow-500" />
           </div>
+
+          <p className={valueStyle}>{machineAgeBuckets[selectedAge]}</p>
           <CustomDropdown
             id="machine-age"
-            label="Machine Age"
             options={machineAgeOptions}
             selectedValue={selectedWarranty}
             onSelect={(value) => setSelectedAge(value as "0-1" | "2-3" | "3+")}
@@ -141,14 +145,15 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
         </div>
 
         {/* Water Type Card with Dropdown */}
-        <div className={`${cardStyle} bg-cyan-50`}>
-          <div className="flex justify-around items-center p-2">
-            <FaTint size={28} className="text-cyan-500" />
-            <p className={valueStyle}>{waterType[selectedWater]}</p>
+        <div className={`${cardStyle}`}>
+          <div className="flex justify-between w-full items-center ">
+            <p className={labelStyle}>Water Type</p>
+            <FaTint size={24} className="text-cyan-500" />
+            
           </div>
+          <p className={valueStyle}>{waterType[selectedWater]}</p>
           <CustomDropdown
             id="water-type"
-            label="Water Type"
             options={waterTypeOptions}
             selectedValue={selectedWater}
             onSelect={(value) =>

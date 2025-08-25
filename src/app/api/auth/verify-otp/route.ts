@@ -40,15 +40,11 @@ export const POST = async (req: Request) => {
     const otpKey = `phone:${contactNumber}`;
     const storedOtp = (await getOtpFromRedis(otpKey)) as string | null;
 
-    console.log("Stored OTP:", storedOtp);
-    console.log("Received OTP:", trimmedOtp);
 
     // Convert both OTPs to string for consistent comparison
     const storedOtpString = storedOtp?.toString().trim();
     const receivedOtpString = trimmedOtp.toString().trim();
 
-    console.log("Stored OTP (string):", storedOtpString);
-    console.log("Received OTP (string):", receivedOtpString);
 
     if (!storedOtp) {
       return NextResponse.json(
@@ -64,8 +60,10 @@ export const POST = async (req: Request) => {
       );
     }
 
+    const { token, response } = generateAndSetToken(employee);
+
     // Generate token and set cookie
-    return generateAndSetToken(employee);
+    return response;
   } catch (error) {
     const Error = getErrorMessage(error);
     return NextResponse.json({ success: false, error: Error }, { status: 500 });

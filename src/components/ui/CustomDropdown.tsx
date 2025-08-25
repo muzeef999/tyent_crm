@@ -21,7 +21,7 @@ type SimpleDropdownProps = {
 
 export default function CustomDropdown({
   options,
-  placeholder = "Select an option",
+  placeholder = "Select ",
   selectedValue,
   onSelect,
   label,
