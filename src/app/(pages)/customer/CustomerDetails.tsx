@@ -79,6 +79,9 @@ const CustomerDetails = ({ customerId }: { customerId: string }) => {
         <p>
           <strong>Remarks:</strong> {customer.remarks}
         </p>
+        <p>
+          <strong>Purchased on:</strong> {format(new Date(customer.createdAt), "dd MMM yyyy")}
+        </p>
       </section>
 
       {/* ========== 🔧 UPCOMING SERVICES ========== */}

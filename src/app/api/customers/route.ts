@@ -132,6 +132,29 @@ export const GET = async (req: Request) => {
     const waterMethod = searchParams.get("waterMethod");
     if (waterMethod) matchStage.waterMethod = waterMethod;
 
+    const startDateStr = searchParams.get("startDate");
+    const endDateStr = searchParams.get("endDate");
+
+
+if (startDateStr || endDateStr) {
+  matchStage.createdAt = {};
+  
+  if (startDateStr) {
+    // Start of the day
+    const start = new Date(startDateStr);
+    start.setHours(0, 0, 0, 0);
+    matchStage.createdAt.$gte = start;
+  }
+
+  if (endDateStr) {
+    // End of the day
+    const end = new Date(endDateStr);
+    end.setHours(23, 59, 59, 999);
+    matchStage.createdAt.$lte = end;
+  }
+}
+
+
     // warranty bucket
     const warranty = searchParams.get("warranty");
     if (warranty) {
@@ -211,11 +234,29 @@ export const GET = async (req: Request) => {
       }
     );
 
+    // Total customers and revenue for the filtered data
+    const summaryPipeline = [
+      { $match: matchStage },
+      {
+        $group: {
+          _id: null,
+          totalCustomers: { $sum: 1 },
+          totalRevenue: { $sum: "$price" }, // replace "price" with your revenue field
+        },
+      },
+    ];
+
+    const summaryResult = await Customer.aggregate(summaryPipeline);
+
+    const totalCustomers = summaryResult[0]?.totalCustomers || 0;
+    const totalRevenue = summaryResult[0]?.totalRevenue || 0;
+
     const customers = await Customer.aggregate(pipeline);
 
     return NextResponse.json({
       success: true,
       data: customers,
+      summary: {  totalCustomers, totalRevenue},
       pagination: {
         total,
         page,

@@ -26,10 +26,12 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   city = [],
 }) => {
   const [selectedStateLabel, setSelectedStateLabel] = useState<string>("");
-  const [selectedStateValue, setSelectedStateValue] = useState<number>(totalStates);
+  const [selectedStateValue, setSelectedStateValue] =
+    useState<number>(totalStates);
 
   const [selectedCityLabel, setSelectedCityLabel] = useState<string>("");
-  const [selectedCityValue, setSelectedCityValue] = useState<number>(totalCities);
+  const [selectedCityValue, setSelectedCityValue] =
+    useState<number>(totalCities);
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -47,6 +49,8 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
     id: `${c._id}-${index}`, // Add unique identifier
   }));
 
+
+
   const formatIndianPrice = (value: number) => {
     if (!value) return "";
     return new Intl.NumberFormat("en-IN").format(value);
@@ -58,6 +62,10 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
     "text-3xl font-bold mt-2 flex items-center gap-2 text-gray-900";
   const labelStyle = "text-sm text-gray-500 font-semibold";
 
+  const stateli = "state";
+  const cityli = "city";
+  const startDatec = "startDate";
+  const endDatec = "endDate";
   return (
     <div className="space-y-6">
       {/* Cards Row */}
@@ -68,7 +76,14 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             <p className={labelStyle}>Total Customers</p>
             <FaUsers size={28} className="text-blue-500" />
           </div>
-          <p className={valueStyle}>{totalCustomers}</p>
+
+          <Link
+            href={`/customer/startDate=${startDate ? encodeURIComponent(startDate.toISOString()) : ""}&endDate=${endDate ? encodeURIComponent(endDate.toISOString()) : ""}`}
+            className={valueStyle}
+          >
+            {totalCustomers}
+          </Link>
+
           <CustomDateDropdown
             label="Select Customer Date Range"
             onDateChange={(start, end) => {
@@ -85,7 +100,14 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             <p className={labelStyle}>Total Revenue</p>
             <FaIndianRupeeSign size={28} className="text-green-500" />
           </div>
-          <p className={valueStyle}>₹ {formatIndianPrice(totalRevenue)}</p>
+          <Link
+            href={`/customer/${encodeURIComponent(
+              stateli
+            )}=${encodeURIComponent(selectedStateLabel)}`}
+            className={valueStyle}
+          >
+            ₹ {formatIndianPrice(totalRevenue)}
+          </Link>
           <CustomDateDropdown
             label="Select Revenue Date Range"
             onDateChange={(start, end) => {
@@ -103,17 +125,19 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             <FaMapMarkerAlt size={28} className="text-indigo-500" />
           </div>
           <Link
-            href={`/customer/${encodeURIComponent(selectedStateLabel)}`}
+            href={`/customer/${encodeURIComponent(
+              stateli
+            )}=${encodeURIComponent(selectedStateLabel)}`}
             className={valueStyle}
           >
-            {selectedStateLabel || selectedStateValue}
+            {selectedStateValue}
           </Link>
           <CustomDropdown
             label="Select State"
             id="state"
             options={mapStatesToOptions}
             selectedValue={selectedStateValue}
-            onSelect={(label, value) => {
+            onSelect={(value, label) => {
               setSelectedStateLabel(String(label));
               setSelectedStateValue(Number(value));
             }}
@@ -127,17 +151,19 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             <FaCity size={28} className="text-purple-500" />
           </div>
           <Link
-            href={`/customer/${encodeURIComponent(selectedCityLabel)}`}
+            href={`/customer/${encodeURIComponent(cityli)}=${encodeURIComponent(
+              selectedCityLabel
+            )}`}
             className={valueStyle}
           >
-            {selectedCityLabel || selectedCityValue}
+            {selectedCityValue}
           </Link>
           <CustomDropdown
             label="Select City"
             id="city"
             options={mapCitiesToOptions}
             selectedValue={selectedCityValue}
-            onSelect={(label, value) => {
+            onSelect={(value, label) => {
               setSelectedCityLabel(String(label)); // string name like "Lucknow"
               setSelectedCityValue(Number(value)); // numeric count
             }}
