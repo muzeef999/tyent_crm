@@ -94,7 +94,6 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
-
 export const GET = async (req: Request) => {
   try {
     await connectDB();
@@ -105,7 +104,9 @@ export const GET = async (req: Request) => {
     const pageStr = searchParams.get("page");
     const limitStr = searchParams.get("limit");
     const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
-    const limit = limitStr ? Math.min(100, Math.max(1, parseInt(limitStr, 10))) : 10;
+    const limit = limitStr
+      ? Math.min(100, Math.max(1, parseInt(limitStr, 10)))
+      : 10;
     const skip = (page - 1) * limit;
 
     // --- filters ---
@@ -135,8 +136,10 @@ export const GET = async (req: Request) => {
     const warranty = searchParams.get("warranty");
     if (warranty) {
       if (warranty === "<1 yr") matchStage.warrantyYears = { $lt: 1 };
-      else if (warranty === "1-2 yrs") matchStage.warrantyYears = { $gte: 1, $lt: 2 };
-      else if (warranty === "2-3 yrs") matchStage.warrantyYears = { $gte: 2, $lt: 3 };
+      else if (warranty === "1-2 yrs")
+        matchStage.warrantyYears = { $gte: 1, $lt: 2 };
+      else if (warranty === "2-3 yrs")
+        matchStage.warrantyYears = { $gte: 2, $lt: 3 };
       else if (warranty === ">3 yrs") matchStage.warrantyYears = { $gte: 3 };
     }
 
@@ -203,7 +206,8 @@ export const GET = async (req: Request) => {
           contactNumber: 1,
           alternativeNumber: 1,
           DOB: 1,
-              },
+          address: 1,
+        },
       }
     );
 
@@ -221,7 +225,9 @@ export const GET = async (req: Request) => {
     });
   } catch (err) {
     console.error("Search Error:", err);
-    return NextResponse.json({ success: false, error: "Search failed" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Search failed" },
+      { status: 500 }
+    );
   }
 };
-

@@ -170,3 +170,11 @@ body {
   background-color: var(--background);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
+/* Apply to your chart elements */
+.recharts-rectangle, /* for bars */
+.recharts-sector,    /* for pie/donut slices */
+.recharts-dot {      /* for scatter points */
+  outline: none;
+  box-shadow: none;
+}

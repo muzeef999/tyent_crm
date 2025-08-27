@@ -32,33 +32,25 @@ const Page: React.FC = () => {
   // Transform AMC data for PieChart
   const pieData =
     data?.analytics.amc.map((item) => ({
-      name:
-        (item._id || "Unknown").charAt(0).toUpperCase() +
-        item._id?.slice(1).toLowerCase(),
+      name:item._id,
       value: item.count,
     })) || [];
 
   const barData =
     data?.analytics.model.map((item) => ({
-      name:
-        (item._id || "Unknown").replace(/_/g, " ").charAt(0).toUpperCase() +
-        item._id.slice(1).toLowerCase(),
+      name: item._id, 
       value: item.count,
-    })) || [];
+    })) || []; 
 
   const waterMethodData =
     data?.analytics.waterMethod.map((item) => ({
-      name:
-        (item._id || "Unknown").replace(/_/g, " ").charAt(0).toUpperCase() +
-        item._id.slice(1).toLowerCase(),
+      name:item._id,
       value: item.count,
     })) || [];
 
   const WaterType =
     data?.analytics.waterType.map((item) => ({
-      name:
-        (item._id || "Unknown").replace(/_/g, " ").charAt(0).toUpperCase() +
-        item._id.slice(1).toLowerCase(),
+      name:item._id,
       value: item.count,
     })) || [];
     

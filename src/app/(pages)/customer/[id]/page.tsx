@@ -13,7 +13,7 @@ const Page =  ({ params }: { params: Promise<{ id: string }> }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(10);
 
-  const { id} = use(params); // "Uttar%20Pradesh"
+  const {id} = use(params); // "Uttar%20Pradesh"
   const state = decodeURIComponent(id);
 
   const { data, isLoading, error } = useQuery({

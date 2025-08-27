@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import React from 'react'
 import {
   PieChart,
@@ -10,14 +11,24 @@ import {
 
 
 const AMC_COLORS: Record<string, string> = {
-  Service_amc: "#0088FE",
-  Service_filter_amc: "#00C49F",
-  Comprehensive_amc: "#FFBB28",
-  Unknown: "#FF8042",
-};
+  SERVICE_AMC: "#0088FE",
+  SERVICE_FILTER_AMC: "#00C49F",
+  COMPREHENSIVE_AMC: "#FFBB28",
+  UNKNOWN: "#FF8042",
+}; 
 
 
 const AmcPieChart: React.FC<{ pieData: any[] }> = ({ pieData }) => {
+
+ const router = useRouter();   
+  const handleBarClick  = (data:any ) => {
+    if (data?.name) {
+      const amc= "amc";
+          const url = `/customer/${encodeURIComponent(amc)}=${encodeURIComponent(data.name)}`;
+          router.push(url);
+    }
+
+  }
   return (
     
     <div style={{ width: "100%", height: 300 }}>
@@ -28,6 +39,8 @@ const AmcPieChart: React.FC<{ pieData: any[] }> = ({ pieData }) => {
             data={pieData}
             cx="50%"
             cy="50%"
+            onClick={handleBarClick} 
+            cursor="pointer"
             labelLine={false}
             label={({ name, percent }) =>
               `${name} ${(percent! * 100).toFixed(0)}%`
