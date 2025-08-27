@@ -1,158 +1,119 @@
 "use client";
-import { getCustomers } from "@/services/serviceApis";
-import { Customer } from "@/types/customer";
-import { getErrorMessage } from "@/utils/getErrorMessage";
+
 import React, { useState } from "react";
-import Offcanvas from "@/components/ui/Offcanvas";
-import CustomerDetails from "@/app/(pages)/customer/CustomerDetails";
+import { useQuery } from "@tanstack/react-query";
+import { getCustomerAnalysis } from "@/services/serviceApis";
+import { CustomerAnalyticsResponse } from "@/types/customer";
+import AmcPieChart from "./recharts/AmcPieChart";
+import ModelBarChat from "./recharts/ModelBarChat";
+import Warranty from "./recharts/Warranty";
+import WaterMethod from "./recharts/WaterMethod";
+import CustomerAnalytics from "./CustomerAnalytics";
 import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
-import TypeSearch from "@/components/TypeSearch";
-import { useQuery } from "@tanstack/react-query";
-import Pagination from "@/components/ui/Pagination";
-import TableLoading from "@/components/ui/TableLoading";
-import useDebounce from "@/hooks/useDebounce";
-import CustomerAnalytics from "@/app/(pages)/customer/CustomerAnalytics";
-import AddCustomer from "@/app/(pages)/customer/AddCustomer";
+import Offcanvas from "@/components/ui/Offcanvas";
+import AddCustomer from "./AddCustomer";
+import WaterTypeChart from "./recharts/WaterTypeChart";
 
-const Page = () => {
-  const [searchText, setSearchText] = useState("");
-  const debouncedSearchText = useDebounce(searchText, 500);
+// Define types for API response
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState<number>(10);
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["customers", page, limit, debouncedSearchText],
-    queryFn: () =>
-      getCustomers({
-        page,
-        limit,
-        searchQuery: debouncedSearchText, // ✅ fixed param name
-      }),
+const Page: React.FC = () => {
+  const [showAddSidebar, setShowAddSidebar] = useState(false);
+  const { data, isLoading, error } = useQuery<CustomerAnalyticsResponse>({
+    queryKey: ["customers"],
+    queryFn: getCustomerAnalysis,
   });
 
-  const [showAddSidebar, setShowAddSidebar] = useState(false);
-  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
-  const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(
-    null
-  );
 
-  const handleRowClick = (customerId: string) => {
-    setSelectedCustomer(customerId);
-    setShowDetailsSidebar(true);
-  };
 
-  // ✅ Correct extraction
-  const customers: Customer[] = data?.data || [];
-  const pagination = data?.pagination;
-  const totalPages = pagination?.totalPages || 1;
-  const totalCustomers = pagination?.total || 0;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">Error loading data</div>;
 
+  // Transform AMC data for PieChart
+  const pieData =
+    data?.analytics.amc.map((item) => ({
+      name:
+        (item._id || "Unknown").charAt(0).toUpperCase() +
+        item._id?.slice(1).toLowerCase(),
+      value: item.count,
+    })) || [];
+
+  const barData =
+    data?.analytics.model.map((item) => ({
+      name:
+        (item._id || "Unknown").replace(/_/g, " ").charAt(0).toUpperCase() +
+        item._id.slice(1).toLowerCase(),
+      value: item.count,
+    })) || [];
+
+  const waterMethodData =
+    data?.analytics.waterMethod.map((item) => ({
+      name:
+        (item._id || "Unknown").replace(/_/g, " ").charAt(0).toUpperCase() +
+        item._id.slice(1).toLowerCase(),
+      value: item.count,
+    })) || [];
+
+  const WaterType =
+    data?.analytics.waterType.map((item) => ({
+      name:
+        (item._id || "Unknown").replace(/_/g, " ").charAt(0).toUpperCase() +
+        item._id.slice(1).toLowerCase(),
+      value: item.count,
+    })) || [];
+    
   const customerStats = {
-    totalCustomers: pagination?.total || 0, // ✅ from backend pagination count
-    activeCustomers: customers.filter((c) => !!c.serialNumber).length, // installed machines
-    amcCustomers: customers.filter((c) => !!c.amcRenewed).length,
-
-    warranty: {
-      "In-Warranty": 10,
-      "Out-of-Warranty": 20,
-    },
-
-    machineAgeBuckets: {
-      "0-1": 10,
-      "2-3": 15,
-      "3+": 20,
-    },
-
-    waterType: {
-      RO: 10,
-      Bore: 5,
-      Municipal: 8,
-    },
+    totalCustomers: data?.summary?.totalCustomers, // ✅ from backend pagination count
+    totalRevenue: data?.summary?.totalPrice, // installed machines
+    totalStates: data?.summary?.totalStates,
+    totalCities: data?.summary?.totalCities,
+    state: data?.analytics.states,
+    city: data?.analytics.cities,
   };
-
-  if (error) {
-    return (
-      <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
-    );
-  }
-
   return (
     <>
-      {/* 🔹 Top Section */}
-      <div className="flex z-9 w-[85%]  fixed right-0  flex-wrap justify-between items-center bg-background  px-6 py-4 gap-4">
-        <div className="flex-1 min-w-[200px]">
-          <TypeSearch onSearch={setSearchText} />
+      <div className="flex justify-between items-center  pt-4 pl-4 pr-4">
+        <div>
+          <h1 className="font-bold text-2xl text-black">
+            Customer Analytics Dashboard
+          </h1>
+          <p className="text-md">Water Ionizer Management System Overview</p>
         </div>
-
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
           Add Customer
         </Button>
       </div>
 
-      {/* 🔹 Table Section */}
-      <div className="p-6 overflow-x-auto mt-26">
-        <CustomerAnalytics {...customerStats} />
-        <br />
+      <div className="grid grid-cols-12 grid-rows-[auto_auto_auto] gap-4 p-4">
+        <div className="col-span-12">
+          <CustomerAnalytics {...customerStats} />
+        </div>
+        {/* Row 2: 30% / 70% split */}
+        <div className="col-span-4 customer-grid-col">
+          <AmcPieChart pieData={pieData} />
+        </div>
+        <div className="col-span-8 customer-grid-col">
+          <ModelBarChat barData={barData} />
+        </div>
 
-        <table className="min-w-[1000px] w-full customtable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email ID</th>
-              <th>Contact Number</th>
-              <th>Alternative Number</th>
-              <th>Date of Birth (DOB)</th>
-              <th colSpan={2}>Address</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <TableLoading />
-            ) : (
-              customers.map((customer) => (
-                <tr
-                  key={customer._id}
-                  className="transition hover:bg-gray-50 cursor-pointer border-t"
-                  onClick={() => handleRowClick(customer._id!)}
-                >
-                  <td data-tooltip={customer.name}>{customer.name}</td>
-                  <td data-tooltip={customer.email}>{customer.email}</td>
-                  <td data-tooltip={customer.contactNumber}>
-                    {customer.contactNumber}{" "}
-                  </td>
-                  <td data-tooltip={customer.alternativeNumber}>
-                    {customer.alternativeNumber}
-                  </td>
-                  <td data-tooltip={customer?.DOB}>
-                    {customer?.DOB
-                      ? new Date(customer.DOB).toLocaleDateString("en-GB")
-                      : ""}
-                  </td>
+        {/* Row 3: 3 equal columns */}
+        <div className="col-span-8 customer-grid-col">
+          <WaterMethod waterMethodData={waterMethodData} />
+        </div>
+        <div className="col-span-4 customer-grid-col">
+          <WaterTypeChart waterType={WaterType} />
+        </div>
 
-                  <td colSpan={2} data-tooltip={customer.address}>
-                    {customer.address}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+
+        <div className="col-span-4 customer-grid-col">
+          <Warranty />
+        </div>
       </div>
 
-      <div className="mb-26">
-        <Pagination
-          totalCustomers={totalCustomers}
-          page={page}
-          limit={limit}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          setLimit={setLimit} // ✅ correct prop name
-        />
-      </div>
-      {/* 🔹 Offcanvas for Add Customer */}
+      <br />
+      <br />
+
       <Offcanvas
         show={showAddSidebar}
         onClose={() => setShowAddSidebar(false)}
@@ -161,17 +122,6 @@ const Page = () => {
         <div className="p-4">
           <AddCustomer onClose={() => setShowAddSidebar(false)} />
         </div>
-      </Offcanvas>
-
-      {/* 🔹 Offcanvas for Customer Details */}
-      <Offcanvas
-        show={showDetailsSidebar}
-        onClose={() => setShowDetailsSidebar(false)}
-        title="Customer Info"
-      >
-        {selectedCustomerId && (
-          <CustomerDetails customerId={selectedCustomerId} />
-        )}
       </Offcanvas>
     </>
   );

@@ -10,13 +10,18 @@ export const login = (contactNumber: string) => axiosInstance.get(`/auth/login?c
 export const verifyOtp = (contactNumber: string, otp: string) => axiosInstance.post("/auth/verify-otp", { contactNumber, otp }).then((res) => res.data);
 //CUSTOMERS 
 
-export const getCustomers = async ({  page = 1,limit = 10,searchQuery = "",}: { page?: number;limit?: number; searchQuery?: string;}) => {
-  const queryString = new URLSearchParams({page: String(page),  limit: String(limit),
-    ...(searchQuery ? { q: searchQuery } : {}),
-  }).toString();
 
-  const res = await axiosInstance.get(`/customers?${queryString}`);
-  return res.data; // contains { data, pagination }
+export const getCustomerAnalysis = () => axiosInstance.get("/customers/analytics").then((res) => res.data);
+
+export const getCustomers = async ({ page = 1, limit = 10,state }: { page?: number; limit?: number;  state?: string; }) => {
+  const query = new URLSearchParams();
+
+  if (page) query.append("page", String(page));
+  if (limit) query.append("limit", String(limit));
+  if (state) query.append("state", state);
+
+  const res = await axiosInstance.get(`/customers/?${state}`);
+  return res.data;
 };
 
 

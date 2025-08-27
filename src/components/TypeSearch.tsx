@@ -15,7 +15,7 @@ type TypeSearchProps = {
 
 export default function TypeSearch({
   onSearch,
-  texts = ["Ask me anything — I’m here to help."],
+  texts = ["What are you looking for?"],
   typingSpeed = 80,
   deletingSpeed = 40,
   pauseAfterTyping = 1400,
@@ -100,7 +100,7 @@ export default function TypeSearch({
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`w-[350px] h-[38px] rounded-md  bg-white text-sm focus:outline-none`}
+        className={`w-[350px] h-[38px] rounded-md  bg-card-background  p-2 focus:outline-none`}
         placeholder="" // keep empty; overlay shows typing text
         aria-label="Search"
       />
@@ -108,7 +108,7 @@ export default function TypeSearch({
       {/* overlay placeholder (shown only when input empty and not focused) */}
       {(!userValue && !isFocused) && (
         <div
-          className="pointer-events-none absolute inset-y-0 flex items-center text-2xl text-gray-500"
+          className="pointer-events-none absolute inset-y-0 flex items-center text-md p-2 text-gray-500"
           style={{ transform: "translateY(0)" }}
         >
           <span>{displayText}</span>

@@ -21,4 +21,7 @@ const SerialSchema = new Schema<Serial>({
   }]
 }, { timestamps: true });
 
+
+SerialSchema.index({ productId: 1, locationId: 1 });
+
 export default mongoose.models.Serial || mongoose.model<Serial>("Serial", SerialSchema);

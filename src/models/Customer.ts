@@ -11,7 +11,9 @@ const customerSchema = new Schema(
     price: { type: Number, required: true },
     payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
     invoiceNumber: { type: String, required: true },
-    serialNumber: { type: String, ref: "Product",},
+    serialNumber: { type: String, ref: "Product" },
+    state: { type: String },
+    city: { type: String },
     warrantyYears: { type: String },
     amcRenewed: {
       type: String,
@@ -25,12 +27,7 @@ const customerSchema = new Schema(
     marketingManager: { type: Schema.Types.ObjectId, ref: "Employee" },
     waterType: {
       type: String,
-      enum: [
-        "RO_company",
-        "RO_third-party",
-        "Bore",
-        "Municipal",
-      ],
+      enum: ["RO_company", "RO_third-party", "Bore", "Municipal"],
       required: true,
     },
     waterMethod: {

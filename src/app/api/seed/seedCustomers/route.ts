@@ -49,59 +49,65 @@ function randomDate(start: Date, end: Date) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
+function getRandomPurchaseDate() {
+  const today = new Date();
+  const tenYearsAgo = new Date(today);
+  tenYearsAgo.setFullYear(today.getFullYear() - 10);
+
+  return randomDate(tenYearsAgo, today); // already have randomDate util
+}
+
+const purchaseDate = getRandomPurchaseDate();
+
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    // Optional: Check if customers already exist to prevent duplicate seeding
-    const existingCustomers = await Customer.countDocuments();
-    if (existingCustomers > 0) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Customers already exist in database. Clear data first or use a different endpoint for adding more customers." 
-        },
-        { status: 400 }
-      );
-    }
+    // 🧹 1. Clear old data
+    await Service.deleteMany({});
+    await Customer.deleteMany({});
+    await Product.updateMany(
+      { assignedTo: { $exists: true } },
+      { $set: { status: "In Stock", assignedTo: null, stock: 1 } }
+    );
 
-    // Get available products
-    const availableProducts = await Product.find({ 
+    // 2. Get fresh products
+    const availableProducts = await Product.find({
       status: "In Stock",
       stock: { $gt: 0 }
     });
-    
+
     if (availableProducts.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: "No products available. Please add products first." 
+        {
+          success: false,
+          message: "No products available. Please add products first."
         },
         { status: 400 }
       );
     }
 
-    const results = {
-      created: 0,
-      failed: 0,
-      errors: [] as string[]
-    };
+    const results = { created: 0, failed: 0, errors: [] as string[] };
 
-    // Create customers and services (one for each available product)
-    for (let i = 0; i < availableProducts.length; i++) {
+    // 3. Seed loop
+    for (let i = 0; i < 830; i++) {
       try {
         const cityData = CITIES[Math.floor(Math.random() * CITIES.length)];
         const hasAMC = Math.random() > 0.4; // 60% have AMC
-        
+
+        // Pick safe name + product using modulo
+        const name = INDIAN_NAMES[i % INDIAN_NAMES.length];
+        const product = availableProducts[i % availableProducts.length];
+
         const customerData = {
-          name: INDIAN_NAMES[i],
+          name,
           contactNumber: generatePhoneNumber(),
           alternativeNumber: generatePhoneNumber(),
-          email: `${INDIAN_NAMES[i].toLowerCase().replace(/\s+/g, '.')}@example.com`,
+          email: `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
           address: `${Math.floor(Math.random() * 100) + 1} ${cityData.city} Road, ${cityData.city}, ${cityData.state}`,
-          price: Math.floor(Math.random() * 15000) + 20000, // 20,000 - 35,000
-          invoiceNumber: `INV-${2020 + Math.floor(i/10)}-${(i % 10) + 1}`.padEnd(15, '0'),
-          serialNumber: availableProducts[i]._id,
+          price: Math.floor(Math.random() * (250000 - 100000 + 1)) + 100000,
+          invoiceNumber: `INV-${2020 + Math.floor(i / 10)}-${(i % 10) + 1}`.padEnd(15, '0'),
+          serialNumber: product._id,
           warrantyYears: WARRANTY_OPTIONS[Math.floor(Math.random() * WARRANTY_OPTIONS.length)],
           amcRenewed: hasAMC ? AMC_OPTIONS[Math.floor(Math.random() * AMC_OPTIONS.length)] : undefined,
           remarks: `Sample customer ${i + 1} - ${hasAMC ? 'With AMC' : 'No AMC'}`,
@@ -110,46 +116,43 @@ export async function POST(request: NextRequest) {
           marketingManager: MANAGER_ID,
           waterType: WATER_TYPES[Math.floor(Math.random() * WATER_TYPES.length)],
           waterMethod: WATER_METHODS[Math.floor(Math.random() * WATER_METHODS.length)],
-          createdAt: randomDate(new Date(2014, 0, 1), new Date()),
+          state: cityData.state,
+          city: cityData.city,
+          createdAt: purchaseDate,
         };
-        
+
         // Create customer
         const newCustomer = await Customer.create(customerData);
-        
-        // Create services (3 upcoming services every 4 months)
+
+        // Create 3 upcoming services every 4 months
         const today = new Date();
         const serviceList = [];
-        
         for (let j = 1; j <= 3; j++) {
           const futureDate = new Date(today);
           futureDate.setMonth(today.getMonth() + j * 4);
-          
           serviceList.push({
             customerId: newCustomer._id,
             visitNo: j,
             serviceDate: futureDate,
             serviceType: ["GENERAL_SERVICE"],
-            status: "PENDING"
+            status: "PENDING",
           });
         }
-        
+
         const createdServices = await Service.insertMany(serviceList);
-        
-        // Update customer with service references
+
+        // Link services to customer
         newCustomer.upcomingServices = createdServices.map((s) => s._id);
         newCustomer.updatedAt = new Date();
         await newCustomer.save();
-        
-        // Update product status
-        await Product.findByIdAndUpdate(
-          customerData.serialNumber,
-          {
-            status: "Out of Stock",
-            assignedTo: newCustomer._id,
-            stock: 0,
-          }
-        );
-        
+
+        // Update product → assigned
+        await Product.findByIdAndUpdate(product._id, {
+          status: "Out of Stock",
+          assignedTo: newCustomer._id,
+          stock: 0,
+        });
+
         results.created++;
       } catch (error) {
         results.failed++;
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Seeding error:', error);
+    console.error("Seeding error:", error);
     return NextResponse.json(
       {
         success: false,
@@ -178,43 +181,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Optional: Add DELETE endpoint to clear seeded data
-export async function DELETE() {
-  try {
-    await connectDB();
-    
-    // Delete all services first (to maintain referential integrity)
-    await Service.deleteMany({});
-    
-    // Reset products status
-    await Product.updateMany(
-      { assignedTo: { $exists: true } },
-      { 
-        status: "In Stock",
-        assignedTo: null,
-        stock: 1
-      }
-    );
-    
-    // Delete all customers
-    const result = await Customer.deleteMany({});
-    
-    return NextResponse.json(
-      {
-        success: true,
-        message: `Deleted ${result.deletedCount} customers and their services. Reset products.`,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Deletion error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Internal Server Error during deletion",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
-}

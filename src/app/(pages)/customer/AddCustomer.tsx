@@ -11,11 +11,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import CustomDropdown from "@/components/ui/CustomDropdown";
-import { Employee } from "@/types/customer";
+import { Cityt, Employee, Option, Statet } from "@/types/customer";
 import { customerValidation } from "@/validations/Validation";
 import { useFieldValidator } from "@/hooks/useFieldValidator";
 import debounce from "lodash.debounce";
 import Button from "@/components/ui/Button";
+import { State, City } from "country-state-city";
+import Accordion from "@/components/ui/Accordion";
 
 const warrantyOptions = [
   { label: "1 Year", value: "1" },
@@ -63,6 +65,18 @@ const WaterType = [
   },
 ];
 
+const mapStatesToOptions = (states: Statet[]): Option[] =>
+  states.map((s) => ({
+    label: s.name,
+    value: s.isoCode, // use isoCode for unique state value
+  }));
+
+const mapCitiesToOptions = (cities: Cityt[]): Option[] =>
+  cities.map((c) => ({
+    label: c.name,
+    value: c.name, // or use `${c.name}-${c.stateCode}` if you need uniqueness
+  }));
+
 const WaterMethod = [
   {
     label: "Direct",
@@ -108,6 +122,8 @@ const initialFormData = {
   waterMethod: "",
   warrantyMachineYears: "",
   warrantyPlatesYears: "",
+  state: "",
+  city: "",
 };
 
 const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
@@ -115,8 +131,19 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   const [productId, setProductId] = useState(""); // Store the product ObjectId
   const [serialInput, setSerialInput] = useState(""); // Store the serial number input
   const { errors, validateField } = useFieldValidator(customerValidation);
+  const [openSection, setOpenSection] = useState<string | null>("customer"); // default open
 
   const [serial, setSerial] = useState("");
+
+
+  const customerFields = ["name", "email", "contactNumber", "alternativeNumber", "address", "DOB", "state", "city"];
+const machineFields = ["serialNumber", "invoiceNumber", "price", "marketingManager", "installedBy", "amcRenewed", "warrantyYears", "warrantyMachineYears", "warrantyPlatesYears"];
+const installationFields = ["waterType", "waterMethod", "phValue", "tdsValue", "remarks"];
+
+const hasCustomerError = customerFields.some((f) => !!errors[f]);
+const hasMachineError = machineFields.some((f) => !!errors[f]);
+const hasInstallationError = installationFields.some((f) => !!errors[f]);
+
 
   // 🔍 Auto search for product by serial
   const {
@@ -249,12 +276,19 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
   if (isLoading) return <p>Setting Up...</p>;
   if (isError) return <p>Unknown Error</p>;
 
+  const handleToggleAccordion = (id: string) => {
+    setOpenSection((prev) => (prev === id ? "" : id)); // only one open at a time
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <section className="border-b pb-3">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">
-          Customer Details
-        </h2>
+    <form onSubmit={handleSubmit} className=" hide-scrollbar">
+      <Accordion
+        title="Customer Details"
+        id="customer"
+        isOpen={openSection === "customer"}
+        onToggle={handleToggleAccordion}
+        hasError={hasCustomerError} 
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
           {/* Input Fields */}
           {[
@@ -304,14 +338,42 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             value={formData.DOB}
             onChange={handleChange}
           />
+
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="State of Residence"
+              id="state"
+              options={mapStatesToOptions(State.getStatesOfCountry("IN"))}
+              selectedValue={formData.state || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, state: String(value) }))
+              }
+            />
+          </div>
+
+          <div className="flex flex-col h-22">
+            <CustomDropdown
+              label="City of Residence"
+              id="city"
+              options={mapCitiesToOptions(
+                City.getCitiesOfState("IN", formData.state)
+              )}
+              selectedValue={formData.city || ""}
+              onSelect={(value) =>
+                setFormData((prev) => ({ ...prev, city: String(value) }))
+              }
+            />
+          </div>
         </div>
-      </section>
+      </Accordion>
 
-      <section className="border-b pb-3">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2 mt-2">
-          Machine Details:
-        </h2>
-
+      <Accordion
+        title="Machine Details"
+        id="machine"
+        isOpen={openSection === "machine"}
+        onToggle={handleToggleAccordion}
+        hasError={hasMachineError}
+      >
         {/* 🔍 Serial Search */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
           <div>
@@ -368,7 +430,10 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={MarkingMangerOptions}
               selectedValue={formData.marketingManager || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, marketingManager: String(value) }))
+                setFormData((prev) => ({
+                  ...prev,
+                  marketingManager: String(value),
+                }))
               }
             />
           </div>
@@ -390,7 +455,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={amcOptions}
               selectedValue={formData.amcRenewed || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, amcRenewed:String( value) }))
+                setFormData((prev) => ({ ...prev, amcRenewed: String(value) }))
               }
             />
           </div>
@@ -401,7 +466,10 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={warrantyOptions}
               selectedValue={formData.warrantyYears || ""}
               onSelect={(value) => {
-                setFormData((prev) => ({ ...prev, warrantyYears: String(value) }))
+                setFormData((prev) => ({
+                  ...prev,
+                  warrantyYears: String(value),
+                }));
               }}
             />
           </div>
@@ -427,18 +495,23 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               options={warrantyPlates}
               selectedValue={formData.warrantyPlatesYears || ""}
               onSelect={(value) =>
-                setFormData((prev) => ({ ...prev, warrantyPlatesYears: String(value) }))
+                setFormData((prev) => ({
+                  ...prev,
+                  warrantyPlatesYears: String(value),
+                }))
               }
             />
           </div>
         </div>
-      </section>
+      </Accordion>
 
-      <section className="pb-3">
-        <h1 className="text-xl font-semibold text-gray-800 mb-2 mt-2">
-          Installation Parameters:
-        </h1>
-
+      <Accordion
+        title="Installation Parameters"
+        id="installation"
+        isOpen={openSection === "installation"}
+        onToggle={handleToggleAccordion}
+        hasError={hasInstallationError}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-6">
           <CustomDropdown
             label="Input Water Source"
@@ -502,10 +575,10 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             )}
           </div>
         </div>
-      </section>
+      </Accordion>
 
       {/* Submit Button */}
-      <div className="col-span-full">
+      <div className="col-span-full justify-end flex">
         <Button variant="primary" type="submit" disabled={!productId}>
           Save Customer
         </Button>

@@ -1,164 +1,146 @@
+"use client";
 import CustomDropdown from "@/components/ui/CustomDropdown";
 import React, { useState } from "react";
-import { FaUsers, FaShieldAlt, FaHourglassHalf, FaTint } from "react-icons/fa";
+import { FaUsers, FaCity, FaMapMarkerAlt } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
+import { FaIndianRupeeSign } from "react-icons/fa6";
+import { Cityt, Option, Statet } from "@/types/customer";
+import Link from "next/link";
 
 type CustomerAnalyticsProps = {
-  totalCustomers: number;
-  activeCustomers: number;
-  warranty: {
-    "In-Warranty": number;
-    "Out-of-Warranty": number;
-  };
-  amcCustomers: number;
-  machineAgeBuckets: {
-    "0-1": number;
-    "2-3": number;
-    "3+": number;
-  };
-  waterType: {
-    RO: number;
-    Bore: number;
-    Municipal: number;
-  };
+  totalCustomers?: number;
+  totalRevenue?: number;
+  totalStates?: number;
+  totalCities?: number;
+  state?: any[];
+  city?: any[];
 };
 
-// Options
-const warrantyOptions = [
-  { label: "In-Warranty", value: "inWarranty" },
-  { label: "Out-of-Warranty", value: "outWarranty" },
-];
-
-const waterTypeOptions = [
-  { label: "RO", value: "RO" },
-  { label: "Bore", value: "Bore" },
-  { label: "Municipal", value: "Municipal" },
-];
-
-const machineAgeOptions = [
-  { label: "0-1 Years", value: "0-1" },
-  { label: "2-3 Years", value: "2-3" },
-  { label: "3+ Years", value: "3+" },
-];
-
-const amcOption = [
-  { label: "Service amc", value: "SERVICE_AMC" },
-  { label: "Service Filter Amc", value: "SERVICE_FILTER_AMC" },
-  { label: "Comprehesive amc", value: "COMPREHENSIVE_AMC" },
-];
-
 const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
-  totalCustomers,
-  warranty,
-  machineAgeBuckets,
-  waterType,
+  totalCustomers = 0,
+  totalRevenue = 0,
+  totalStates = 0,
+  totalCities = 0,
+  state = [],
+  city = [],
 }) => {
-  const [filteredCustomers, setFilteredCustomers] = useState(totalCustomers);
+  const [selectedStateLabel, setSelectedStateLabel] = useState<string>("");
+  const [selectedStateValue, setSelectedStateValue] = useState<number>(totalStates);
+
+  const [selectedCityLabel, setSelectedCityLabel] = useState<string>("");
+  const [selectedCityValue, setSelectedCityValue] = useState<number>(totalCities);
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [selectedAmc, setSelecteAmc] = useState<
-    "SERVICE_AMC" | "SERVICE_FILTER_AMC" | "COMPREHENSIVE_AMC"
-  >("SERVICE_AMC");
-  const [selectedAge, setSelectedAge] = useState<"0-1" | "2-3" | "3+">("0-1");
-  const [selectedWater, setSelectedWater] = useState<
-    "RO" | "Bore" | "Municipal"
-  >("RO");
-  const [selectedWarranty, setSelectedWarranty] = useState<
-    "In-Warranty" | "Out-of-Warranty"
-  >("In-Warranty");
+
+  // ✅ Map states and cities to dropdown options with unique keys
+  const mapStatesToOptions: Option[] = state.map((s: any, index: number) => ({
+    label: s._id,
+    value: s.count,
+    id: `${s._id}-${index}`, // Add unique identifier
+  }));
+
+  const mapCitiesToOptions: Option[] = city.map((c: any, index: number) => ({
+    label: c._id,
+    value: c.count,
+    id: `${c._id}-${index}`, // Add unique identifier
+  }));
+
+  const formatIndianPrice = (value: number) => {
+    if (!value) return "";
+    return new Intl.NumberFormat("en-IN").format(value);
+  };
 
   const cardStyle =
-    "flex flex-col items-center justify-between rounded-2xl p-4 w-full bg-background border border-gray-200 cursor-pointer hover:border-primary";
-  const valueStyle = "text-2xl font-bold mt-2 flex items-center justify-center";
-  const labelStyle = "text-md text-gray-600  font-semibold -mt-2";
+    "flex flex-col justify-between rounded-xl p-4 w-full bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow cursor-pointer";
+  const valueStyle =
+    "text-3xl font-bold mt-2 flex items-center gap-2 text-gray-900";
+  const labelStyle = "text-sm text-gray-500 font-semibold";
 
   return (
     <div className="space-y-6">
-      {/* Cards */}
-      <div className="grid lg:grid-cols-5 gap-4">
-        <div className={`${cardStyle}`}>
-          <div className="flex justify-between w-full items-center">
+      {/* Cards Row */}
+      <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-6">
+        {/* Total Customers */}
+        <div className={cardStyle}>
+          <div className="flex justify-between items-center">
             <p className={labelStyle}>Total Customers</p>
-            <FaUsers size={24} className="text-blue-500" />
+            <FaUsers size={28} className="text-blue-500" />
           </div>
+          <p className={valueStyle}>{totalCustomers}</p>
           <CustomDateDropdown
-            label="Customer Date Range"
+            label="Select Customer Date Range"
             onDateChange={(start, end) => {
               console.log("Selected Range:", start, end);
-              // 🔥 Call API or filter customers based on start & end
+              setStartDate(start);
+              setEndDate(end);
             }}
           />
         </div>
-        <div className={`${cardStyle}`}>
-          <div className="flex justify-between w-full items-center ">
-            <p className={labelStyle}>Amc</p>
-            <FaShieldAlt size={24} className="text-purple-500" />
-          </div>
-          <p className={valueStyle}>{warranty[selectedWarranty]}</p>
 
-          <CustomDropdown
-            id="amc"
-            options={amcOption}
-            selectedValue={selectedAmc}
-            onSelect={(value) =>
-              setSelecteAmc(
-                value as
-                  | "SERVICE_AMC"
-                  | "SERVICE_FILTER_AMC"
-                  | "COMPREHENSIVE_AMC"
-              )
-            }
+        {/* Total Revenue */}
+        <div className={cardStyle}>
+          <div className="flex justify-between items-center">
+            <p className={labelStyle}>Total Revenue</p>
+            <FaIndianRupeeSign size={28} className="text-green-500" />
+          </div>
+          <p className={valueStyle}>₹ {formatIndianPrice(totalRevenue)}</p>
+          <CustomDateDropdown
+            label="Select Revenue Date Range"
+            onDateChange={(start, end) => {
+              console.log("Selected Range:", start, end);
+              setStartDate(start);
+              setEndDate(end);
+            }}
           />
         </div>
 
-        <div className={`${cardStyle}`}>
-          <div className="flex justify-between w-full items-center">
-            <p className={`${labelStyle}`}>Warranty</p>
-            <FaShieldAlt size={24} className="text-green-500" />
+        {/* Total States */}
+        <div className={cardStyle}>
+          <div className="flex justify-between items-center">
+            <p className={labelStyle}>Total States</p>
+            <FaMapMarkerAlt size={28} className="text-indigo-500" />
           </div>
-          <p className={valueStyle}>{warranty[selectedWarranty]}</p>
+          <Link
+            href={`/customer/${encodeURIComponent(selectedStateLabel)}`}
+            className={valueStyle}
+          >
+            {selectedStateLabel || selectedStateValue}
+          </Link>
           <CustomDropdown
-            id="warranty"
-            options={warrantyOptions}
-            selectedValue={selectedWarranty}
-            onSelect={(value) =>
-              setSelectedWarranty(value as "In-Warranty" | "Out-of-Warranty")
-            }
-          />
-        </div>
-        {/* Machine Age Card with Dropdown */}
-        <div className={`${cardStyle}`}>
-          <div className="flex justify-between w-full items-center">
-            <p className={`${labelStyle}`}>Machine Age</p>
-            <FaHourglassHalf size={24} className="text-yellow-500" />
-          </div>
-
-          <p className={valueStyle}>{machineAgeBuckets[selectedAge]}</p>
-          <CustomDropdown
-            id="machine-age"
-            options={machineAgeOptions}
-            selectedValue={selectedWarranty}
-            onSelect={(value) => setSelectedAge(value as "0-1" | "2-3" | "3+")}
+            label="Select State"
+            id="state"
+            options={mapStatesToOptions}
+            selectedValue={selectedStateValue}
+            onSelect={(label, value) => {
+              setSelectedStateLabel(String(label));
+              setSelectedStateValue(Number(value));
+            }}
           />
         </div>
 
-        {/* Water Type Card with Dropdown */}
-        <div className={`${cardStyle}`}>
-          <div className="flex justify-between w-full items-center ">
-            <p className={labelStyle}>Water Type</p>
-            <FaTint size={24} className="text-cyan-500" />
-            
+        {/* Total Cities */}
+        <div className={cardStyle}>
+          <div className="flex justify-between items-center">
+            <p className={labelStyle}>Total Cities</p>
+            <FaCity size={28} className="text-purple-500" />
           </div>
-          <p className={valueStyle}>{waterType[selectedWater]}</p>
+          <Link
+            href={`/customer/${encodeURIComponent(selectedCityLabel)}`}
+            className={valueStyle}
+          >
+            {selectedCityLabel || selectedCityValue}
+          </Link>
           <CustomDropdown
-            id="water-type"
-            options={waterTypeOptions}
-            selectedValue={selectedWater}
-            onSelect={(value) =>
-              setSelectedWater(value as "RO" | "Bore" | "Municipal")
-            }
+            label="Select City"
+            id="city"
+            options={mapCitiesToOptions}
+            selectedValue={selectedCityValue}
+            onSelect={(label, value) => {
+              setSelectedCityLabel(String(label)); // string name like "Lucknow"
+              setSelectedCityValue(Number(value)); // numeric count
+            }}
           />
         </div>
       </div>

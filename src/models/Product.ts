@@ -7,12 +7,12 @@ const ProductSchema = new Schema<Product>(
     _id: {
       type: String,
     },
-    serialNumber: {
+    serialNumber: { 
       type: String,
       unique: true,
       required: true,
     },
-    name: { type: String, required: true },
+    name: { type: String, enum:["NMP-5", "NMP-7","NMP-9","NMP-11","UCE-9","UCE-11","UCE-13","Hybrid-H2","H-Rich"], required: true },
     stock: {
       type: Number,
       default: 1,

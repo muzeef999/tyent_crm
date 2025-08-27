@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { usePathname } from "next/navigation";
+import { FaRegUser } from "react-icons/fa";
+import TypeSearch from "../TypeSearch";
+import useDebounce from "@/hooks/useDebounce";
 
 const AppBar = () => {
   const [scrolling, setScrolling] = useState(false);
+const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 500);
 
-  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,12 +28,16 @@ const AppBar = () => {
 
   return (
     <div
-      className={`fixed left-60 right-0 top-0 z-50 transition-shadow px-8 bg-background ${
-        scrolling ? "shadow-md" : "" 
+      className={`fixed left-60 right-0 top-0 z-9 transition-shadow px-8 bg-background ${
+        scrolling ? "shadow-md" : ""
       }`}
     >
       <div className="flex relative justify-between items-center p-2 px-t">
-        <div></div>
+        <div>
+          <div className="flex-1 min-w-[200px]">
+            <TypeSearch onSearch={setSearchText} />
+          </div>
+        </div>
         <div className="flex items-center space-x-3 mb-2">
           <div className="border rounded-full">
             <ThemeToggle />
@@ -37,18 +45,15 @@ const AppBar = () => {
           <div className="border rounded-full p-1">
             <IoNotificationsOutline size={24} />
           </div>
-        </div>
-
-        <div className="absolute mt-8 flex justify-between items-end w-full">
-          {pathname == "/" ? (
-            <></>
-          ) : (
-            <>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 dark:text-gray-100">
-                Hi Muzeef 👋 Need a hand?
-              </h1>
-            </>
-          )}
+          <div className="flex items-center space-x-1">
+            <div className="border rounded-full p-1 bg-[#b9b9b9]">
+              <FaRegUser size={24} fill="white" />
+            </div>
+            <div>
+              <p className="text-md mb-0 p-0">Shaik Muzeef</p>
+              <p className="text-sm -mt-1 p-0 text-gray-500">Developer</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

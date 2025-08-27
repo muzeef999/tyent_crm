@@ -25,6 +25,34 @@ export interface Customer {
   updatedAt?: string;
   warrantyMachineYears: string;
   warrantyPlatesYears: string;
+  state: string;
+  city: string;
+}
+
+export interface AccordionProps {
+  title: string;
+  id: string;
+  onToggle: (id: string) => void;
+  children: ReactNode;
+    isOpen: boolean;
+hasError?: boolean;
+}
+
+export interface Option {
+  label: string;
+  value: string | number;
+}
+
+export interface Statet {
+  name: string;
+  isoCode: string;
+  countryCode: string;
+}
+
+export interface Cityt {
+  name: string;
+  countryCode: string;
+  stateCode: string;
 }
 
 export interface Account {
@@ -230,3 +258,32 @@ export interface PartHarvest {
   date: Date;
   notes?: string;
 }
+
+
+//recharts
+
+export interface AmcDataItem  {
+  _id: string | null;
+  count: number;
+};
+
+export interface Analytics {
+  amc: AmcDataItem[];
+  waterType: any[];
+  model: any[];
+  warranty: any[];
+  waterMethod: any[];
+  states: any[];
+  cities: any[];
+};
+
+export interface CustomerAnalyticsResponse  {
+  success: boolean;
+  summary?: {
+    totalCustomers: number;
+    totalPrice: number;
+    totalStates: number;
+    totalCities: number;
+  };
+  analytics: Analytics;
+};

@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
+import Product from "@/models/Product";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import fs from "fs";
 import path from "path";
@@ -12,23 +13,25 @@ export async function POST() {
       process.cwd(),
       "src",
       "fakeData",
-      "customer.json"
+      "products.json"
     );
 
-    const customers = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    const products = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
     // Clear existing data (optional)
-    await Customer.deleteMany();
+    await Product.deleteMany();
 
     // Insert new data
-    const data = await Customer.insertMany(customers);
+    const data = await Product.insertMany(products);
 
     return new Response(
       JSON.stringify({
         success: true,
 
-        message: "Customer seeded successfully!",
+        message: "Product seeded successfully!",
         data,
+
+
       }),
       { status: 200 }
     );

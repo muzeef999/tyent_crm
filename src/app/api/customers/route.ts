@@ -4,6 +4,7 @@ import Product from "@/models/Product";
 import Service from "@/models/Service";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { customerValidation } from "@/validations/Validation";
+import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
@@ -93,50 +94,85 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
+
 export const GET = async (req: Request) => {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
 
-    // Parse parameters
-    const q = searchParams.get("q")?.trim() || ""; // string
-    const pageStr = searchParams.get("page"); // string | null
-    const limitStr = searchParams.get("limit"); // string | null
-
-    const page = pageStr ? Math.max(1, parseInt(pageStr)) : 1;
-    const limit = limitStr ? Math.min(50, Math.max(1, parseInt(limitStr))) : 10;
+    // --- parse pagination ---
+    const q = searchParams.get("q")?.trim() || "";
+    const pageStr = searchParams.get("page");
+    const limitStr = searchParams.get("limit");
+    const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
+    const limit = limitStr ? Math.min(100, Math.max(1, parseInt(limitStr, 10))) : 10;
     const skip = (page - 1) * limit;
 
-    // Base match stage (for other filters like price)
+    // --- filters ---
     const matchStage: any = {};
 
-    // Price filters (if needed)
+    const id = searchParams.get("id");
+    if (id && Types.ObjectId.isValid(id)) {
+      matchStage._id = new Types.ObjectId(id);
+    }
+
+    const state = searchParams.get("state");
+    if (state) matchStage.state = state;
+
+    const city = searchParams.get("city");
+    if (city) matchStage.city = city;
+
+    const amc = searchParams.get("amc");
+    if (amc) matchStage.amcRenewed = amc;
+
+    const waterType = searchParams.get("waterType");
+    if (waterType) matchStage.waterType = waterType;
+
+    const waterMethod = searchParams.get("waterMethod");
+    if (waterMethod) matchStage.waterMethod = waterMethod;
+
+    // warranty bucket
+    const warranty = searchParams.get("warranty");
+    if (warranty) {
+      if (warranty === "<1 yr") matchStage.warrantyYears = { $lt: 1 };
+      else if (warranty === "1-2 yrs") matchStage.warrantyYears = { $gte: 1, $lt: 2 };
+      else if (warranty === "2-3 yrs") matchStage.warrantyYears = { $gte: 2, $lt: 3 };
+      else if (warranty === ">3 yrs") matchStage.warrantyYears = { $gte: 3 };
+    }
+
+    // price filters
     const minPrice = parseFloat(searchParams.get("minPrice") || "");
     const maxPrice = parseFloat(searchParams.get("maxPrice") || "");
-    if (!isNaN(minPrice)) matchStage.price = { $gte: minPrice };
-    if (!isNaN(maxPrice)) matchStage.price = { $lte: maxPrice };
+    if (!isNaN(minPrice) || !isNaN(maxPrice)) {
+      matchStage.price = {};
+      if (!isNaN(minPrice)) matchStage.price.$gte = minPrice;
+      if (!isNaN(maxPrice)) matchStage.price.$lte = maxPrice;
+    }
 
-    // Aggregation pipeline
+    const model = searchParams.get("model");
+
+    // --- pipeline ---
     const pipeline: any[] = [
-      { $match: Object.keys(matchStage).length ? matchStage : {} },
-      // Join with Employee collection
+      { $match: matchStage },
+
+      // join product info
       {
         $lookup: {
-          from: "employees", // Collection name (case-sensitive)
-          localField: "installedBy",
-          foreignField: "_id",
-          as: "installedByEmployee",
+          from: "products",
+          localField: "serialNumber",
+          foreignField: "serialNumber",
+          as: "productInfo",
         },
       },
-      {
-        $unwind: {
-          path: "$installedByEmployee",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+      { $unwind: { path: "$productInfo", preserveNullAndEmptyArrays: true } },
     ];
 
-    // Add text search if query exists
+    // filter by model after lookup
+    if (model) {
+      pipeline.push({ $match: { "productInfo.name": model } });
+    }
+
+    // text search
     if (q) {
       pipeline.push({
         $match: {
@@ -146,19 +182,17 @@ export const GET = async (req: Request) => {
             { contactNumber: { $regex: q, $options: "i" } },
             { DOB: { $regex: q, $options: "i" } },
             { address: { $regex: q, $options: "i" } },
-            // Search in employee name
-            { "installedByEmployee.name": { $regex: q, $options: "i" } },
           ],
         },
       });
     }
 
-    // Count total matching documents
+    // count total before pagination
     const countPipeline = [...pipeline, { $count: "total" }];
     const totalResult = await Customer.aggregate(countPipeline);
     const total = totalResult[0]?.total || 0;
 
-    // Add pagination and projection
+    // apply pagination
     pipeline.push(
       { $skip: skip },
       { $limit: limit },
@@ -169,17 +203,7 @@ export const GET = async (req: Request) => {
           contactNumber: 1,
           alternativeNumber: 1,
           DOB: 1,
-          address: 1,
-          installedModel: 1,
-
-          invoiceNumber: 1,
-          price: 1,
-          amcRenewed: 1,
-          installedBy: {
-            _id: "$installedByEmployee._id",
-            name: "$installedByEmployee.name",
-          },
-        },
+              },
       }
     );
 
@@ -197,9 +221,7 @@ export const GET = async (req: Request) => {
     });
   } catch (err) {
     console.error("Search Error:", err);
-    return NextResponse.json(
-      { success: false, error: "Search failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Search failed" }, { status: 500 });
   }
 };
+

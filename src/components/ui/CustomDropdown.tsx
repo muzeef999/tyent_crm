@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from "react";
 type Option = {
   label: string;
   value: string | number;
+  id?: string; // Add optional id for unique identification
 };
 
 type GroupedOption = {
@@ -14,7 +15,7 @@ type SimpleDropdownProps = {
   options: (Option | GroupedOption)[];
   placeholder?: string;
   selectedValue: string | number; // controlled selected value
-  onSelect: (value: string | number) => void;
+  onSelect: (value: string | number, label?: string) => void;
   label?: string; // optional label
   id?: string; // optional id for accessibility
 };
@@ -59,8 +60,13 @@ export default function CustomDropdown({
   const selectedLabel = findSelectedLabel();
 
   const handleSelect = (option: Option) => {
-    onSelect(option.value);
+    onSelect(option.value, option.label); // Correct order: (value, label)
     setIsOpen(false);
+  };
+
+  // Generate a unique key for each option
+  const getOptionKey = (option: Option, index: number, prefix?: string) => {
+    return option.id || `${prefix || ''}${option.value}-${index}`;
   };
 
   return (
@@ -101,24 +107,24 @@ export default function CustomDropdown({
         <ul className="absolute z-10 mt-1 w-full border-[#d2d6dd] rounded-md bg-white shadow-lg max-h-60 overflow-auto">
           {options.map((option, idx) =>
             "value" in option ? (
-              // Flat option
+              // Flat option - use unique key
               <li
-                key={option.value}
+                key={getOptionKey(option, idx)}
                 className="cursor-pointer px-4 py-2 hover:bg-blue-100"
                 onClick={() => handleSelect(option)}
               >
                 {option.label}
               </li>
             ) : (
-              // Grouped option
-              <li key={`group-${idx}`}>
+              // Grouped option - use unique key
+              <li key={`group-${idx}-${option.label}`}>
                 <div className="px-4 py-2 font-semibold bg-gray-100">
                   {option.label}
                 </div>
                 <ul>
-                  {option.options.map((sub) => (
+                  {option.options.map((sub, subIdx) => (
                     <li
-                      key={sub.value}
+                      key={getOptionKey(sub, subIdx, 'sub-')}
                       className="cursor-pointer px-6 py-2 hover:bg-blue-100"
                       onClick={() => handleSelect(sub)}
                     >
