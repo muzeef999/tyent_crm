@@ -14,6 +14,7 @@ import { IoIosAdd } from "react-icons/io";
 import Offcanvas from "@/components/ui/Offcanvas";
 import AddCustomer from "./AddCustomer";
 import WaterTypeChart from "./recharts/WaterTypeChart";
+import CustomerDashboard from "@/components/skeleton/CustomerDashboard";
 
 // Define types for API response
 
@@ -26,7 +27,7 @@ const Page: React.FC = () => {
 
 
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div><CustomerDashboard /></div>;
   if (error) return <div className="text-red-500">Error loading data</div>;
 
   // Transform AMC data for PieChart
