@@ -31,6 +31,11 @@ export const PATCH = async (
 
     await connectDB();
 
+    if(body.employeeId){
+    body.assignedDate = new Date(); 
+
+    }
+
     // ✅ Ensure employeeId is included in the update
     const updatedService = await Service.findByIdAndUpdate(
       id,
@@ -55,6 +60,10 @@ export const PATCH = async (
     return NextResponse.json({ success: false, error: Error }, { status: 500 });
   }
 };
+
+
+
+
 
 export const GET = async (
   req: NextRequest,

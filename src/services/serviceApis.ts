@@ -34,6 +34,7 @@ export const getCustomerById = (id: string) => axiosInstance.get(`/customers/${i
 
 //SERVICES
 export const getServices = () => axiosInstance.get("/services").then((res) => res.data);
+export const analytics = () => axiosInstance.get("/services/analytics").then((res) => res.data);
 export const createService = (data: Omit<Service, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/services", data).then((res) => res.data);
 export const updateService = (id: string, updatedFields: Record<string, any>) => axiosInstance.patch(`/services/${id}`,updatedFields).then((res) => res.data);
 export const deleteService = (id: string) => axiosInstance.delete(`/services/${id}`).then((res) => res.data);

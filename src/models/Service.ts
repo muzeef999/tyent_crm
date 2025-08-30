@@ -50,6 +50,11 @@ const serviceSchema = new Schema(
   { timestamps: true }
 );
 
+
+serviceSchema.index({ serviceDate: 1 });
+serviceSchema.index({ status: 1 });
+serviceSchema.index({ employeeId: 1 });
+
 const Service =
   mongoose.models.Service || mongoose.model("Service", serviceSchema);
 

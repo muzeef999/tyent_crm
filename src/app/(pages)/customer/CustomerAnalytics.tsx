@@ -7,6 +7,8 @@ import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import { Cityt, Option, Statet } from "@/types/customer";
 import Link from "next/link";
+import CountUp from "react-countup";
+
 
 type CustomerAnalyticsProps = {
   totalCustomers?: number;
@@ -49,8 +51,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
     id: `${c._id}-${index}`, // Add unique identifier
   }));
 
-
-
   const formatIndianPrice = (value: number) => {
     if (!value) return "";
     return new Intl.NumberFormat("en-IN").format(value);
@@ -78,7 +78,11 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           </div>
 
           <Link
-            href={`/customer/startDate=${startDate ? encodeURIComponent(startDate.toISOString()) : ""}&endDate=${endDate ? encodeURIComponent(endDate.toISOString()) : ""}`}
+            href={`/customer/startDate=${
+              startDate ? encodeURIComponent(startDate.toISOString()) : ""
+            }&endDate=${
+              endDate ? encodeURIComponent(endDate.toISOString()) : ""
+            }`}
             className={valueStyle}
           >
             {totalCustomers}
@@ -106,7 +110,14 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             )}=${encodeURIComponent(selectedStateLabel)}`}
             className={valueStyle}
           >
-            ₹ {formatIndianPrice(totalRevenue)}
+            ₹{" "}
+            <CountUp
+              end={Number(totalRevenue)} // make sure totalRevenue is a number
+              duration={2} // 2 seconds animation
+              separator="," // add commas: 1000000 → 1,000,000
+              prefix="" // optional
+              decimals={0} // optional: show decimals
+            />
           </Link>
           <CustomDateDropdown
             label="Select Revenue Date Range"
