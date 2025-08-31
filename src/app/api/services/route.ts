@@ -76,7 +76,7 @@ export const GET = async (req: Request) => {
     const skip = (page - 1) * limit;
 
     // 🔎 Build filter object
-    let filter: any = {};
+    const  filter: any = {};
 
     if (q) {
       filter.$or = [
