@@ -13,7 +13,7 @@ const WaterMethod: React.FC<{ waterMethodData: any[] }> = ({
   waterMethodData,
 }) => {
   return (
-    <div style={{ width: "100%", height: 300 }}>
+    <div style={{ width: "100%", height: 410 }}>
       <h1 className="text-sm mb-4">Water Method</h1>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
@@ -22,7 +22,7 @@ const WaterMethod: React.FC<{ waterMethodData: any[] }> = ({
             top: 10,
             right: 10,
             left: 0,
-            bottom: 0,
+            bottom: 90,
           }}
         >
           <defs>
@@ -32,8 +32,21 @@ const WaterMethod: React.FC<{ waterMethodData: any[] }> = ({
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
+          <XAxis dataKey="name" interval={0} tick={(props) => {
+              const { x, y, payload } = props;
+              return (
+                <text
+                  x={x}
+                  y={y + 10} // move down a little
+                  textAnchor="end"
+                  transform={`rotate(-30, ${x}, ${y + 10})`}
+                  fontSize={12}
+                >
+                  {payload.value}
+                </text>
+              );
+            }} />
+          <YAxis  />
           <Tooltip />
           <Area
             type="monotone"

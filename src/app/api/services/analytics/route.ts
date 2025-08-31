@@ -6,84 +6,66 @@ export const GET = async (req: Request) => {
     await connectDB();
 
     const url = new URL(req.url);
-    const { startDate, endDate } = Object.fromEntries(
-      url.searchParams.entries()
-    );
+    const { startDate, endDate } = Object.fromEntries(url.searchParams.entries());
 
-    const matchDate: any = {};
-    if (startDate) matchDate.serviceDate = { $gte: new Date(startDate) };
-    if (endDate) {
-      matchDate.serviceDate = {
-        ...matchDate.serviceDate,
-        $lte: new Date(endDate),
-      };
-    }
+    // ✅ Default range = today
+    const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
+    const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
+
+    const matchDate: any = {
+      serviceDate: {
+        $gte: startDate ? new Date(startDate) : todayStart,
+        $lte: endDate ? new Date(endDate) : todayEnd,
+      },
+    };
 
     const stats = await Service.aggregate([
       { $match: matchDate },
       {
         $facet: {
-          // Existing counts
+          // Total count in given range
           totalTickets: [{ $count: "count" }],
+
+          // Tickets only for today (regardless of selected range)
           ticketsToday: [
             {
               $match: {
-                serviceDate: {
-                  $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                  $lte: new Date(new Date().setHours(23, 59, 59, 999)),
-                },
+                serviceDate: { $gte: todayStart, $lte: todayEnd },
               },
             },
             { $count: "count" },
           ],
 
+          // Status-based counts
           inProgress: [{ $match: { status: "ONGOING" } }, { $count: "count" }],
           closed: [{ $match: { status: "CLOSED" } }, { $count: "count" }],
           cancelled: [{ $match: { status: "CANCELLED" } }, { $count: "count" }],
           pending: [{ $match: { status: "PENDING" } }, { $count: "count" }],
-          serviceNotAssigned: [
-            { $match: { employeeId: null } },
-            { $count: "count" },
-          ],
-          inWarranty: [
-            { $match: { serviceType: "IN_WARRANTY_BREAKDOWN" } },
-            { $count: "count" },
-          ],
+          serviceNotAssigned: [{ $match: { employeeId: null } }, { $count: "count" }],
+
+          // Service type buckets
+          inWarranty: [{ $match: { serviceType: "IN_WARRANTY_BREAKDOWN" } }, { $count: "count" }],
           outWarranty: [
             {
               $match: {
                 serviceType: {
-                  $in: [
-                    "RO_SYSTEM_MALFUNCTIONING",
-                    "PRESSURE_TANK_NOT_FUNCTIONING",
-                  ],
+                  $in: ["RO_SYSTEM_MALFUNCTIONING", "PRESSURE_TANK_NOT_FUNCTIONING"],
                 },
               },
             },
             { $count: "count" },
           ],
-          sparesChanged: [
-            { $match: { serviceType: "SPARE_PART_REPLACEMENT" } },
-            { $count: "count" },
-          ],
-          generalServicesDue: [
-            { $match: { serviceType: "GENERAL_SERVICE" } },
-            { $count: "count" },
-          ],
+          sparesChanged: [{ $match: { serviceType: "SPARE_PART_REPLACEMENT" } }, { $count: "count" }],
+          generalServicesDue: [{ $match: { serviceType: "GENERAL_SERVICE" } }, { $count: "count" }],
 
-          // Average Response Time (hours)
+          // Avg Response Time (hours)
           avgResponseTime: [
             {
               $project: {
                 responseTimeInHours: {
                   $cond: [
                     { $and: ["$closingDate", "$serviceDate"] },
-                    {
-                      $divide: [
-                        { $subtract: ["$closingDate", "$serviceDate"] },
-                        1000 * 60 * 60,
-                      ],
-                    },
+                    { $divide: [{ $subtract: ["$closingDate", "$serviceDate"] }, 1000 * 60 * 60] },
                     null,
                   ],
                 },
@@ -92,12 +74,14 @@ export const GET = async (req: Request) => {
             { $group: { _id: null, avg: { $avg: "$responseTimeInHours" } } },
           ],
 
-          // Monthly Tickets for Graph
+          // Group by service type (for charts)
+
           serviceType: [
             { $unwind: "$serviceType" }, // flatten the array of service types
             { $group: { _id: "$serviceType", count: { $sum: 1 } } },
             { $sort: { count: -1 } }, // optional: sort by most common service type
           ],
+
         },
       },
     ]);
@@ -124,8 +108,6 @@ export const GET = async (req: Request) => {
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: "Something went wrong" }), {
-      status: 500,
-    });
+    return new Response(JSON.stringify({ error: "Something went wrong" }), { status: 500 });
   }
 };

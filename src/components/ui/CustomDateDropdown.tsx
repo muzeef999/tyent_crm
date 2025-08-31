@@ -85,6 +85,7 @@ const CustomDateRangeDropdown: React.FC<CustomDateRangeDropdownProps> = ({
               onChange={(date) => {
                 setEndDate(date);
                 onDateChange(startDate, date);
+                setIsOpen(false);
               }}
               selectsEnd
               startDate={startDate}

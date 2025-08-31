@@ -49,12 +49,17 @@ const Page: React.FC = () => {
       value: item.count,
     })) || [];
 
-  const WaterType =
-    data?.analytics.waterType.map((item) => ({
-      name:item._id,
-      value: item.count,
-    })) || [];
-    
+    const WaterType =
+      data?.analytics.waterType.map((item) => ({
+        name:item._id,
+        value: item.count,
+      })) || [];
+
+      const Warrantyd = data?.analytics.warranty.map((item) => ({
+        name: item._id,
+        value: item.count,
+      })) || [];
+
   const customerStats = {
     totalCustomers: data?.summary?.totalCustomers, // ✅ from backend pagination count
     totalRevenue: data?.summary?.totalPrice, // installed machines
@@ -91,17 +96,20 @@ const Page: React.FC = () => {
         </div>
 
         {/* Row 3: 3 equal columns */}
-        <div className="col-span-8 customer-grid-col">
+        <div className="col-span-12 customer-grid-col">
           <WaterMethod waterMethodData={waterMethodData} />
         </div>
+
+
+        <div className="col-span-8 customer-grid-col">
+          <Warranty  warranty = {Warrantyd}/>
+        </div>
+
         <div className="col-span-4 customer-grid-col">
           <WaterTypeChart waterType={WaterType} />
         </div>
 
 
-        <div className="col-span-4 customer-grid-col">
-          <Warranty />
-        </div>
       </div>
 
       <br />
