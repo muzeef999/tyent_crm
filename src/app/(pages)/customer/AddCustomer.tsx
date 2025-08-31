@@ -120,6 +120,7 @@ const initialFormData = {
   phValue: "",
   waterType: "",
   waterMethod: "",
+  purchaseDate:"",
   warrantyMachineYears: "",
   warrantyPlatesYears: "",
   state: "",
@@ -135,15 +136,38 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
 
   const [serial, setSerial] = useState("");
 
+  const customerFields = [
+    "name",
+    "email",
+    "contactNumber",
+    "alternativeNumber",
+    "address",
+    "DOB",
+    "state",
+    "city",
+  ];
+  const machineFields = [
+    "serialNumber",
+    "invoiceNumber",
+    "price",
+    "marketingManager",
+    "installedBy",
+    "amcRenewed",
+    "warrantyYears",
+    "warrantyMachineYears",
+    "warrantyPlatesYears",
+  ];
+  const installationFields = [
+    "waterType",
+    "waterMethod",
+    "phValue",
+    "tdsValue",
+    "remarks",
+  ];
 
-  const customerFields = ["name", "email", "contactNumber", "alternativeNumber", "address", "DOB", "state", "city"];
-const machineFields = ["serialNumber", "invoiceNumber", "price", "marketingManager", "installedBy", "amcRenewed", "warrantyYears", "warrantyMachineYears", "warrantyPlatesYears"];
-const installationFields = ["waterType", "waterMethod", "phValue", "tdsValue", "remarks"];
-
-const hasCustomerError = customerFields.some((f) => !!errors[f]);
-const hasMachineError = machineFields.some((f) => !!errors[f]);
-const hasInstallationError = installationFields.some((f) => !!errors[f]);
-
+  const hasCustomerError = customerFields.some((f) => !!errors[f]);
+  const hasMachineError = machineFields.some((f) => !!errors[f]);
+  const hasInstallationError = installationFields.some((f) => !!errors[f]);
 
   // 🔍 Auto search for product by serial
   const {
@@ -287,7 +311,7 @@ const hasInstallationError = installationFields.some((f) => !!errors[f]);
         id="customer"
         isOpen={openSection === "customer"}
         onToggle={handleToggleAccordion}
-        hasError={hasCustomerError} 
+        hasError={hasCustomerError}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
           {/* Input Fields */}
@@ -313,8 +337,6 @@ const hasInstallationError = installationFields.some((f) => !!errors[f]);
               label: "Alternative Number",
               placeholder: "Enter alternative phone number",
             },
-
-            { name: "address", label: "Address", placeholder: "Enter address" },
           ].map(({ name, label, placeholder, type = "text" }) => (
             <div key={name} className="flex flex-col h-22">
               <Input
@@ -331,13 +353,22 @@ const hasInstallationError = installationFields.some((f) => !!errors[f]);
             </div>
           ))}
 
-          <Input
-            name="DOB"
-            label="Date of Birth"
-            type="date"
-            value={formData.DOB}
-            onChange={handleChange}
-          />
+          <div className="flex flex-col h-22">
+            <Input
+              name={"address"}
+              label={"Address"}
+              placeholder={"Enter address"}
+              type={"text"}
+              value={formData.address}
+              onChange={handleChange}
+            />
+            {errors.address && (
+              <p className="text-red-600 -mt-4 text-sm">
+                {errors.address}
+              </p>
+            )}
+          </div>
+
 
           <div className="flex flex-col h-22">
             <CustomDropdown
@@ -364,6 +395,26 @@ const hasInstallationError = installationFields.some((f) => !!errors[f]);
               }
             />
           </div>
+          <Input
+            name="DOB"
+            label="Date of Birth"
+            type="date"
+            value={formData.DOB}
+            onChange={handleChange}
+          />
+
+
+
+          <div className="flex flex-col h-22">
+            <Input
+              name="purchaseDate"
+              label="Purchase Date"
+              type="date"
+              value={formData.purchaseDate}
+              onChange={handleChange}
+            />
+          </div>
+
         </div>
       </Accordion>
 

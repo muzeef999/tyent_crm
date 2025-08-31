@@ -8,14 +8,23 @@ import { Service } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
 
 const Page = () => {
+
   const [searchText, setSearchText] = useState("");
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
   const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
   const [employeeId, setEmployeeId] = useState(" ");
+  
+    const searchParams = useSearchParams();
+    const startDate = searchParams.get("start");
+    const endDate = searchParams.get("end");
+    const type = searchParams.get("type");
+  
+
 
   const { data: getEmployeesDataId } = useQuery({
     queryKey: ["Assingdata", employeeId],
@@ -28,8 +37,12 @@ const Page = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["services"],
-    queryFn: () => getServices(),
+    queryKey: ["services", startDate, endDate],
+    queryFn: () => getServices({ 
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      type: type ? type : undefined
+    }),
   });
 
   if (error)

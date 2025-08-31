@@ -23,6 +23,7 @@ export interface Customer {
   phValue: string;
   createdAt?: string;
   updatedAt?: string;
+  purchaseDate?: string;
   warrantyMachineYears: string;
   warrantyPlatesYears: string;
   state: string;

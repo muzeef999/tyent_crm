@@ -42,11 +42,11 @@ const CustomDateRangeDropdown: React.FC<CustomDateRangeDropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full rounded-md border border-[#d2d6dd] px-4 py-2 text-left bg-white flex justify-between items-center"
       >
-         <span className="text-sm truncate">
-    {startDate && endDate
-      ? `${startDate.toLocaleDateString()} → ${endDate.toLocaleDateString()}`
-      : "Select Date Range"}
-  </span>
+        <span className="text-sm truncate">
+          {startDate && endDate
+            ? `${startDate.toLocaleDateString()} → ${endDate.toLocaleDateString()}`
+            : "Select Date Range"}
+        </span>
         <svg
           className={`w-5 h-5 transition-transform ${
             isOpen ? "rotate-180" : ""
@@ -70,6 +70,10 @@ const CustomDateRangeDropdown: React.FC<CustomDateRangeDropdownProps> = ({
           <div className="flex flex-col gap-3">
             <DatePicker
               selected={startDate}
+              dateFormat="dd/MM/yyyy" // shows day/month/year
+              showMonthDropdown // 👈 dropdown for months
+              showYearDropdown // 👈 dropdown for years
+              dropdownMode="select" // makes them dropdowns
               onChange={(date) => {
                 setStartDate(date);
                 onDateChange(date, endDate);
@@ -82,6 +86,10 @@ const CustomDateRangeDropdown: React.FC<CustomDateRangeDropdownProps> = ({
             />
             <DatePicker
               selected={endDate}
+              dateFormat="dd/MM/yyyy" // shows day/month/year
+              showMonthDropdown // 👈 dropdown for months
+              showYearDropdown // 👈 dropdown for years
+              dropdownMode="select" // makes them dropdowns
               onChange={(date) => {
                 setEndDate(date);
                 onDateChange(startDate, date);

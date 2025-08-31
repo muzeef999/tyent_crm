@@ -59,95 +59,123 @@ export const GET = async (req: Request) => {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
+
+    // query params
     const q = searchParams.get("q")?.trim() || "";
     const pageStr = searchParams.get("page");
     const limitStr = searchParams.get("limit");
+    const startParam = searchParams.get("start");
+    const endParam = searchParams.get("end");
+    const type = searchParams.get("type");
+
+    // pagination
     const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
     const limit = limitStr
       ? Math.min(50, Math.max(1, parseInt(limitStr, 10)))
       : 10;
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    let filter = {};
+    // 🔎 Build filter object
+    let filter: any = {};
+
     if (q) {
-      filter = {
-        $or: [
-          { mode: { $regex: q, $options: "i" } },
-          { serviceType: { $regex: q, $options: "i" } },
-        ],
+      filter.$or = [
+        { mode: { $regex: q, $options: "i" } },
+        { serviceType: { $regex: q, $options: "i" } },
+      ];
+    }
+
+    if (startParam && endParam) {
+      filter.serviceDate = {
+        $gte: new Date(startParam),
+        $lte: new Date(endParam),
       };
     }
 
+    if (type) {
+      filter.serviceType = type;
+    }
+
+    // total before pagination
     const total = await Service.countDocuments(filter);
 
+    // main query
     const services = await Service.find(filter)
       .populate("customerId", "name installedModel")
-      
+      .populate("employeeId", "name email") // add employee info if needed
       .skip(skip)
       .limit(limit)
       .sort({ serviceDate: 1 })
       .lean();
 
-    //status calculating logic
+    // === Analytics (based only on filtered services) ===
+    const totalTickets = services.length;
+    const ticketsToday = services.filter((s) => {
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+      return s.serviceDate >= startOfDay && s.serviceDate <= endOfDay;
+    }).length;
 
-    const now = new Date();
+    const inProgress = services.filter((s) => s.status === "IN_PROGRESS").length;
+    const closed = services.filter((s) => s.status === "CLOSED").length;
+    const cancelled = services.filter((s) => s.status === "CANCELLED").length;
+    const pending = services.filter((s) => s.status === "PENDING").length;
 
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const serviceNotAssigned = services.filter((s) => !s.employeeId).length;
 
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+    const inWarranty = services.filter(
+      (s) => s.warrantyStatus === "IN_WARRANTY"
+    ).length;
 
+    const outWarranty = services.filter(
+      (s) => s.warrantyStatus === "OUT_WARRANTY"
+    ).length;
 
-     const [
-      totalTicketsThisMonth,
-      ticketsToday,
-      ticketsResolved,
-      ticketsIncomplete,
-      generalServiceDue,
-    ] = await Promise.all([
-      // 1. All tickets in this month
-      Service.countDocuments({
-        serviceDate: { $gte: startOfMonth, $lte: endOfMonth },
-      }),
-      // 2. Tickets today
-      Service.countDocuments({
-        serviceDate: { $gte: startOfDay, $lte: endOfDay },
-      }),
-      // 3. Resolved tickets (closingDate exists)
-      Service.countDocuments({
-        closingDate: { $exists: true, $ne: null },
-      }),
-      // 4. Incomplete tickets this month (no closingDate)
-      Service.countDocuments({
-        serviceDate: { $gte: startOfMonth, $lte: endOfMonth },
-        $or: [{ closingDate: { $exists: false } }, { closingDate: null }],
-      }),
-      // 5. General services due this month
-      Service.countDocuments({
-        serviceDate: { $gte: startOfMonth, $lte: endOfMonth },
-        serviceType: "GENERAL_SERVICE",
-      }),
-    ]);
+    const sparesChanged = services.filter(
+      (s) => s.sparesChanged && s.sparesChanged.length > 0
+    ).length;
+
+    const generalServicesDue = services.filter(
+      (s) => s.serviceType === "GENERAL_SERVICE"
+    ).length;
+
+    // group by type
+    const serviceTypeAgg: Record<string, number> = {};
+    services.forEach((s) => {
+      const t = s.serviceType || "UNKNOWN";
+      serviceTypeAgg[t] = (serviceTypeAgg[t] || 0) + 1;
+    });
+    const serviceType = Object.entries(serviceTypeAgg).map(([type, count]) => ({
+      type,
+      count,
+    }));
 
     return NextResponse.json(
       {
         success: true,
-        message: "Filtered upcoming services fetched successfully",
-        data: services,
+        message: "Filtered services fetched successfully",
+        data: services, // user + service details
         pagination: {
           total,
           page,
           limit,
           totalPages: Math.ceil(total / limit),
         },
-        totalTicketsThisMonth,
+        analytics: {
+          totalTickets,
           ticketsToday,
-          // ticketsProgress,
-          ticketsResolved,
-          ticketsIncomplete,
-          generalServiceDue,
+          inProgress,
+          closed,
+          cancelled,
+          pending,
+          serviceNotAssigned,
+          inWarranty,
+          outWarranty,
+          sparesChanged,
+          generalServicesDue,
+          serviceType,
+        },
       },
       { status: 200 }
     );

@@ -45,7 +45,7 @@ const ModelBarChart: React.FC<{ barData: any[] }> = ({ barData }) => {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Legend />
+         
           <Bar
             dataKey="value"
             barSize={30}

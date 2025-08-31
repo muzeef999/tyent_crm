@@ -14,7 +14,7 @@ const Accordion: React.FC<AccordionProps> = ({
 }) => {
   return (
     <div
-      className={`border rounded-xl mb-4 shadow-sm cursor-pointer ${
+      className={`border rounded-xl mb-4 shadow-sm cursor-pointer -z-10 ${
         isOpen ? "border-primary" : "border-gray-300"
       } ${hasError ? "border-red-500" : isOpen ? "border-green-500" : ""}`}
     >

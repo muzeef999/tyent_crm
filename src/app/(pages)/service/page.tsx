@@ -10,7 +10,6 @@ import {
   FiTool,
   FiShield,
 } from "react-icons/fi";
-import { ReportsSection } from "./ReportSection";
 import { useQuery } from "@tanstack/react-query";
 import { analytics } from "@/services/serviceApis";
 import CountUp from "react-countup";
@@ -18,6 +17,8 @@ import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
 import ServiceType from "./recharts/ServiceType";
 import { useSearchParams } from "next/navigation";
+import ReportsSection from "./ReportSection";
+import Link from "next/link";
 
 interface StatsCardProps {
   title: string;
@@ -34,15 +35,17 @@ const StatsCard: React.FC<StatsCardProps> = ({
   iconBg,
   link,
 }) => (
-  <div className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow">
-    <div>
-      <p className="text-sm text-gray-500">{title}</p>
-      <h2 className="text-2xl font-bold mt-1">
-        <CountUp end={Number(value)} duration={1.5} separator="," />
-      </h2>
+  <Link href={link}>
+    <div className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow">
+      <div>
+        <p className="text-sm text-gray-500">{title}</p>
+        <h2 className="text-2xl font-bold mt-1">
+          <CountUp end={Number(value)} duration={1.5} separator="," />
+        </h2>
+      </div>
+      <div className={`p-3 rounded-lg ${iconBg} text-white`}>{icon}</div>
     </div>
-    <div className={`p-3 rounded-lg ${iconBg} text-white`}>{icon}</div>
-  </div>
+  </Link>
 );
 
 const PageContent = () => {
@@ -74,63 +77,100 @@ const PageContent = () => {
       value: serviceAnalyticsd?.totalTickets || 0,
       icon: <FiFileText />,
       iconBg: "bg-blue-500",
-      link: "",
+      link: `/service/${"total-tickets"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
+          : ""
+      }`,
     },
+
     {
       title: "Tickets Today",
       value: serviceAnalyticsd?.ticketsToday || 0,
       icon: <FiCalendar />,
       iconBg: "bg-green-500",
-      link: "",
+      link: `/service/${"ticketsToday"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
+          : ""
+      }`,
     },
     {
       title: "Tickets In Progress",
       value: serviceAnalyticsd?.inProgress || 0,
       icon: <FiClock />,
       iconBg: "bg-yellow-500",
-      link: "",
+      link: `/service/${"inProgress"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=IN_PROGRESS`
+          : ""
+      }`,
     },
     {
       title: "Tickets Closed",
       value: serviceAnalyticsd?.closed || 0,
       icon: <FiCheckCircle />,
       iconBg: "bg-purple-500",
-      link: "",
+      link: `/service/${"closed"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=CLOSED`
+          : ""
+      }`,
     },
     {
       title: "General Services Due",
       value: serviceAnalyticsd?.generalServicesDue || 0,
       icon: <FiAlertTriangle />,
       iconBg: "bg-red-500",
-      link: "",
+      link: `/service/${"generalServicesDue"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=GENERAL_SERVICE`
+          : ""
+      }`,
     },
     {
       title: "Spares Changed",
       value: serviceAnalyticsd?.sparesChanged || 0,
       icon: <FiTool />,
       iconBg: "bg-teal-500",
-      link: "",
+      link: `/service/${"sparesChanged"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
+          : ""
+      }`,
     },
     {
       title: "In-Warranty RO",
       value: serviceAnalyticsd?.inWarranty || 0,
       icon: <FiShield />,
       iconBg: "bg-indigo-500",
-      link: "",
+      link: `/service/${"inWarranty"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=IN_WARRANTY`
+          : ""
+      }`,
     },
     {
       title: "Out-Warranty RO",
       value: serviceAnalyticsd?.outWarranty || 0,
       icon: <FiShield />,
       iconBg: "bg-orange-500",
-      link: "",
+      link: `/service/${"outWarranty"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=OUT_WARRANTY`
+          : ""
+      }`,
     },
     {
       title: "Avg-Ticket Resolution Time",
       value: serviceAnalyticsd?.avgResolutionTime || 0,
       icon: <FiClock />,
       iconBg: "bg-gray-500",
-      link: "",
+      link: `/service/${"avgResolutionTime"}${
+        startDate && endDate
+          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
+          : ""
+      }`,
     },
   ];
 

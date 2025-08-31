@@ -33,12 +33,21 @@ export const getCustomerById = (id: string) => axiosInstance.get(`/customers/${i
 
 
 //SERVICES
-export const getServices = () => axiosInstance.get("/services").then((res) => res.data);
+
 export const createService = (data: Omit<Service, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/services", data).then((res) => res.data);
 export const updateService = (id: string, updatedFields: Record<string, any>) => axiosInstance.patch(`/services/${id}`,updatedFields).then((res) => res.data);
 export const deleteService = (id: string) => axiosInstance.delete(`/services/${id}`).then((res) => res.data);
 export const getServiceById = (id: string) => axiosInstance.get(`/services/${id}`).then((res) => res.data);
 
+
+export const getServices = ({startDate, endDate, type} :{ startDate?: Date | null; endDate?: Date | null; type?: string | null; }) => {
+  const params = new URLSearchParams();
+  if (startDate) params.append("startDate", startDate.toISOString().split("T")[0]); // YYYY-MM-DD
+  if (endDate) params.append("endDate", endDate.toISOString().split("T")[0]);
+  if (type) params.append("type", type);
+
+  return axiosInstance.get(`/services?${params.toString()}`).then((res) => res.data);
+};
 
 // serviceApis.ts
 export const analytics = ({ 
