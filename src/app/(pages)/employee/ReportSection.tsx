@@ -79,7 +79,7 @@ export default function ReportsSection() {
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-2 mb-2">
           <FiFileText className="h-4 w-4 text-gray-600" />
-          <span className="text-sm font-medium text-gray-700">Report Summary</span>
+          <span className="text-sm font-medium text-gray-700">select Employe  data</span>
         </div>
         <p className="text-sm text-gray-600">{getSummary()}</p>
       </div>

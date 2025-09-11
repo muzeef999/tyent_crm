@@ -1,79 +1,102 @@
 "use client";
+
+import React, { useState } from "react";
 import AddEmployee from "@/components/AddEmployee";
-import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
-import Pagination from "@/components/ui/Pagination";
-import TableLoading from "@/components/ui/TableLoading";
-import useDebounce from "@/hooks/useDebounce";
-import { getEmployees } from "@/services/serviceApis";
-import { Employee } from "@/types/customer";
+import { employeeAnlaytics } from "@/services/serviceApis";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
-import EmployeeAnalytics from "./EmployeeAnalytics";
 import ReportsSection from "./ReportSection";
-import { FaShieldAlt, FaUsers } from "react-icons/fa";
-import CustomDateRangeDropdown from "@/components/ui/CustomDateDropdown";
-import CustomDropdown from "@/components/ui/CustomDropdown";
+import {
+  FaUsers,
+  FaUserTie,
+  FaHeadset,
+  FaUserCog,
+  FaUserGraduate,
+  FaUserShield,
+} from "react-icons/fa";
+import Link from "next/link";
+import CountUp from "react-countup";
 
-const desiginationOption = [
-  { value: "Marketing Manager", label: "Marketing Manager" },
-  { value: "Technical Manager", label: "Technical Manager" },
-  { value: "Telecall Manager", label: "Telecall Manager" },
-  { value: "Stock Manager", label: "Stock Manager" },
-  { value: "Account Manager", label: "Account Manager" },
-  { value: "Technician", label: "Technician" },
-  { value: "Telecaller", label: "Telecaller" },
-  { value: "Stock Clerk", label: "Stock Clerk" },
-  { value: "Accountant", label: "Accountant" },
-  { value: "Customer Support", label: "Customer Support" },
-  { value: "Intern", label: "Intern" },
-  { value: "HR Executive", label: "HR Executive" },
-  { value: "Sales Executive", label: "Sales Executive" },
-];
+// 🔹 Props for Designation Card
+interface StatsCardProps {
+  title: string;
+  value: number | string;
+  icon: React.ReactNode;
+  iconBg: string;
+  link: string;
+}
 
+const DesgCard: React.FC<StatsCardProps> = ({
+  title,
+  value,
+  icon,
+  iconBg,
+  link,
+}) => (
+  <Link href={link}>
+    <div className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow">
+      <div>
+        <p className="text-sm text-gray-500">{title}</p>
+        <h2 className="text-2xl font-bold mt-1">
+          <CountUp end={Number(value)} duration={1.5} separator="," />
+        </h2>
+      </div>
+      <div className={`p-3 rounded-lg ${iconBg} text-white`}>{icon}</div>
+    </div>
+  </Link>
+);
 
 const Page = () => {
-  const [showAddSidebar, setShowAddSidebar] = useState(false); // fixed
-  const [searchText, setSearchText] = useState("");
-  const debouncedSearchText = useDebounce(searchText, 500);
+  const [showAddSidebar, setShowAddSidebar] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState<number>(10);
-
-  const {
-    data: employees,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["employees"],
-    queryFn: () =>
-      getEmployees({ page, limit, searchQuery: debouncedSearchText }),
+  const { data: employeesanlaytics, isLoading, error } = useQuery({
+    queryKey: ["employeesAnalaytics"],
+    queryFn: employeeAnlaytics,
   });
 
-  const pagination = employees?.pagination;
-  const totalPages = pagination?.totalPages || 1;
+  if (isLoading) {
+    return <div className="p-6 text-gray-500">Loading employees...</div>;
+  }
 
-  const totalCustomers = pagination?.total || 0;
-  const newCustomers = 10;
-  const unsatisfiedCustomers = 5;
+  if (error) {
+    return (
+      <div className="p-6 text-red-500">Error: {getErrorMessage(error)}</div>
+    );
+  }
 
-  const dateToDate = 7;
-  const Desiginations = "Software Engineer";
+  // ✅ Convert API response into lookup { designation: count }
+  const counts: Record<string, number> = {};
+  employeesanlaytics?.messaage?.forEach(
+    (item: { _id: string; count: number }) => {
+      counts[item._id] = item.count;
+    }
+  );
 
-  if (error)
-    return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;
-
-    const cardStyle =
-    "flex flex-col items-center justify-center rounded-2xl shadow-lg p-6 w-full";
-
-  const valueStyle = "text-2xl font-bold";
-  const labelStyle = "text-sm text-gray-600 mt-2 font-semibold";
+  // ✅ Designation options with dynamic counts
+  const designationOptions = [
+    { label: "Marketing Manager", icon: <FaUserTie />, value: counts["Marketing Manager"] || 0, iconBg: "bg-red-500", link: "/link" },
+    { label: "Technical Manager", icon: <FaUserCog />, value: counts["Technical Manager"] || 0, iconBg: "bg-green-500", link: "/link" },
+    { label: "Telecall Manager", icon: <FaHeadset />, value: counts["Telecall Manager"] || 0, iconBg: "bg-purple-500", link: "/link" },
+    { label: "Stock Manager", icon: <FaUserShield />, value: counts["Stock Manager"] || 0, iconBg: "bg-red-500", link: "/link" },
+    { label: "Account Manager", icon: <FaUserTie />, value: counts["Account Manager"] || 0, iconBg: "bg-indigo-500", link: "/link" },
+    { label: "Technician", icon: <FaUserCog />, value: counts["Technician"] || 0, iconBg: "bg-orange-500", link: "/link" },
+    { label: "Telecaller", icon: <FaHeadset />, value: counts["Telecaller"] || 0, iconBg: "bg-pink-500", link: "/link" },
+    { label: "Stock Clerk", icon: <FaUserShield />, value: counts["Stock Clerk"] || 0, iconBg: "bg-teal-500", link: "/link" },
+    { label: "Accountant", icon: <FaUserTie />, value: counts["Accountant"] || 0, iconBg: "bg-gray-600", link: "/link" },
+    { label: "Customer Support", icon: <FaHeadset />, value: counts["Customer Support"] || 0, iconBg: "bg-blue-400", link: "/link" },
+    { label: "Intern", icon: <FaUserGraduate />, value: counts["Intern"] || 0, iconBg: "bg-yellow-500", link: "/link" },
+    { label: "HR Executive", icon: <FaUserTie />, value: counts["HR Executive"] || 0, iconBg: "bg-rose-500", link: "/link" },
+    { label: "Sales Executive", icon: <FaUsers />, value: counts["Sales Executive"] || 0, iconBg: "bg-green-600", link: "/link" },
+    { label: "Super Admin", icon: <FaUserShield />, value: counts["Super Admin"] || 0, iconBg: "bg-black", link: "/link" },
+    { label: "Admin", icon: <FaUserShield />, value: counts["Admin"] || 0, iconBg: "bg-gray-800", link: "/link" },
+  ];
 
   return (
     <>
+      {/* Header */}
       <div className="flex flex-wrap justify-between items-start px-6 py-4 gap-4">
         <div>
           <h1 className="font-bold text-2xl text-black">
@@ -84,62 +107,39 @@ const Page = () => {
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
-          Add Customer
+          Add Employee
         </Button>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 p-4">
-        <div className="col-span-4 md:col-span-4">
+      {/* Reports + Designations side by side (desktop) / stacked (mobile) */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
+        {/* Reports Section */}
+        <div className="md:col-span-4">
           <ReportsSection />
         </div>
-        <div className="col-span-8 md:col-span-8">
 
-          <div>
-          {/* Customer Date Range */}
-          <div className={`${cardStyle} bg-blue-50`}>
-            <div className="flex flex-col items-center">
-              <FaUsers size={28} className="text-blue-500" />
-              <p className="mt-2 text-lg font-semibold">Customer Date Range</p>
-            </div>
-            <div className="mt-3 w-full">
-              <CustomDateRangeDropdown
-                label="Select Date Range"
-                onDateChange={(start, end) => {
-                  console.log("Selected Range:", start, end);
-                  // 🔥 filter customers here
-                }}
+        {/* Designation Cards */}
+        <div className="md:col-span-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+            {designationOptions.map((stat, index) => (
+              <DesgCard
+                key={index}
+                title={stat.label}
+                value={stat.value}
+                icon={stat.icon}
+                iconBg={stat.iconBg}
+                link={stat.link}
               />
-            </div>
-          </div>
-
-          {/* AMC Selection */}
-          <div className={`${cardStyle} bg-purple-50`}>
-            <div className="flex flex-col items-center">
-              <FaShieldAlt size={28} className="text-purple-500" />
-              <p className="mt-2 text-lg font-semibold">AMC Plan</p>
-            </div>
-            <div className="mt-3 w-full">
-              <CustomDropdown
-                id="amc"
-                label="Select AMC"
-                options={desiginationOption}
-                selectedValue={""} // 🔥 Replace with your state
-                onSelect={(value) => {
-                  console.log("Selected AMC:", value);
-                  // setSelectedAmc(value) here
-                }}
-              />
-            </div>
-          </div>
-
+            ))}
           </div>
         </div>
       </div>
 
+      {/* Add Employee Sidebar */}
       <Offcanvas
         show={showAddSidebar}
         onClose={() => setShowAddSidebar(false)}
-        title="Add Employee" // fixed title
+        title="Add Employee"
       >
         <div className="p-4">
           <AddEmployee onClose={() => setShowAddSidebar(false)} />

@@ -116,6 +116,7 @@ export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);
 export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
 
+export const employeeAnlaytics = () => axiosInstance.get(`/employees/analytics`).then((res) => res.data);
 
 
 
