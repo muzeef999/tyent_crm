@@ -145,16 +145,19 @@ export interface Service {
 
 export interface InputProps {
   label?: string;
-  name: string;
+  name?: string;
   type?: string;
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;
+  maxLength?: number;
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
-  onBlur?: () => void; // ⬅ optional
+  onBlur?: () => void;
+  className?: string; // ✅ allow styling override
 }
+
 
 export interface Leads {
   id: string;

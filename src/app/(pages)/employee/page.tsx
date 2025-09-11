@@ -13,6 +13,27 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 import EmployeeAnalytics from "./EmployeeAnalytics";
+import ReportsSection from "./ReportSection";
+import { FaShieldAlt, FaUsers } from "react-icons/fa";
+import CustomDateRangeDropdown from "@/components/ui/CustomDateDropdown";
+import CustomDropdown from "@/components/ui/CustomDropdown";
+
+const desiginationOption = [
+  { value: "Marketing Manager", label: "Marketing Manager" },
+  { value: "Technical Manager", label: "Technical Manager" },
+  { value: "Telecall Manager", label: "Telecall Manager" },
+  { value: "Stock Manager", label: "Stock Manager" },
+  { value: "Account Manager", label: "Account Manager" },
+  { value: "Technician", label: "Technician" },
+  { value: "Telecaller", label: "Telecaller" },
+  { value: "Stock Clerk", label: "Stock Clerk" },
+  { value: "Accountant", label: "Accountant" },
+  { value: "Customer Support", label: "Customer Support" },
+  { value: "Intern", label: "Intern" },
+  { value: "HR Executive", label: "HR Executive" },
+  { value: "Sales Executive", label: "Sales Executive" },
+];
+
 
 const Page = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false); // fixed
@@ -45,11 +66,20 @@ const Page = () => {
   if (error)
     return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;
 
+    const cardStyle =
+    "flex flex-col items-center justify-center rounded-2xl shadow-lg p-6 w-full";
+
+  const valueStyle = "text-2xl font-bold";
+  const labelStyle = "text-sm text-gray-600 mt-2 font-semibold";
+
   return (
     <>
-      <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
+      <div className="flex flex-wrap justify-between items-start px-6 py-4 gap-4">
         <div>
-          <TypeSearch onSearch={setSearchText} />
+          <h1 className="font-bold text-2xl text-black">
+            Employee Analytics Dashboard
+          </h1>
+          <p className="text-md">Water Ionizer Management System Overview</p>
         </div>
 
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
@@ -58,66 +88,52 @@ const Page = () => {
         </Button>
       </div>
 
-      <div className="p-6 overflow-x-auto">
-        <EmployeeAnalytics
-          active={newCustomers}
-          inactive={unsatisfiedCustomers}
-          dateToDate={dateToDate}
-          Desiginations={Desiginations}
-        />
-      </div>
-      <div className="p-6 overflow-x-auto">
-        <table className="w-full min-w-[1000px] customtable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Desigination</th>
-              <th>Joining Date</th>
-              <th>Last Working Date</th>
-              <th>phone Contact</th>
-              <th>Gmail Contact</th>
-              <th>Address</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <TableLoading />
-            ) : (
-              employees?.data?.map((employee: Employee) => (
-                <tr key={employee._id}>
-                  <td>{employee.name}</td>
-                  <td>{employee.status}</td>
-                  <td>{employee?.designation}</td>
-                  <td>
-                    {employee.joiningDate
-                      ? new Date(employee.joiningDate).toLocaleDateString()
-                      : "N/A"}
-                  </td>
-                  <td>
-                    {employee.lastWorkingDate
-                      ? new Date(employee.lastWorkingDate).toLocaleDateString()
-                      : "continue"}
-                  </td>
-                  <td>{employee.contactNumber}</td>
-                  <td>{employee.email}</td>
-                  <td>{employee.address}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <div className="grid grid-cols-12 gap-4 p-4">
+        <div className="col-span-4 md:col-span-4">
+          <ReportsSection />
+        </div>
+        <div className="col-span-8 md:col-span-8">
 
-      <div className="mb-26">
-        <Pagination
-          totalCustomers={totalCustomers}
-          page={page}
-          limit={limit}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          setLimit={setLimit} // ✅ correct prop name
-        />
+          <div>
+          {/* Customer Date Range */}
+          <div className={`${cardStyle} bg-blue-50`}>
+            <div className="flex flex-col items-center">
+              <FaUsers size={28} className="text-blue-500" />
+              <p className="mt-2 text-lg font-semibold">Customer Date Range</p>
+            </div>
+            <div className="mt-3 w-full">
+              <CustomDateRangeDropdown
+                label="Select Date Range"
+                onDateChange={(start, end) => {
+                  console.log("Selected Range:", start, end);
+                  // 🔥 filter customers here
+                }}
+              />
+            </div>
+          </div>
+
+          {/* AMC Selection */}
+          <div className={`${cardStyle} bg-purple-50`}>
+            <div className="flex flex-col items-center">
+              <FaShieldAlt size={28} className="text-purple-500" />
+              <p className="mt-2 text-lg font-semibold">AMC Plan</p>
+            </div>
+            <div className="mt-3 w-full">
+              <CustomDropdown
+                id="amc"
+                label="Select AMC"
+                options={desiginationOption}
+                selectedValue={""} // 🔥 Replace with your state
+                onSelect={(value) => {
+                  console.log("Selected AMC:", value);
+                  // setSelectedAmc(value) here
+                }}
+              />
+            </div>
+          </div>
+
+          </div>
+        </div>
       </div>
 
       <Offcanvas
