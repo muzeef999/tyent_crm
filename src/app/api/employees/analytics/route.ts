@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
 
-const GET = () => {
+export  const GET = () => {
    return NextResponse.json({success:true, message: "hello data"})   
 }
