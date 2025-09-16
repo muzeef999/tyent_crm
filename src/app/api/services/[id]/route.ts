@@ -63,8 +63,6 @@ export const PATCH = async (
 
 
 
-
-
 export const GET = async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

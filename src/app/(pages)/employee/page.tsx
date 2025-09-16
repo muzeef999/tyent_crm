@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import Link from "next/link";
 import CountUp from "react-countup";
+import Pagination from "@/components/ui/Pagination";
 
 // 🔹 Props for Designation Card
 interface StatsCardProps {
@@ -134,6 +135,8 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+
 
       {/* Add Employee Sidebar */}
       <Offcanvas

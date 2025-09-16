@@ -13,16 +13,24 @@ export const verifyOtp = (contactNumber: string, otp: string) => axiosInstance.p
 
 export const getCustomerAnalysis = () => axiosInstance.get("/customers/analytics").then((res) => res.data);
 
-export const getCustomers = async ({ page = 1, limit = 10,state }: { page?: number; limit?: number;  state?: string; }) => {
-  const query = new URLSearchParams();
 
-  if (page) query.append("page", String(page));
-  if (limit) query.append("limit", String(limit));
-  if (state) query.append("state", state);
+export const getCustomers = async ({ page = 1, limit = 10, type,}: { page?: number; limit?: number; type?: string;
+}) => {
 
-  const res = await axiosInstance.get(`/customers/?${state}`);
+  const params: Record<string, string | number> = { page, limit };
+
+  if (type) {
+    const [key, value] = type.split("="); 
+    if (key && value) {
+      params[key] = value; 
+    }
+  }
+
+  const res = await axiosInstance.get(`/customers`, { params });
   return res.data;
 };
+
+
 
 
 export const getCustomerInDetail = (id: string) => axiosInstance.get(`customers/${id}`).then((res) => res.data);

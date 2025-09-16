@@ -2,6 +2,7 @@
 import AddService from "@/components/AddService";
 import AssignService from "@/components/AssignService";
 import Offcanvas from "@/components/ui/Offcanvas";
+import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
 import { getServiceById, getServices } from "@/services/serviceApis";
 import { Service } from "@/types/customer";
@@ -14,7 +15,6 @@ import React, { useState } from "react";
 
 const Page = () => {
 
-  const [searchText, setSearchText] = useState("");
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
   const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
   const [employeeId, setEmployeeId] = useState(" ");
@@ -142,6 +142,8 @@ const Page = () => {
           </tbody>
         </table>
       </div>
+
+
 
       <Offcanvas
         show={showAddSidebar}

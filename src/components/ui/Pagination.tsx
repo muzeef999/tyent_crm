@@ -32,7 +32,6 @@ const generatePageLimits = (totalCustomers: number, step: number = 10) => {
   return limits;
 };
 
-
 const Pagination: React.FC<PaginationProps> = ({
   page,
   totalPages,
@@ -41,16 +40,13 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   setLimit,
 }) => {
-
-
-const pagesLimit = generatePageLimits(totalCustomers);
+  const pagesLimit = generatePageLimits(totalCustomers);
 
   useEffect(() => {
     if (!limit) {
       setLimit(10);
     }
   }, [limit, setLimit]);
-
 
 
   return (
@@ -63,47 +59,79 @@ const pagesLimit = generatePageLimits(totalCustomers);
       }}
       className="w-full flex justify-end py-2 bg-linear-to-r from-transparent via-[yourColor10%] to-background"
     >
-      <div className="flex items-center gap-2 px-6  ">
+      <div className="flex items-center gap-2 px-6">
         {/* Prev Button */}
         <button
           onClick={() => onPageChange(Math.max(page - 1, 1))}
           disabled={page === 1}
-          className="px-3 py-1 flex items-center gap-1 rounded  hover:bg-gray-100 disabled:opacity-50"
+          className="px-3 py-1 flex items-center gap-1 rounded hover:bg-gray-100 disabled:opacity-50"
         >
           <IoIosArrowRoundBack size={20} />
           Prev
         </button>
 
-        {/* Page Numbers */}
+        {/* Page Numbers with ellipsis */}
         <div className="flex items-center gap-1">
-          {Array.from({ length: totalPages }, (_, i) => {
-            const pageNumber = i + 1;
-            return (
+          {/* Always show first page */}
+          <button
+            onClick={() => onPageChange(1)}
+            className={`px-2 rounded-full ${
+              page === 1 ? "bg-primary text-white" : "hover:bg-gray-100"
+            }`}
+          >
+            1
+          </button>
+
+          {/* Left ellipsis */}
+          {page > 4 && <span className="px-2">...</span>}
+
+          {/* Window around current page */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter(
+              (p) =>
+                p >= page - 2 && p <= page + 2 && p !== 1 && p !== totalPages
+            )
+            .map((p) => (
               <button
-                key={pageNumber}
-                onClick={() => onPageChange(pageNumber)}
-                className={`px-2  rounded-full ${
-                  page === pageNumber
-                    ? "bg-primary text-white"
-                    : "hover:bg-gray-100"
+                key={p}
+                onClick={() => onPageChange(p)}
+                className={`px-2 rounded-full ${
+                  page === p ? "bg-primary text-white" : "hover:bg-gray-100"
                 }`}
               >
-                {pageNumber}
+                {p}
               </button>
-            );
-          })}
+            ))}
+
+          {/* Right ellipsis */}
+          {page < totalPages - 3 && <span className="px-2">...</span>}
+
+          {/* Always show last page */}
+          {totalPages > 1 && (
+            <button
+              onClick={() => onPageChange(totalPages)}
+              className={`px-2 rounded-full ${
+                page === totalPages
+                  ? "bg-primary text-white"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {totalPages}
+            </button>
+          )}
         </div>
 
         {/* Next Button */}
         <button
           onClick={() => onPageChange(Math.min(page + 1, totalPages))}
           disabled={page === totalPages}
-          className="px-3 py-1 flex items-center gap-1 rounded  hover:bg-gray-100 disabled:opacity-50"
+          className="px-3 py-1 flex items-center gap-1 rounded hover:bg-gray-100 disabled:opacity-50"
         >
           Next
           <IoIosArrowRoundForward size={20} />
         </button>
 
+        {/* Page size dropdown */}
         <CustomDropdown
           id="pages"
           options={pagesLimit}

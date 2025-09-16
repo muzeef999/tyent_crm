@@ -19,6 +19,8 @@ import ServiceType from "./recharts/ServiceType";
 import { useSearchParams } from "next/navigation";
 import ReportsSection from "./ReportSection";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+const  SeviceDashboard = dynamic(()=> import("@/components/skeleton/SeviceDashboard"), {ssr: false});
 
 interface StatsCardProps {
   title: string;
@@ -68,7 +70,12 @@ const PageContent = () => {
       }),
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="p-4 h-100vh">
+        <SeviceDashboard />
+      </div>
+    );
   if (error) return <p>Error loading analytics</p>;
 
   const stats = [

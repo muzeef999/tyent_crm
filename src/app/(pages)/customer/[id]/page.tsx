@@ -13,13 +13,18 @@ const Page =  ({ params }: { params: Promise<{ id: string }> }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(10);
 
-  const {id} = use(params); // "Uttar%20Pradesh"
-  const state = decodeURIComponent(id);
+  const {id} = use(params); 
+ const type = id ? decodeURIComponent(id) : undefined; // Only decode if id exists
+
+
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["customers", page, limit, state],
-    queryFn: () => getCustomers({ page, limit, state }),
+    queryKey: ["customers", page, limit, type],
+    queryFn: () => getCustomers({ page, limit, type}),
   });
+
+
+
 
   const [showAddSidebar, setShowAddSidebar] = useState(false);
   const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);

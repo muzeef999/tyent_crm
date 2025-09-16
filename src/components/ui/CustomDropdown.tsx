@@ -104,7 +104,7 @@ export default function CustomDropdown({
       </button>
 
       {isOpen && (
-        <ul className="absolute  mt-1 w-full border-[#d2d6dd] rounded-md bg-white shadow-lg max-h-60 z-60 overflow-auto">
+        <ul className="absolute  mt-1 w-full border-[#d2d6dd] rounded-md bg-white shadow-lg max-h-60 z-99 overflow-auto">
           {options.map((option, idx) =>
             "value" in option ? (
               // Flat option - use unique key

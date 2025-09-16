@@ -14,9 +14,9 @@ import { IoIosAdd } from "react-icons/io";
 import Offcanvas from "@/components/ui/Offcanvas";
 import AddCustomer from "./AddCustomer";
 import WaterTypeChart from "./recharts/WaterTypeChart";
-import CustomerDashboard from "@/components/skeleton/CustomerDashboard";
+import dynamic from "next/dynamic";
+const CustomerSkeltom = dynamic(() => import("@/components/skeleton/CustomerDashboard"),{  ssr:false})
 
-// Define types for API response
 
 const Page: React.FC = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false);
@@ -27,7 +27,9 @@ const Page: React.FC = () => {
 
 
 
-  if (isLoading) return <div><CustomerDashboard /></div>;
+  if (isLoading) return  <div className="p-4  h-100vh"> 
+      <CustomerSkeltom />
+    </div>;
   if (error) return <div className="text-red-500">Error loading data</div>;
 
   // Transform AMC data for PieChart
