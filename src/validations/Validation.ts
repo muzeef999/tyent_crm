@@ -75,6 +75,19 @@ export const customerValidation = z
           "Contact number must contain only numbers and valid phone characters",
       }),
 
+
+city: z
+  .string()
+  .trim()
+  .min(1, { message: "City is required" })
+  .max(100, { message: "City must be less than 100 characters" }),
+
+state: z
+  .string()
+  .trim()
+  .min(1, { message: "State is required" })
+  .max(100, { message: "State must be less than 100 characters" }),
+
     email: z
       .string()
       .trim()
@@ -250,3 +263,4 @@ export const customerValidation = z
       path: ["alternativeNumber"],
     }
   );
+

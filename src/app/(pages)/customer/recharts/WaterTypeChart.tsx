@@ -10,12 +10,36 @@ import {
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#00c49f"];
 
-const WaterTypeChart: React.FC<{ waterType: { name: string; value: number }[] }> = ({ waterType }) => {
+const WaterTypeChart: React.FC<{ waterType: { name: string; value: number }[] }> = ({
+  waterType,
+}) => {
+  const handleLegendClick = (name: string) => {
+    const url = `/customer/waterType=${encodeURIComponent(name)}`;
+  };
+
   const renderLegend = () => {
     return (
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexWrap: "wrap", gap: "10px" }}>
+      <ul
+        style={{
+          listStyle: "none",
+          margin: 0,
+          padding: 0,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
+      >
         {waterType.map((entry, index) => (
-          <li key={entry.name} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <li
+            key={entry.name}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              cursor: "pointer",
+            }}
+            onClick={() => handleLegendClick(entry.name)}
+          >
             <span
               style={{
                 display: "inline-block",
@@ -50,7 +74,10 @@ const WaterTypeChart: React.FC<{ waterType: { name: string; value: number }[] }>
             label={{ position: "insideStart", fill: "#fff" }}
           >
             {waterType.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </RadialBar>
           <Legend content={renderLegend} />

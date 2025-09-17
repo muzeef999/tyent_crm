@@ -13,6 +13,7 @@ export const GET = async (
     await connectDB();
 
     const customer = await Customer.findById(id)
+       .populate("serviceHistory")
       .populate("upcomingServices")
       .populate("serialNumber", "name")
       .populate("installedBy", "name")

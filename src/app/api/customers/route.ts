@@ -132,28 +132,26 @@ export const GET = async (req: Request) => {
     const waterMethod = searchParams.get("waterMethod");
     if (waterMethod) matchStage.waterMethod = waterMethod;
 
-    const startDateStr = searchParams.get("startDate");
-    const endDateStr = searchParams.get("endDate");
+    const startDateStr = searchParams.get("start");
+    const endDateStr = searchParams.get("end");
 
+    if (startDateStr || endDateStr) {
+      matchStage.purchaseDate = {};
 
-if (startDateStr || endDateStr) {
-  matchStage.createdAt = {};
-  
-  if (startDateStr) {
-    // Start of the day
-    const start = new Date(startDateStr);
-    start.setHours(0, 0, 0, 0);
-    matchStage.createdAt.$gte = start;
-  }
+      if (startDateStr) {
+        // Start of the day
+        const start = new Date(startDateStr);
+        start.setHours(0, 0, 0, 0);
+        matchStage.purchaseDate.$gte = start;
+      }
 
-  if (endDateStr) {
-    // End of the day
-    const end = new Date(endDateStr);
-    end.setHours(23, 59, 59, 999);
-    matchStage.createdAt.$lte = end;
-  }
-}
-
+      if (endDateStr) {
+        // End of the day
+        const end = new Date(endDateStr);
+        end.setHours(23, 59, 59, 999);
+        matchStage.purchaseDate.$lte = end;
+      }
+    }
 
     // warranty bucket
     const warranty = searchParams.get("warranty");
@@ -256,7 +254,7 @@ if (startDateStr || endDateStr) {
     return NextResponse.json({
       success: true,
       data: customers,
-      summary: {  totalCustomers, totalRevenue},
+      summary: { totalCustomers, totalRevenue },
       pagination: {
         total,
         page,

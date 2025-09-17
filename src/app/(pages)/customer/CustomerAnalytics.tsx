@@ -5,10 +5,16 @@ import { FaUsers, FaCity, FaMapMarkerAlt } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
 import { FaIndianRupeeSign } from "react-icons/fa6";
-import { Cityt, Option, Statet } from "@/types/customer";
+import {
+  Cityt,
+  CustomerAnalyticsResponse,
+  Option,
+  Statet,
+} from "@/types/customer";
 import Link from "next/link";
 import CountUp from "react-countup";
-
+import { useQuery } from "@tanstack/react-query";
+import { getCustomerAnalysis } from "@/services/serviceApis";
 
 type CustomerAnalyticsProps = {
   totalCustomers?: number;
@@ -38,6 +44,21 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
+  const formatDate = (date: Date | null) => {
+    if (!date) return "";
+    return date.toISOString().split("T")[0]; // "2025-09-17"
+  };
+
+  const { data } = useQuery({
+    queryKey: ["customers"],
+    queryFn: () =>
+      getCustomerAnalysis({
+        start: formatDate(startDate),
+        end: formatDate(endDate),
+      }),
+    enabled: !!startDate && !!endDate, // only run when both are picked
+  });
+
   // ✅ Map states and cities to dropdown options with unique keys
   const mapStatesToOptions: Option[] = state.map((s: any, index: number) => ({
     label: s._id,
@@ -51,11 +72,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
     id: `${c._id}-${index}`, // Add unique identifier
   }));
 
-  const formatIndianPrice = (value: number) => {
-    if (!value) return "";
-    return new Intl.NumberFormat("en-IN").format(value);
-  };
-
   const cardStyle =
     "flex flex-col justify-between rounded-xl p-4 w-full bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow cursor-pointer";
   const valueStyle =
@@ -64,8 +80,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
 
   const stateli = "state";
   const cityli = "city";
-  const startDatec = "startDate";
-  const endDatec = "endDate";
+
   return (
     <div className="space-y-6">
       {/* Cards Row */}
@@ -85,13 +100,12 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             }`}
             className={valueStyle}
           >
-            {totalCustomers}
+            {endDate ? data?.summary.totalCustomers : totalCustomers}
           </Link>
 
           <CustomDateDropdown
             label="Select Customer Date Range"
             onDateChange={(start, end) => {
-              console.log("Selected Range:", start, end);
               setStartDate(start);
               setEndDate(end);
             }}
@@ -111,18 +125,27 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             className={valueStyle}
           >
             ₹{" "}
-            <CountUp
-              end={Number(totalRevenue)} // make sure totalRevenue is a number
-              duration={2} // 2 seconds animation
-              separator="," // add commas: 1000000 → 1,000,000
-              prefix="" // optional
-              decimals={0} // optional: show decimals
-            />
+            {endDate ? (
+              <CountUp
+                end={Number(data?.summary.totalPrice)} // make sure totalRevenue is a number
+                duration={2} // 2 seconds animation
+                separator="," // add commas: 1000000 → 1,000,000
+                prefix="" // optional
+                decimals={0} // optional: show decimals
+              />
+            ) : (
+              <CountUp
+                end={Number(totalRevenue)} // make sure totalRevenue is a number
+                duration={2} // 2 seconds animation
+                separator="," // add commas: 1000000 → 1,000,000
+                prefix="" // optional
+                decimals={0} // optional: show decimals
+              />
+            )}
           </Link>
           <CustomDateDropdown
             label="Select Revenue Date Range"
             onDateChange={(start, end) => {
-              console.log("Selected Range:", start, end);
               setStartDate(start);
               setEndDate(end);
             }}
@@ -141,11 +164,14 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             )}=${encodeURIComponent(selectedStateLabel)}`}
             className={valueStyle}
           >
-            {selectedStateValue}
+
+             {endDate ? data?.summary.totalStates : selectedStateValue}
+            
           </Link>
           <CustomDropdown
             label="Select State"
             id="state"
+
             options={mapStatesToOptions}
             selectedValue={selectedStateValue}
             onSelect={(value, label) => {
@@ -167,7 +193,9 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             )}`}
             className={valueStyle}
           >
-            {selectedCityValue}
+             {endDate ? data?.summary.totalCities : selectedCityValue}
+            
+            
           </Link>
           <CustomDropdown
             label="Select City"

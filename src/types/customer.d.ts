@@ -149,10 +149,12 @@ export interface InputProps {
   type?: string;
   placeholder?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   required?: boolean;
   disabled?: boolean;
   maxLength?: number;
+   max?: string; 
+  min?: string;  
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
   onBlur?: () => void;
   className?: string; // ✅ allow styling override

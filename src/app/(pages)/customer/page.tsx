@@ -22,7 +22,7 @@ const Page: React.FC = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false);
   const { data, isLoading, error } = useQuery<CustomerAnalyticsResponse>({
     queryKey: ["customers"],
-    queryFn: getCustomerAnalysis,
+    queryFn: () => getCustomerAnalysis(),
   });
 
 

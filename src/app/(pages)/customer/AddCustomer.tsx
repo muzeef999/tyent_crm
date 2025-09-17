@@ -376,7 +376,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               id="state"
               options={mapStatesToOptions(State.getStatesOfCountry("IN"))}
               selectedValue={formData.state || ""}
-              onSelect={(value) =>
+              onSelect={(value, option) =>
                 setFormData((prev) => ({ ...prev, state: String(value) }))
               }
             />
@@ -400,6 +400,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
             label="Date of Birth"
             type="date"
             value={formData.DOB}
+            max={new Date().toISOString().split("T")[0]} 
             onChange={handleChange}
           />
 
@@ -410,6 +411,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
               name="purchaseDate"
               label="Purchase Date"
               type="date"
+               max={new Date().toISOString().split("T")[0]} 
               value={formData.purchaseDate}
               onChange={handleChange}
             />

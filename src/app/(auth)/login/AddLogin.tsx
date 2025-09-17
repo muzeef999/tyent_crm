@@ -115,7 +115,7 @@ export default function EmployeeLogin() {
                   type="text"
                   maxLength={1}
                   value={digit}
-                  onChange={(e) => handleChange(e, index)}
+                  onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>, index)}
                   onKeyDown={(e) => handleBackspace(e, index)}
                   ref={(el) => {
                     inputRefs.current[index] = el;

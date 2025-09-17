@@ -11,7 +11,12 @@ export const verifyOtp = (contactNumber: string, otp: string) => axiosInstance.p
 //CUSTOMERS 
 
 
-export const getCustomerAnalysis = () => axiosInstance.get("/customers/analytics").then((res) => res.data);
+// api.ts
+export const getCustomerAnalysis = (params?: { start?: string; end?: string }) => {
+  return axiosInstance
+    .get("/customers/analytics", { params }) // Axios automatically appends ?start=...&end=...
+    .then((res) => res.data);
+};
 
 
 export const getCustomers = async ({ page = 1, limit = 10, type,}: { page?: number; limit?: number; type?: string;

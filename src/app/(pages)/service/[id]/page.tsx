@@ -1,6 +1,6 @@
 "use client";
 import AddService from "@/components/AddService";
-import AssignService from "@/components/AssignService";
+import AssignService from "@/app/api/services/AssignService";
 import Offcanvas from "@/components/ui/Offcanvas";
 import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";

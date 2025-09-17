@@ -3,6 +3,8 @@ import Service from "@/models/Service";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
+import Customer from "@/models/Customer";
+
 
 export const PATCH = async (
   req: NextRequest,
@@ -10,51 +12,46 @@ export const PATCH = async (
 ) => {
   try {
     const { id } = await params;
-
-    // Validate service ID
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { error: "Invalid service ID" },
-        { status: 400 }
-      );
-    }
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return NextResponse.json({ error: "Invalid service ID" }, { status: 400 });
 
     const body = await req.json();
-
-    // ✅ Optional: validate employeeId if provided
-    if (body.employeeId && !mongoose.Types.ObjectId.isValid(body.employeeId)) {
-      return NextResponse.json(
-        { error: "Invalid employee ID" },
-        { status: 400 }
-      );
-    }
-
     await connectDB();
 
-    if(body.employeeId){
-    body.assignedDate = new Date(); 
+    // Optional: validate employeeId
+    if (body.employeeId && !mongoose.Types.ObjectId.isValid(body.employeeId))
+      return NextResponse.json({ error: "Invalid employee ID" }, { status: 400 });
 
-    }
+    if (body.employeeId) body.assignedDate = new Date();
 
-    // ✅ Ensure employeeId is included in the update
+    // Update the service
     const updatedService = await Service.findByIdAndUpdate(
       id,
       { $set: { ...body, employeeId: body.employeeId } },
       { new: true, runValidators: true }
     );
 
-    if (!updatedService) {
+    if (!updatedService)
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
+
+    // ✅ Move to serviceHistory if completed
+    if (body.status === "COMPLETED") {
+      const customer = await Customer.findById(updatedService.customerId);
+      if (customer) {
+        customer.upcomingServices = customer.upcomingServices.filter(
+          (svc:any) => svc.toString() !== updatedService._id.toString()
+        );
+        customer.serviceHistory.push(updatedService._id);
+        await customer.save();
+      }
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Service updated successfully",
-        data: updatedService,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Service updated successfully",
+      data: updatedService,
+    }, { status: 200 });
+
   } catch (err) {
     const Error = getErrorMessage(err);
     return NextResponse.json({ success: false, error: Error }, { status: 500 });

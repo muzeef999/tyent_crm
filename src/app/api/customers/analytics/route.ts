@@ -6,7 +6,22 @@ export const GET = async (req: Request) => {
   try {
     await connectDB();
 
+    const { searchParams } = new URL(req.url);
+    const startDate = searchParams.get("start");
+    const endDate = searchParams.get("end");
+
+    const match: any = {};
+
+    if (startDate && endDate) {
+      match.purchaseDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
     const pipeline: any = [
+      { $match: match },
+
       {
         $lookup: {
           from: "products",
@@ -22,11 +37,12 @@ export const GET = async (req: Request) => {
           machineAgeYears: {
             $divide: [
               { $subtract: [new Date(), "$purchaseDate"] },
-              1000 * 60 * 60 * 24 * 365.25, // milliseconds in a year (accounting for leap years)
+              1000 * 60 * 60 * 24 * 365.25,
             ],
           },
         },
       },
+
       {
         $facet: {
           summary: [
@@ -71,10 +87,7 @@ export const GET = async (req: Request) => {
                 bucket: {
                   $switch: {
                     branches: [
-                      {
-                        case: { $lt: ["$machineAgeYears", 1] },
-                        then: "1. <1 yr", // Add numeric prefix for ordering
-                      },
+                      { case: { $lt: ["$machineAgeYears", 1] }, then: "1. <1 yr" },
                       {
                         case: {
                           $and: [
@@ -93,10 +106,7 @@ export const GET = async (req: Request) => {
                         },
                         then: "3. 2-3 yrs",
                       },
-                      {
-                        case: { $gte: ["$machineAgeYears", 3] },
-                        then: "4. >3 yrs",
-                      },
+                      { case: { $gte: ["$machineAgeYears", 3] }, then: "4. >3 yrs" },
                     ],
                     default: "5. Unknown",
                   },
@@ -104,15 +114,10 @@ export const GET = async (req: Request) => {
               },
             },
             { $group: { _id: "$bucket", count: { $sum: 1 } } },
-            { $sort: { _id: 1 } }, // Sort by the numeric prefix
+            { $sort: { _id: 1 } },
             {
               $project: {
-                _id: {
-                  $arrayElemAt: [
-                    { $split: ["$_id", ". "] }, // Remove the numeric prefix
-                    1,
-                  ],
-                },
+                _id: { $arrayElemAt: [{ $split: ["$_id", ". "] }, 1] },
                 count: 1,
               },
             },
@@ -141,14 +146,12 @@ export const GET = async (req: Request) => {
 
     return NextResponse.json({
       success: true,
-
-      summary: result[0].summary[0] || {
+      summary: analytics.summary[0] || {
         totalCustomers: 0,
         totalPrice: 0,
         totalStates: 0,
         totalCities: 0,
       },
-
       analytics: {
         amc: analytics.amcAnalytics,
         waterType: analytics.waterTypeAnalytics,
@@ -161,9 +164,6 @@ export const GET = async (req: Request) => {
     });
   } catch (err) {
     console.error("Search Error:", err);
-    return NextResponse.json(
-      { success: false, error: "Search failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Search failed" }, { status: 500 });
   }
 };

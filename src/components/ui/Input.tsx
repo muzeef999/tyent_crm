@@ -17,6 +17,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       onChange,
       disabled = false,
       className = "",
+      max,
+      min
+    
     },
     ref
   ) => {
@@ -31,7 +34,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
-          ref={ref} // ✅ works now
+          ref={ref}
           maxLength={maxLength}
           id={name}
           name={name}
@@ -43,6 +46,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           onBlur={onBlur}
           onKeyDown={onKeyDown}
           disabled={disabled}
+          max={max}
+          min={min}
+
         />
       </div>
     );
