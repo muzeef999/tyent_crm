@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import Input from "../../../components/ui/Input";
-import Button from "../../../components/ui/Button";
+import React, { useRef, useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 import { getEmployees, getServiceById, updateService } from "@/services/serviceApis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Employee } from "@/types/customer";
 import { CiEdit } from "react-icons/ci";
 import { toast } from "sonner";
+import Button from "@/components/ui/Button";
 
 const serviceTypeOptions = [
   { label: "General Service", value: "GENERAL_SERVICE" },

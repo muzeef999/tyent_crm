@@ -1,16 +1,15 @@
 "use client";
-import AddService from "@/components/AddService";
-import AssignService from "@/app/api/services/AssignService";
+import AddService from "@/app/(pages)/service/AddService";
 import Offcanvas from "@/components/ui/Offcanvas";
-import Pagination from "@/components/ui/Pagination";
 import TableLoading from "@/components/ui/TableLoading";
 import { getServiceById, getServices } from "@/services/serviceApis";
 import { Service } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
+import AssignService from "../AssignService";
 
 
 const Page = () => {

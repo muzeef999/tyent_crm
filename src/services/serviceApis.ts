@@ -19,20 +19,15 @@ export const getCustomerAnalysis = (params?: { start?: string; end?: string }) =
 };
 
 
-export const getCustomers = async ({ page = 1, limit = 10, type,}: { page?: number; limit?: number; type?: string;
-}) => {
-
-  const params: Record<string, string | number> = { page, limit };
-
+export const getCustomers = async ({ page = 1, limit = 10, type, q = ""}: { page?: number; limit?: number; type?: string; q?:string}) => {
+  const params: Record<string, string | number> = { page, limit, q };
   if (type) {
     const [key, value] = type.split("="); 
     if (key && value) {
       params[key] = value; 
     }
   }
-
-  const res = await axiosInstance.get(`/customers`, { params });
-  return res.data;
+  const res = await axiosInstance.get(`/customers`, { params });return res.data;
 };
 
 

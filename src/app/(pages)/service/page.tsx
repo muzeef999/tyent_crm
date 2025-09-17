@@ -20,6 +20,8 @@ import { useSearchParams } from "next/navigation";
 import ReportsSection from "./ReportSection";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Offcanvas from "@/components/ui/Offcanvas";
+import AddService from "./AddService";
 const  SeviceDashboard = dynamic(()=> import("@/components/skeleton/SeviceDashboard"), {ssr: false});
 
 interface StatsCardProps {
@@ -262,6 +264,18 @@ const PageContent = () => {
       <div className="customer-grid-col m-4">
         <ServiceType ServiceType={serviceAnalyticsd?.serviceType} />
       </div>
+
+
+      
+      <Offcanvas
+        show={showAddSidebar}
+        onClose={() => setShowAddSidebar(false)}
+        title="Add Service"
+      >
+        <div className="p-4">
+          <AddService onClose={() => setShowAddSidebar(false)} />
+        </div>
+      </Offcanvas>
     </>
   );
 };

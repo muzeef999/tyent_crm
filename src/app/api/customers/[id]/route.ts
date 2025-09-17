@@ -12,8 +12,12 @@ export const GET = async (
 
     await connectDB();
 
+    const {searchParams } = new URL(req.url);
+
+    const q = searchParams.get("q")?.trim() || "";
+
     const customer = await Customer.findById(id)
-       .populate("serviceHistory")
+      .populate("serviceHistory")
       .populate("upcomingServices")
       .populate("serialNumber", "name")
       .populate("installedBy", "name")
@@ -28,3 +32,4 @@ export const GET = async (
     return NextResponse.json({ sucess: false, error: Error }, { status: 500 });
   }
 };
+

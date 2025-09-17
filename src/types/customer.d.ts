@@ -158,6 +158,7 @@ export interface InputProps {
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
   onBlur?: () => void;
   className?: string; // ✅ allow styling override
+ onFocus?: React.FocusEventHandler<HTMLInputElement>
 }
 
 

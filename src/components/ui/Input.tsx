@@ -18,8 +18,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       disabled = false,
       className = "",
       max,
-      min
-    
+      min,
+      onFocus
     },
     ref
   ) => {
@@ -48,6 +48,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           disabled={disabled}
           max={max}
           min={min}
+          onFocus={onFocus}
 
         />
       </div>

@@ -94,6 +94,8 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
+
+// ✅ GET API
 export const GET = async (req: Request) => {
   try {
     await connectDB();
@@ -117,6 +119,18 @@ export const GET = async (req: Request) => {
       matchStage._id = new Types.ObjectId(id);
     }
 
+    const contact = searchParams.get("contactNumber");
+    if (contact) matchStage.contactNumber = contact;
+
+    const email = searchParams.get("email");
+    if (email) matchStage.email = email;
+
+    const invoice = searchParams.get("invoiceNumber");
+    if (invoice) matchStage.invoiceNumber = invoice;
+
+    const serial = searchParams.get("serialNumber");
+    if (serial) matchStage.serialNumber = serial;
+
     const state = searchParams.get("state");
     if (state) matchStage.state = state;
 
@@ -139,14 +153,12 @@ export const GET = async (req: Request) => {
       matchStage.purchaseDate = {};
 
       if (startDateStr) {
-        // Start of the day
         const start = new Date(startDateStr);
         start.setHours(0, 0, 0, 0);
         matchStage.purchaseDate.$gte = start;
       }
 
       if (endDateStr) {
-        // End of the day
         const end = new Date(endDateStr);
         end.setHours(23, 59, 59, 999);
         matchStage.purchaseDate.$lte = end;
@@ -196,14 +208,16 @@ export const GET = async (req: Request) => {
       pipeline.push({ $match: { "productInfo.name": model } });
     }
 
-    // text search
+    // 🔎 text search (index fields + regex fallback)
     if (q) {
       pipeline.push({
         $match: {
           $or: [
             { name: { $regex: q, $options: "i" } },
-            { email: { $regex: q, $options: "i" } },
-            { contactNumber: { $regex: q, $options: "i" } },
+            { email: { $regex: q, $options: "i" } },          // indexed
+            { contactNumber: { $regex: q, $options: "i" } },  // indexed
+            { invoiceNumber: { $regex: q, $options: "i" } },  // indexed
+            { serialNumber: { $regex: q, $options: "i" } },   // indexed
             { DOB: { $regex: q, $options: "i" } },
             { address: { $regex: q, $options: "i" } },
           ],
@@ -225,6 +239,8 @@ export const GET = async (req: Request) => {
           name: 1,
           email: 1,
           contactNumber: 1,
+          invoiceNumber: 1,
+          serialNumber: 1,
           alternativeNumber: 1,
           DOB: 1,
           address: 1,
@@ -270,3 +286,4 @@ export const GET = async (req: Request) => {
     );
   }
 };
+
