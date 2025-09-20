@@ -44,52 +44,49 @@ export const GET = async (req: NextRequest) => {
   try {
     await connectDB();
 
-    const { searchParams } = new URL(req.url);
+ const { searchParams } = new URL(req.url);
 
-    // Get search query, fallback to empty string (no filter)
-    const q = searchParams.get("q")?.trim() || "";
+const q = searchParams.get("q")?.trim() || "";
+const pageStr = searchParams.get("page");
+const limitStr = searchParams.get("limit");
+const designationStr = searchParams.get("designation")?.trim(); // Fixed variable name
 
-    // Parse pagination params - no defaults for limit
-    const pageStr = searchParams.get("page");
-    const limitStr = searchParams.get("limit");
-    
-    // If limit is not provided, we'll return all records without pagination
-    const hasPagination = limitStr !== null;
-    
-    const page = hasPagination ? (pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1) : 1;
-    const limit = hasPagination ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 0;
-    const skip = hasPagination ? (page - 1) * limit : 0;
+const hasPagination = limitStr !== null;
 
-    // Build search filter for MongoDB
-    let filter = {};
-    if (q) {
-      filter = {
-        $or: [
-          { name: { $regex: q, $options: "i" } },
-          { email: { $regex: q, $options: "i" } },
-          { contactNumber: { $regex: q, $options: "i" } },
-          { designation: { $regex: q, $options: "i" } },
-          { status: { $regex: q, $options: "i" } },
-          { adharNumber: { $regex: q, $options: "i" } },
-          { panNumber: { $regex: q, $options: "i" } },
-        ],
-      };
-    }
+const page = hasPagination ? (pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1) : 1;
+const limit = hasPagination ? Math.min(50, Math.max(1, parseInt(limitStr, 10))) : 0;
+const skip = hasPagination ? (page - 1) * limit : 0;
 
-    // Fetch total count
+// 🔹 Use `any` type to allow dynamic keys
+const filter: any = {};
+
+if (q) {
+  filter.$or = [
+    { name: { $regex: q, $options: "i" } },
+    { email: { $regex: q, $options: "i" } },
+    { contactNumber: { $regex: q, $options: "i" } },
+    { designation: { $regex: q, $options: "i" } },
+    { status: { $regex: q, $options: "i" } },
+    { adharNumber: { $regex: q, $options: "i" } },
+    { panNumber: { $regex: q, $options: "i" } },
+  ];
+}
+
+// 🔹 Only add designation filter if provided
+if (designationStr) {
+  filter.designation = { $regex: designationStr, $options: "i" };
+}
+
     const total = await Employee.countDocuments(filter);
 
-    // Fetch employees with filter
     let query = Employee.find(filter).sort({ createdAt: -1 });
     
-    // Apply pagination only if limit was provided
     if (hasPagination) {
       query = query.skip(skip).limit(limit);
     }
 
     const employees = await query.lean();
 
-    // Return results
     return NextResponse.json(
       {
         success: true,

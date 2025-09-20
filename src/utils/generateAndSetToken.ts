@@ -1,28 +1,29 @@
-// @/app/utils/generateAndSetToken.ts
-import { NextResponse } from "next/server";
+// utils/generateAndSetToken.ts
 import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 
-export function generateAndSetToken(user: { _id: string }) {
-  // 1️⃣ Generate JWT token (expires in 24h)
-  const token = jwt.sign(
-    { id: user._id.toString() },
-    process.env.JWT_SECRET!,
-    { expiresIn: "24h" }
-  );
+export function generateAndSetToken(employee: any) {
+  // Payload we want inside token
+  const payload = {
+    id: employee._id,
+    designation: employee.designation,
+  };
 
-  // 2️⃣ Create a NextResponse to set the cookie
-  const response = NextResponse.json({ success: true, message: "Logged in", token });
-
-  // 3️⃣ Set the cookie using Next.js cookie API
-  response.cookies.set({
-    name: "token",
-    value: token,
-    httpOnly: true,
-    maxAge: 24 * 60 * 60, // 24 hours in seconds
-    path: "/",
-    sameSite: "lax",
+  // Sign the JWT
+  const token = jwt.sign(payload, process.env.JWT_SECRET!, {
+    expiresIn: "7d", // token valid for 7 days
   });
 
-  // 4️⃣ Return both token and response
+  // Set the cookie
+  const response = NextResponse.json(
+    { success: true, message: "Login successful" },
+    { status: 200 }
+  );
+
+  response.cookies.set("token", token, {
+    sameSite: "strict",
+    path: "/",
+  });
+
   return { token, response };
 }

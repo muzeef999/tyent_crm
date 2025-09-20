@@ -77,22 +77,22 @@ const Page = () => {
   );
 
   // ✅ Designation options with dynamic counts
-  const designationOptions = [
-    { label: "Marketing Manager", icon: <FaUserTie />, value: counts["Marketing Manager"] || 0, iconBg: "bg-red-500", link: "/link" },
-    { label: "Technical Manager", icon: <FaUserCog />, value: counts["Technical Manager"] || 0, iconBg: "bg-green-500", link: "/link" },
-    { label: "Telecall Manager", icon: <FaHeadset />, value: counts["Telecall Manager"] || 0, iconBg: "bg-purple-500", link: "/link" },
-    { label: "Stock Manager", icon: <FaUserShield />, value: counts["Stock Manager"] || 0, iconBg: "bg-red-500", link: "/link" },
-    { label: "Account Manager", icon: <FaUserTie />, value: counts["Account Manager"] || 0, iconBg: "bg-indigo-500", link: "/link" },
-    { label: "Technician", icon: <FaUserCog />, value: counts["Technician"] || 0, iconBg: "bg-orange-500", link: "/link" },
-    { label: "Telecaller", icon: <FaHeadset />, value: counts["Telecaller"] || 0, iconBg: "bg-pink-500", link: "/link" },
-    { label: "Stock Clerk", icon: <FaUserShield />, value: counts["Stock Clerk"] || 0, iconBg: "bg-teal-500", link: "/link" },
-    { label: "Accountant", icon: <FaUserTie />, value: counts["Accountant"] || 0, iconBg: "bg-gray-600", link: "/link" },
-    { label: "Customer Support", icon: <FaHeadset />, value: counts["Customer Support"] || 0, iconBg: "bg-blue-400", link: "/link" },
-    { label: "Intern", icon: <FaUserGraduate />, value: counts["Intern"] || 0, iconBg: "bg-yellow-500", link: "/link" },
-    { label: "HR Executive", icon: <FaUserTie />, value: counts["HR Executive"] || 0, iconBg: "bg-rose-500", link: "/link" },
-    { label: "Sales Executive", icon: <FaUsers />, value: counts["Sales Executive"] || 0, iconBg: "bg-green-600", link: "/link" },
-    { label: "Super Admin", icon: <FaUserShield />, value: counts["Super Admin"] || 0, iconBg: "bg-black", link: "/link" },
-    { label: "Admin", icon: <FaUserShield />, value: counts["Admin"] || 0, iconBg: "bg-gray-800", link: "/link" },
+  const designationOptions = [ 
+    { label: "Marketing Manager", icon: <FaUserTie />, value: counts["Marketing Manager"] || 0, iconBg: "bg-red-500", link: "employee/designation=Marketing Manager" },
+    { label: "Technical Manager", icon: <FaUserCog />, value: counts["Technical Manager"] || 0, iconBg: "bg-green-500", link: "employee/designation=Technical Manager" },
+    { label: "Telecall Manager", icon: <FaHeadset />, value: counts["Telecall Manager"] || 0, iconBg: "bg-purple-500", link: "employee/designation=Telecall Manager" },
+    { label: "Stock Manager", icon: <FaUserShield />, value: counts["Stock Manager"] || 0, iconBg: "bg-red-500", link: "employee/designation=Stock Manager" },
+    { label: "Account Manager", icon: <FaUserTie />, value: counts["Account Manager"] || 0, iconBg: "bg-indigo-500", link: "employee/designation=Account Manager" },
+    { label: "Technician", icon: <FaUserCog />, value: counts["Technician"] || 0, iconBg: "bg-orange-500", link: "employee/designation=Technician" },
+    { label: "Telecaller", icon: <FaHeadset />, value: counts["Telecaller"] || 0, iconBg: "bg-pink-500", link: "employee/designation=Telecaller" },
+    { label: "Stock Clerk", icon: <FaUserShield />, value: counts["Stock Clerk"] || 0, iconBg: "bg-teal-500", link: "employee/designation=Stock Clerk" },
+    { label: "Accountant", icon: <FaUserTie />, value: counts["Accountant"] || 0, iconBg: "bg-gray-600", link: "employee/designation=Accountant" },
+    { label: "Customer Support", icon: <FaHeadset />, value: counts["Customer Support"] || 0, iconBg: "bg-blue-400", link: "employee/designation=Customer Support" },
+    { label: "Intern", icon: <FaUserGraduate />, value: counts["Intern"] || 0, iconBg: "bg-yellow-500", link: "employee/designation=Intern" },
+    { label: "HR Executive", icon: <FaUserTie />, value: counts["HR Executive"] || 0, iconBg: "bg-rose-500", link: "employee/designation=HR Executive" },
+    { label: "Sales Executive", icon: <FaUsers />, value: counts["Sales Executive"] || 0, iconBg: "bg-green-600", link: "employee/designation=Sales Executive" },
+    { label: "Super Admin", icon: <FaUserShield />, value: counts["Super Admin"] || 0, iconBg: "bg-black", link: "employee/designation=Super Admin" },
+    { label: "Admin", icon: <FaUserShield />, value: counts["Admin"] || 0, iconBg: "bg-gray-800", link: "employee/designation=Admin" },
   ];
 
   return (

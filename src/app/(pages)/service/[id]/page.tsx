@@ -7,23 +7,27 @@ import { Service } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import AssignService from "../AssignService";
 
-
 const Page = () => {
-
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
   const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
   const [employeeId, setEmployeeId] = useState(" ");
-  
-    const searchParams = useSearchParams();
-    const startDate = searchParams.get("start");
-    const endDate = searchParams.get("end");
-    const type = searchParams.get("type");
-  
 
+   const { id } = useParams<{ id: string }>();
+
+  // Decode if it's URL encoded
+  const query = id ? decodeURIComponent(id) : "";
+
+  console.log("🟢 Decoded Query:", query);
+
+  const { data: service, isLoading, error } = useQuery({
+    queryKey: ["services", query],
+    queryFn: () => getServices(query),
+    enabled: !!query,
+  });
 
   const { data: getEmployeesDataId } = useQuery({
     queryKey: ["Assingdata", employeeId],
@@ -31,25 +35,10 @@ const Page = () => {
     enabled: !!employeeId,
   });
 
-  const {
-    data: service,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["services", startDate, endDate],
-    queryFn: () => getServices({ 
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-      type: type ? type : undefined
-    }),
-  });
-
   if (error)
     return (
       <div className="text-red-600 p-4">Error: {getErrorMessage(error)}</div>
     );
-
-  
 
   return (
     <>
@@ -141,8 +130,6 @@ const Page = () => {
           </tbody>
         </table>
       </div>
-
-
 
       <Offcanvas
         show={showAddSidebar}

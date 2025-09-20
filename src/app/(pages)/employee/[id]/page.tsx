@@ -1,6 +1,5 @@
 "use client";
 import AddEmployee from "@/components/AddEmployee";
-import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
 import Pagination from "@/components/ui/Pagination";
@@ -10,7 +9,8 @@ import { getEmployees } from "@/services/serviceApis";
 import { Employee } from "@/types/customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import { useParams } from "next/navigation";
+import React, { use, useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 
 const Page = () => {
@@ -21,25 +21,29 @@ const Page = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(10);
 
+  
+const { id } = useParams();
+
+// Handle id being string | string[]
+const type = Array.isArray(id) ? decodeURIComponent(id[0]) : id ? decodeURIComponent(id) : "";
+
+console.log("id", type);
+
   const {
     data: employees,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["employees"],
+    queryKey: ["employees", type],
     queryFn: () =>
-      getEmployees({ page, limit, searchQuery: debouncedSearchText }),
+      getEmployees({ page, limit,type, searchQuery: debouncedSearchText }),
   });
 
   const pagination = employees?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
   const totalCustomers = pagination?.total || 0;
-  const newCustomers = 10;
-  const unsatisfiedCustomers = 5;
-
-  const dateToDate = 7;
-  const Desiginations = "Software Engineer";
+  
 
   if (error)
     return <div className="text-red-500">Error: {getErrorMessage(error)}</div>;

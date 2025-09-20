@@ -15,6 +15,10 @@ import Link from "next/link";
 import CountUp from "react-countup";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomerAnalysis } from "@/services/serviceApis";
+import Button from "@/components/ui/Button";
+import { IoIosAdd } from "react-icons/io";
+import Offcanvas from "@/components/ui/Offcanvas";
+import AddCustomer from "./AddCustomer";
 
 type CustomerAnalyticsProps = {
   totalCustomers?: number;
@@ -43,6 +47,10 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+
+
+   const [showAddSidebar, setShowAddSidebar] = useState(false);
+ 
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -83,6 +91,19 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
 
   return (
     <div className="space-y-6">
+
+        <div className="flex justify-between items-center  pt-4 pl-4 pr-4">
+        <div>
+          <h1 className="font-bold text-2xl text-black">
+            Customer Analytics Dashboard
+          </h1>
+          <p className="text-md">Water Ionizer Management System Overview</p>
+        </div>
+        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
+          <IoIosAdd size={22} />
+          Add Customer
+        </Button>
+      </div>
       {/* Cards Row */}
       <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-6">
         {/* Total Customers */}
@@ -209,6 +230,17 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           />
         </div>
       </div>
+
+      
+      <Offcanvas
+        show={showAddSidebar}
+        onClose={() => setShowAddSidebar(false)}
+        title="Add Customer"
+      >
+        <div className="p-4">
+          <AddCustomer onClose={() => setShowAddSidebar(false)} />
+        </div>
+      </Offcanvas>
     </div>
   );
 };

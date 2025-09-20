@@ -7,9 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
   try {
-    // Get contactNumber from query parameter
     const phone = (req.nextUrl.searchParams.get("contactNumber") || "").trim();
-
     if (!phone) {
       return NextResponse.json(
         { success: false, error: "Phone number is required" },
@@ -21,6 +19,8 @@ export const GET = async (req: NextRequest) => {
 
     const employee = await Employee.findOne({ contactNumber: phone }).lean();
 
+
+
     if (!employee) {
       return NextResponse.json(
         { success: false, error: "Employee not found" },
@@ -28,11 +28,14 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
+
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Save OTP to Redis
     await saveOtpToRedis(`phone:${phone}`, otp);
+
+    console.log(`Generated OTP for ${phone}: ${otp}`);
 
     // Send OTP via Bulkly
     await axios.post("https://live.bulkly.io/api/sendbulkly", {
@@ -41,6 +44,7 @@ export const GET = async (req: NextRequest) => {
       recipientPhone: phone,
       templateId: "1531142600990906",
     });
+
 
     return NextResponse.json(
       { success: true, message: "OTP sent successfully." },

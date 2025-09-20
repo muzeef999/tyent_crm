@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   AreaChart,
@@ -8,12 +9,17 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useRouter } from "next/navigation";
 
 const ServiceTypeChart: React.FC<{
   ServiceType: { type: string; count: number }[];
 }> = ({ ServiceType }) => {
+  const router = useRouter();
 
-
+  const handleClick = (type: string) => {
+    // Navigate with query string
+    router.push(`/service/${encodeURIComponent(type)}`);
+  };
 
   return (
     <div style={{ width: "100%", height: 410 }}>
@@ -21,12 +27,7 @@ const ServiceTypeChart: React.FC<{
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={ServiceType}
-          margin={{
-            top: 10,
-            right: 0,
-            left: 0,
-            bottom: 100,
-          }}
+          margin={{ top: 10, right: 0, left: 0, bottom: 100 }}
         >
           <defs>
             <CartesianGrid strokeDasharray="3 3" />
@@ -35,19 +36,21 @@ const ServiceTypeChart: React.FC<{
               <stop offset="95%" stopColor="#008ac7" stopOpacity={0} />
             </linearGradient>
           </defs>
-        
+
           <XAxis
             dataKey="type"
-            interval={0} // show all labels
+            interval={0}
             tick={(props) => {
               const { x, y, payload } = props;
               return (
                 <text
                   x={x}
-                  y={y + 10} // move down a little
+                  y={y + 10}
                   textAnchor="end"
                   transform={`rotate(-30, ${x}, ${y + 10})`}
                   fontSize={12}
+                  style={{ cursor: "pointer", fill: "#008ac7" }}
+                  onClick={() => handleClick(payload.value)}
                 >
                   {payload.value}
                 </text>
@@ -64,7 +67,6 @@ const ServiceTypeChart: React.FC<{
             fillOpacity={0.5}
             fill="url(#colorValue)"
             connectNulls={true}
-            
           />
         </AreaChart>
       </ResponsiveContainer>

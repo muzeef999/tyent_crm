@@ -86,11 +86,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.totalTickets || 0,
       icon: <FiFileText />,
       iconBg: "bg-blue-500",
-      link: `/service/${"total-tickets"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
-          : ""
-      }`,
+      link: `/service/?q=total-tickets&start=${startDate}&end=${endDate}`,
     },
 
     {
@@ -98,29 +94,21 @@ const PageContent = () => {
       value: serviceAnalyticsd?.ticketsToday || 0,
       icon: <FiCalendar />,
       iconBg: "bg-green-500",
-      link: `/service/${"ticketsToday"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
-          : ""
-      }`,
+      link: `/service/?q=ticketsToday&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Tickets In Progress",
       value: serviceAnalyticsd?.inProgress || 0,
       icon: <FiClock />,
       iconBg: "bg-yellow-500",
-      link: `/service/${"inProgress"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=IN_PROGRESS`
-          : ""
-      }`,
+      link: `/service/IN_PROGRESS&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Tickets Closed",
       value: serviceAnalyticsd?.closed || 0,
       icon: <FiCheckCircle />,
       iconBg: "bg-purple-500",
-      link: `/service/${"closed"}${
+      link: `/service/?q=${"closed"}${
         startDate && endDate
           ? `?start=${startDate}&end=${endDate}&type=CLOSED`
           : ""
@@ -131,7 +119,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.generalServicesDue || 0,
       icon: <FiAlertTriangle />,
       iconBg: "bg-red-500",
-      link: `/service/${"generalServicesDue"}${
+      link: `/service/?q=${"generalServicesDue"}${
         startDate && endDate
           ? `?start=${startDate}&end=${endDate}&type=GENERAL_SERVICE`
           : ""
@@ -142,7 +130,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.sparesChanged || 0,
       icon: <FiTool />,
       iconBg: "bg-teal-500",
-      link: `/service/${"sparesChanged"}${
+      link: `/service/?q=${"sparesChanged"}${
         startDate && endDate
           ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
           : ""
@@ -153,7 +141,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.inWarranty || 0,
       icon: <FiShield />,
       iconBg: "bg-indigo-500",
-      link: `/service/${"inWarranty"}${
+      link: `/service/?q=${"inWarranty"}${
         startDate && endDate
           ? `?start=${startDate}&end=${endDate}&type=IN_WARRANTY`
           : ""
@@ -164,7 +152,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.outWarranty || 0,
       icon: <FiShield />,
       iconBg: "bg-orange-500",
-      link: `/service/${"outWarranty"}${
+      link: `/service/?q=${"outWarranty"}${
         startDate && endDate
           ? `?start=${startDate}&end=${endDate}&type=OUT_WARRANTY`
           : ""
@@ -175,7 +163,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.avgResolutionTime || 0,
       icon: <FiClock />,
       iconBg: "bg-gray-500",
-      link: `/service/${"avgResolutionTime"}${
+      link: `/service/?q=${"avgResolutionTime"}${
         startDate && endDate
           ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
           : ""

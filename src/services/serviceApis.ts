@@ -41,21 +41,19 @@ export const getCustomerById = (id: string) => axiosInstance.get(`/customers/${i
 
 
 //SERVICES
+export const createService = (data: {customerId: string;serviceDate: string; serviceType: string[];}) => axiosInstance.post("/services", data).then((res) => res.data);
 
-export const createService = (data: Omit<Service, '_id' | 'createdAt' | 'updatedAt'>) => axiosInstance.post("/services", data).then((res) => res.data);
 export const updateService = (id: string, updatedFields: Record<string, any>) => axiosInstance.patch(`/services/${id}`,updatedFields).then((res) => res.data);
 export const deleteService = (id: string) => axiosInstance.delete(`/services/${id}`).then((res) => res.data);
 export const getServiceById = (id: string) => axiosInstance.get(`/services/${id}`).then((res) => res.data);
 
 
-export const getServices = ({startDate, endDate, type} :{ startDate?: Date | null; endDate?: Date | null; type?: string | null; }) => {
-  const params = new URLSearchParams();
-  if (startDate) params.append("startDate", startDate.toISOString().split("T")[0]); // YYYY-MM-DD
-  if (endDate) params.append("endDate", endDate.toISOString().split("T")[0]);
-  if (type) params.append("type", type);
-
-  return axiosInstance.get(`/services?${params.toString()}`).then((res) => res.data);
+// servicesApi.ts
+export const getServices = (query: string) => {
+  console.log("Fetching services with query:", query); // Debug log to check the query value
+  return axiosInstance.get(`/services?${query}`).then((res) => res.data);
 };
+
 
 // serviceApis.ts
 export const analytics = ({ 
@@ -93,12 +91,14 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 export const getEmployees = async ({
   page,
   limit,
+  type,
   searchQuery = "",
   getAll = false,
 }: {
   page?: number;
   limit?: number;
   searchQuery?: string;
+  type?:string;
   getAll?: boolean;
 }) => {
   const params: Record<string, string> = {};
@@ -119,10 +119,13 @@ export const getEmployees = async ({
   return res.data; // contains { data, pagination }
 };
 
+export const employeAssignTask =(id:string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
 export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);
 export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
+
+
 
 export const employeeAnlaytics = () => axiosInstance.get(`/employees/analytics`).then((res) => res.data);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomerAnalysis } from "@/services/serviceApis";
 import { CustomerAnalyticsResponse } from "@/types/customer";
@@ -9,22 +9,19 @@ import ModelBarChat from "./recharts/ModelBarChat";
 import Warranty from "./recharts/Warranty";
 import WaterMethod from "./recharts/WaterMethod";
 import CustomerAnalytics from "./CustomerAnalytics";
-import Button from "@/components/ui/Button";
-import { IoIosAdd } from "react-icons/io";
-import Offcanvas from "@/components/ui/Offcanvas";
-import AddCustomer from "./AddCustomer";
 import WaterTypeChart from "./recharts/WaterTypeChart";
 import dynamic from "next/dynamic";
 const CustomerSkeltom = dynamic(() => import("@/components/skeleton/CustomerDashboard"),{  ssr:false})
 
 
 const Page: React.FC = () => {
-  const [showAddSidebar, setShowAddSidebar] = useState(false);
+ 
   const { data, isLoading, error } = useQuery<CustomerAnalyticsResponse>({
     queryKey: ["customers"],
     queryFn: () => getCustomerAnalysis(),
   });
 
+  
 
 
   if (isLoading) return  <div className="p-4  h-100vh"> 
@@ -72,18 +69,6 @@ const Page: React.FC = () => {
   };
   return (
     <>
-      <div className="flex justify-between items-center  pt-4 pl-4 pr-4">
-        <div>
-          <h1 className="font-bold text-2xl text-black">
-            Customer Analytics Dashboard
-          </h1>
-          <p className="text-md">Water Ionizer Management System Overview</p>
-        </div>
-        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
-          <IoIosAdd size={22} />
-          Add Customer
-        </Button>
-      </div>
 
       <div className="grid grid-cols-12 grid-rows-[auto_auto_auto] gap-4 p-4">
         <div className="col-span-12">
@@ -117,15 +102,6 @@ const Page: React.FC = () => {
       <br />
       <br />
 
-      <Offcanvas
-        show={showAddSidebar}
-        onClose={() => setShowAddSidebar(false)}
-        title="Add Customer"
-      >
-        <div className="p-4">
-          <AddCustomer onClose={() => setShowAddSidebar(false)} />
-        </div>
-      </Offcanvas>
     </>
   );
 };

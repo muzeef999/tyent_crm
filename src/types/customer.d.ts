@@ -159,6 +159,7 @@ export interface InputProps {
   onBlur?: () => void;
   className?: string; // ✅ allow styling override
  onFocus?: React.FocusEventHandler<HTMLInputElement>
+ inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }
 
 

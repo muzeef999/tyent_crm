@@ -4,8 +4,11 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import Customer from "@/models/Customer";
+import Employee from "@/models/Employee";
 
 
+
+//edit service details or assign employee
 export const PATCH = async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,6 +37,13 @@ export const PATCH = async (
     if (!updatedService)
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
+    if (body.employeeId) {
+      await Employee.findByIdAndUpdate(
+        body.employeeId,
+        { $addToSet: { assignedServices: updatedService._id } } // prevent duplicates
+      );
+    }
+
     // ✅ Move to serviceHistory if completed
     if (body.status === "COMPLETED") {
       const customer = await Customer.findById(updatedService.customerId);
@@ -60,6 +70,10 @@ export const PATCH = async (
 
 
 
+
+
+
+//get service details by id
 export const GET = async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

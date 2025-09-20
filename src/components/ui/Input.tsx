@@ -19,7 +19,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       className = "",
       max,
       min,
-      onFocus
+      onFocus,
+      inputMode
     },
     ref
   ) => {
@@ -34,6 +35,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
+        inputMode={inputMode}
           ref={ref}
           maxLength={maxLength}
           id={name}
