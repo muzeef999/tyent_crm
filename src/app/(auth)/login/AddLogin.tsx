@@ -137,7 +137,7 @@ export default function EmployeeLogin() {
       animate={{ y: 0 }}
       transition={{ duration: 0.9, ease: "easeOut" }}
     >
-      <div className="h-screen flex items-end justify-center">
+      <div className="h-screen min-w-[400px] flex items-end justify-center">
         <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-t-2xl">
           <WelocomeImage />
           <h1 className="text-4xl font-bold mb-2 text-center text-primary">

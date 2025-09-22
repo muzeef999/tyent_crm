@@ -12,34 +12,34 @@ const PUBLIC_PATHS = ["/login", "/otp"];
 // Role-based allowed routes
 // ----------------------
 const ROLE_ACCESS: Record<string, string[]> = {
-  Admin: ["*"],
+  "Admin": ["*"],
   "Super Admin": ["*"],
-  "Marketing Manager": ["/leads", "/employee"],
+  "Marketing Manager": ["/leads", "/"],
   "Technical Manager": ["/service", "/employee"],
   "Telecall Manager": ["/customer"],
   "HR Executive": ["/employee"],
   "Customer Support": ["/customer"],
-  Accountant: ["/account"],
+  "Accountant": ["/account"],
   "Stock Clerk": ["/employee", "/stock"],
   "Stock Manager": ["/employee", "/stock"],
-  Technician: ["/workspace"],
+  "Technician": ["/workspace"],
 };
 
 // ----------------------
 // Default route per designation
 // ----------------------
 const DEFAULT_ROUTES: Record<string, string> = {
-  Admin: "/dashboard",
-  "Super Admin": "/dashboard",
+  "Admin": "/customer",
+  "Super Admin": "/customer",
   "Marketing Manager": "/leads",
   "Technical Manager": "/service",
   "Telecall Manager": "/customer",
   "HR Executive": "/employee",
   "Customer Support": "/customer",
-  Accountant: "/account",
+  "Accountant": "/account",
   "Stock Clerk": "/employee",
-  "Stock Manager": "/employee",
-  Technician: "/workspace",
+  "Stock Manager": "/stock",
+  "Technician": "/workspace",
 };
 
 // ----------------------
