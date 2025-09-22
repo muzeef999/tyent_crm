@@ -7,8 +7,11 @@ import { usePathname } from "next/navigation";
 import { FaRegUser } from "react-icons/fa";
 import TypeSearch from "../TypeSearch";
 import useDebounce from "@/hooks/useDebounce";
+import { useAuth } from "@/hooks/useAuth";
 
 const AppBar = () => {
+    const { user } = useAuth();
+
   const [scrolling, setScrolling] = useState(false);
 const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 500);
@@ -50,8 +53,8 @@ const [searchText, setSearchText] = useState("");
               <FaRegUser size={24} fill="white" />
             </div>
             <div>
-              <p className="text-md mb-0 p-0">Shaik Muzeef</p>
-              <p className="text-sm -mt-1 p-0 text-gray-500">Developer</p>
+              <p className="text-md mb-0 p-0">{user?.customer}</p>
+              <p className="text-sm -mt-1 p-0 text-gray-500">{user?.designation}</p>
             </div>
           </div>
         </div>
