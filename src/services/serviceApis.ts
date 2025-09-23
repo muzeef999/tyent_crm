@@ -88,35 +88,17 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 //EMPLOYEES
 
-export const getEmployees = async ({
-  page,
-  limit,
-  type,
-  searchQuery = "",
-  getAll = false,
-}: {
-  page?: number;
-  limit?: number;
-  searchQuery?: string;
-  type?:string;
-  getAll?: boolean;
-}) => {
-  const params: Record<string, string> = {};
-  
-  // Add search query if provided
-  if (searchQuery) {
-    params.q = searchQuery;
-  }
 
-  // Only add pagination params if not fetching all records
-  if (!getAll) {
-    params.page = String(page);
-    params.limit = String(limit);
-  }
 
-  const queryString = new URLSearchParams(params).toString();
-  const res = await axiosInstance.get(`/employees?${queryString}`);
-  return res.data; // contains { data, pagination }
+export const getEmployees = async ({ page = 1, limit = 10, designation,}: { page?: number; limit?: number; designation?: string;}) => {
+  const params: Record<string, string | number> = { page, limit,};
+  if (designation) {
+    const [key, value] = designation.split("="); 
+    if (key && value) {
+      params[key] = value; 
+    }
+  }
+  const res = await axiosInstance.get(`/employees`, { params });return res.data;
 };
 
 export const employeAssignTask =(id:string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);

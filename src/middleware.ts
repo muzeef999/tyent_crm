@@ -3,14 +3,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-// ----------------------
-// Public pages
-// ----------------------
 const PUBLIC_PATHS = ["/login", "/otp"];
 
-// ----------------------
-// Role-based allowed routes
-// ----------------------
 const ROLE_ACCESS: Record<string, string[]> = {
   "Admin": ["*"],
   "Super Admin": ["*"],
@@ -25,9 +19,6 @@ const ROLE_ACCESS: Record<string, string[]> = {
   "Technician": ["/workspace"],
 };
 
-// ----------------------
-// Default route per designation
-// ----------------------
 const DEFAULT_ROUTES: Record<string, string> = {
   "Admin": "/customer",
   "Super Admin": "/customer",
@@ -42,25 +33,16 @@ const DEFAULT_ROUTES: Record<string, string> = {
   "Technician": "/workspace",
 };
 
-// ----------------------
-// Helper: Verify JWT
-// ----------------------
 async function verifyJWT(token: string, secret: string) {
   const secretKey = new TextEncoder().encode(secret);
   const { payload } = await jwtVerify(token, secretKey);
   return payload;
 }
 
-// ----------------------
-// Middleware function
-// ----------------------
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  // ----------------------
-  // Public routes (login/otp)
-  // ----------------------
   if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
     if (token) {
       try {
@@ -79,9 +61,6 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // ----------------------
-  // Protected routes
-  // ----------------------
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -114,9 +93,6 @@ export async function middleware(req: NextRequest) {
   }
 }
 
-// ----------------------
-// Apply middleware to all routes except static and API
-// ----------------------
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

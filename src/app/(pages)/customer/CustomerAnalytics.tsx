@@ -5,20 +5,18 @@ import { FaUsers, FaCity, FaMapMarkerAlt } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
 import { FaIndianRupeeSign } from "react-icons/fa6";
-import {
-  Cityt,
-  CustomerAnalyticsResponse,
-  Option,
-  Statet,
-} from "@/types/customer";
+import { Option} from "@/types/customer";
 import Link from "next/link";
 import CountUp from "react-countup";
 import { useQuery } from "@tanstack/react-query";
-import { getCustomerAnalysis } from "@/services/serviceApis";
+import { getCustomerAnalysis, getCustomers } from "@/services/serviceApis";
 import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
 import Offcanvas from "@/components/ui/Offcanvas";
 import AddCustomer from "./AddCustomer";
+import { useAuth } from "@/hooks/useAuth";
+import TypeSearch from "@/components/TypeSearch";
+import useDebounce from "@/hooks/useDebounce";
 
 type CustomerAnalyticsProps = {
   totalCustomers?: number;
@@ -48,9 +46,11 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
+  const [showAddSidebar, setShowAddSidebar] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
-   const [showAddSidebar, setShowAddSidebar] = useState(false);
- 
+  const { user } = useAuth();
+  
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -81,7 +81,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   }));
 
   const cardStyle =
-    "flex flex-col justify-between rounded-xl p-4 w-full bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow cursor-pointer";
+    "flex flex-col justify-between rounded-xl p-4 w-full bg-white border border-gray-200 shadow-sm hover:shadow-lg transition-shadow cursor-pointer";
   const valueStyle =
     "text-3xl font-bold mt-2 flex items-center gap-2 text-gray-900";
   const labelStyle = "text-sm text-gray-500 font-semibold";
@@ -89,21 +89,31 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const stateli = "state";
   const cityli = "city";
 
-  return (
-    <div className="space-y-6">
 
-        <div className="flex justify-between items-center  pt-4 pl-4 pr-4">
+
+  return (
+    <div>
+      <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
         <div>
-          <h1 className="font-bold text-2xl text-black">
-            Customer Analytics Dashboard
+          <h1 className="font-medium text-2xl text-black">
+            Hello,{user?.customer}
           </h1>
-          <p className="text-md">Water Ionizer Management System Overview</p>
+          <p className="text-md">{user?.designation}</p>
         </div>
+
+        <div>
+          <div className="flex-1 min-w-[580px]">
+            <TypeSearch onSearch={setSearchText} placeHolderData={"🔍 Search customer by contact number, email, invoice, or serial number"} />
+          </div>
+        </div>
+
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
           Add Customer
         </Button>
       </div>
+
+
       {/* Cards Row */}
       <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-6">
         {/* Total Customers */}
@@ -185,14 +195,11 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             )}=${encodeURIComponent(selectedStateLabel)}`}
             className={valueStyle}
           >
-
-             {endDate ? data?.summary.totalStates : selectedStateValue}
-            
+            {endDate ? data?.summary.totalStates : selectedStateValue}
           </Link>
           <CustomDropdown
             label="Select State"
             id="state"
-
             options={mapStatesToOptions}
             selectedValue={selectedStateValue}
             onSelect={(value, label) => {
@@ -214,9 +221,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
             )}`}
             className={valueStyle}
           >
-             {endDate ? data?.summary.totalCities : selectedCityValue}
-            
-            
+            {endDate ? data?.summary.totalCities : selectedCityValue}
           </Link>
           <CustomDropdown
             label="Select City"
@@ -231,7 +236,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
         </div>
       </div>
 
-      
       <Offcanvas
         show={showAddSidebar}
         onClose={() => setShowAddSidebar(false)}

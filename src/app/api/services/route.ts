@@ -53,7 +53,6 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
-//get service details
 
 export const GET = async (req: Request) => {
   try {
@@ -65,7 +64,8 @@ export const GET = async (req: Request) => {
     const limitStr = searchParams.get("limit");
     const startParam = searchParams.get("start");
     const endParam = searchParams.get("end");
-    const type = searchParams.get("type"); // monthly, weekly, yearly, or serviceType filter
+    const type = searchParams.get("type"); // serviceType or monthly/weekly/yearly
+    const status = searchParams.get("status"); // filter status
 
     const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
     const limit = limitStr
@@ -76,23 +76,31 @@ export const GET = async (req: Request) => {
     // Build filter
     const filter: any = {};
 
+    // Free text search
     if (q) {
       filter.$or = [
-        { mode: { $regex: q, $options: "i" } },
+        { status: { $regex: q, $options: "i" } },
         { serviceType: { $regex: q, $options: "i" } },
+        { notes: { $regex: q, $options: "i" } },
       ];
     }
 
+    // Status filter (regex → supports starts/ends/contains)
+    if (status) {
+      filter.status = { $regex: status, $options: "i" };
+    }
+
+    // ServiceType filter (regex → supports starts/ends/contains)
+    if (type && !["monthly", "weekly", "yearly"].includes(type)) {
+      filter.serviceType = { $regex: type, $options: "i" };
+    }
+
+    // Date range
     if (startParam && endParam) {
       filter.serviceDate = {
         $gte: new Date(startParam),
         $lte: new Date(endParam),
       };
-    }
-
-    // If type is one of your specific service types, filter by that too
-    if (type && !["monthly", "weekly", "yearly"].includes(type)) {
-      filter.serviceType = type;
     }
 
     const total = await Service.countDocuments(filter);
@@ -102,48 +110,33 @@ export const GET = async (req: Request) => {
       .populate("employeeId", "name email")
       .skip(skip)
       .limit(limit)
-      .sort({ serviceDate: 1 })
+      .sort({ serviceDate: -1 })
       .lean();
 
-    // Analytics calculations
-    const totalTickets = services.length;
+    // Analytics
+    const totalTickets = total;
 
-    const ticketsToday = services.filter((s) => {
-      const today = new Date();
-      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-      return s.serviceDate >= startOfDay && s.serviceDate <= endOfDay;
-    }).length;
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const inProgress = services.filter((s) => s.status === "IN_PROGRESS").length;
-    const closed = services.filter((s) => s.status === "CLOSED").length;
-    const cancelled = services.filter((s) => s.status === "CANCELLED").length;
-    const pending = services.filter((s) => s.status === "PENDING").length;
-
-    const serviceNotAssigned = services.filter((s) => !s.employeeId).length;
-
-    const inWarranty = services.filter((s) => s.warrantyStatus === "IN_WARRANTY").length;
-    const outWarranty = services.filter((s) => s.warrantyStatus === "OUT_WARRANTY").length;
-
-    const sparesChanged = services.filter((s) => s.sparesChanged?.length > 0).length;
-    const generalServicesDue = services.filter((s) => s.serviceType === "GENERAL_SERVICE").length;
-
-    // Group by service type
-    const serviceTypeAgg: Record<string, number> = {};
-    services.forEach((s) => {
-      const t = s.serviceType || "UNKNOWN";
-      serviceTypeAgg[t] = (serviceTypeAgg[t] || 0) + 1;
+    const ticketsToday = await Service.countDocuments({
+      ...filter,
+      serviceDate: { $gte: startOfDay, $lte: endOfDay },
     });
-    const serviceType = Object.entries(serviceTypeAgg).map(([type, count]) => ({ type, count }));
 
-    // Average ticket resolution time (only for CLOSED tickets)
-    const closedServices = services.filter((s) => s.status === "CLOSED" && s.resolvedAt && s.createdAt);
-    const avgResolutionTime =
-      closedServices.length > 0
-        ? closedServices.reduce((acc, s) => acc + (new Date(s.resolvedAt).getTime() - new Date(s.createdAt).getTime()), 0) /
-          closedServices.length /
-          1000 / 60 // minutes
-        : 0;
+    // Status counts
+    const statusCounts = await Service.aggregate([
+      { $match: filter },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]);
+
+    // Service type counts
+    const serviceTypeCounts = await Service.aggregate([
+      { $match: filter },
+      { $unwind: "$serviceType" },
+      { $group: { _id: "$serviceType", count: { $sum: 1 } } },
+    ]);
 
     return NextResponse.json(
       {
@@ -159,17 +152,8 @@ export const GET = async (req: Request) => {
         analytics: {
           totalTickets,
           ticketsToday,
-          inProgress,
-          closed,
-          cancelled,
-          pending,
-          serviceNotAssigned,
-          inWarranty,
-          outWarranty,
-          sparesChanged,
-          generalServicesDue,
-          avgResolutionTimeInMinutes: avgResolutionTime.toFixed(2),
-          serviceType,
+          statusCounts,
+          serviceType: serviceTypeCounts,
         },
       },
       { status: 200 }
@@ -186,3 +170,4 @@ export const GET = async (req: Request) => {
     );
   }
 };
+

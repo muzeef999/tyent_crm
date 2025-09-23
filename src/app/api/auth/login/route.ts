@@ -38,12 +38,12 @@ export const GET = async (req: NextRequest) => {
     console.log(`Generated OTP for ${phone}: ${otp}`);
 
     // Send OTP via Bulkly
-    await axios.post("https://live.bulkly.io/api/sendbulkly", {
-      phoneId: "333862093154829",
-      otp,
-      recipientPhone: phone,
-      templateId: "1531142600990906",
-    });
+    // await axios.post("https://live.bulkly.io/api/sendbulkly", {
+    //   phoneId: "333862093154829",
+    //   otp,
+    //   recipientPhone: phone,
+    //   templateId: "1531142600990906",
+    // });
 
 
     return NextResponse.json(

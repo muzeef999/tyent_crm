@@ -47,7 +47,7 @@ export default function EmployeeLogin() {
     onSuccess: (data) => {
       toast.success("OTP verified successfully!");
 
-
+        window.location.reload();
       // You might want to redirect or set auth state here
     },
     onError: (error: any) => {

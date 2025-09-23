@@ -10,20 +10,27 @@ import dayjs from "dayjs";
 import { useParams, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import AssignService from "../AssignService";
+import Pagination from "@/components/ui/Pagination";
 
 const Page = () => {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState<number>(10);
   const [showAddSidebar, setShowAddSidebar] = useState<boolean>(false);
   const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
   const [employeeId, setEmployeeId] = useState(" ");
 
-   const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
 
   // Decode if it's URL encoded
   const query = id ? decodeURIComponent(id) : "";
 
   console.log("🟢 Decoded Query:", query);
 
-  const { data: service, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["services", query],
     queryFn: () => getServices(query),
     enabled: !!query,
@@ -34,6 +41,11 @@ const Page = () => {
     queryFn: () => getServiceById(employeeId),
     enabled: !!employeeId,
   });
+
+  const service = data?.data || [];
+  const pagination = data?.pagination;
+  const totalPages = pagination?.totalPages || 1;
+  const totalCustomers = pagination?.total || 0;
 
   if (error)
     return (
@@ -129,6 +141,17 @@ const Page = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="mb-26">
+        <Pagination
+          totalCustomers={totalCustomers}
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          setLimit={setLimit} // ✅ correct prop name
+        />
       </div>
 
       <Offcanvas

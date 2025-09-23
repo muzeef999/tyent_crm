@@ -1,6 +1,5 @@
 "use client";
 import "@/app/globals.css";
-import AppBar from "@/components/ui/AppBar";
 import Sidebar from "@/components/ui/Sidebar";
 import {
   QueryClient,
@@ -34,8 +33,7 @@ export default function RootLayout({
               <Sidebar />
             </div>
 
-            <main className="flex flex-col flex-1 ml-64 mt-14 w-full rounded-xl bg-card-background h-screen">
-              <AppBar />
+            <main className="flex flex-col flex-1 ml-64  w-full rounded-xl bg-card-background h-screen">
               <div className="flex-1  overflow-auto">{children}</div>
             </main>
           </div>

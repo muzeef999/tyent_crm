@@ -22,7 +22,12 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import Offcanvas from "@/components/ui/Offcanvas";
 import AddService from "./AddService";
-const  SeviceDashboard = dynamic(()=> import("@/components/skeleton/SeviceDashboard"), {ssr: false});
+import TypeSearch from "@/components/TypeSearch";
+import { useAuth } from "@/hooks/useAuth";
+const SeviceDashboard = dynamic(
+  () => import("@/components/skeleton/SeviceDashboard"),
+  { ssr: false }
+);
 
 interface StatsCardProps {
   title: string;
@@ -58,6 +63,10 @@ const PageContent = () => {
   const searchParams = useSearchParams();
   const startDate = searchParams.get("start");
   const endDate = searchParams.get("end");
+
+  const [searchText, setSearchText] = useState("");
+
+  const { user } = useAuth();
 
   const {
     data: serviceAnalyticsd,
@@ -101,7 +110,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.inProgress || 0,
       icon: <FiClock />,
       iconBg: "bg-yellow-500",
-      link: `/service/IN_PROGRESS&start=${startDate}&end=${endDate}`,
+      link: `/service/status=ONGOING&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Tickets Closed",
@@ -119,11 +128,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.generalServicesDue || 0,
       icon: <FiAlertTriangle />,
       iconBg: "bg-red-500",
-      link: `/service/?q=${"generalServicesDue"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=GENERAL_SERVICE`
-          : ""
-      }`,
+       link: `/service/type=GENERAL SERVICE&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Spares Changed",
@@ -190,17 +195,31 @@ const PageContent = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center  pt-4 pl-4 pr-4">
+    <div className="m-4">
+      <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
         <div>
-          <h1 className="font-bold text-2xl text-black">
-            Service Analytics Dashboard
+          <h1 className="font-medium text-2xl text-black">
+            Hello,{user?.customer}
           </h1>
-          <p className="text-md">Water Ionizer Management System Overview</p>
+          <p className="text-md">{user?.designation}</p>
         </div>
+
+        <div>
+          <div className="flex-1 min-w-[580px]">
+            <TypeSearch
+              onSearch={setSearchText}
+              placeHolderData={
+                "🔍 Search customer by contact number, email, invoice, or serial number"
+              }
+            />
+          </div>
+        </div>
+
         <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
           <IoIosAdd size={22} />
           Add Service
         </Button>
+      </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4 p-4">
@@ -253,8 +272,6 @@ const PageContent = () => {
         <ServiceType ServiceType={serviceAnalyticsd?.serviceType} />
       </div>
 
-
-      
       <Offcanvas
         show={showAddSidebar}
         onClose={() => setShowAddSidebar(false)}

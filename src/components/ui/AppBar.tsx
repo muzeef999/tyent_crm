@@ -3,19 +3,15 @@
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
 import { IoNotificationsOutline } from "react-icons/io5";
-import { usePathname } from "next/navigation";
 import { FaRegUser } from "react-icons/fa";
 import TypeSearch from "../TypeSearch";
 import useDebounce from "@/hooks/useDebounce";
 import { useAuth } from "@/hooks/useAuth";
 
 const AppBar = () => {
-    const { user } = useAuth();
-
   const [scrolling, setScrolling] = useState(false);
-const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 500);
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,10 +47,6 @@ const [searchText, setSearchText] = useState("");
           <div className="flex items-center space-x-1">
             <div className="border rounded-full p-1 bg-[#b9b9b9]">
               <FaRegUser size={24} fill="white" />
-            </div>
-            <div>
-              <p className="text-md mb-0 p-0">{user?.customer}</p>
-              <p className="text-sm -mt-1 p-0 text-gray-500">{user?.designation}</p>
             </div>
           </div>
         </div>

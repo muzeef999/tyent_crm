@@ -26,7 +26,7 @@ const serviceSchema = new Schema(
         enum: [
           "GENERAL_SERVICE",
           "PAID_SERVICE",
-          "IN_WARRANTY_BREAKDOWN",
+          "IN_WARRANTY_BREAKDOWN", 
           "FILTER_REPLACEMENT",
           "INSTALLATION",
           "RE_INSTALLATION",

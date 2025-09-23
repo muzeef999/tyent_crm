@@ -16,7 +16,7 @@ export const POST = async (req: NextRequest) => {
   } catch (err) {
     const errorMsg = getErrorMessage(err);
 
-    return NextResponse.json(
+    return NextResponse.json( 
       {
         sucess: false,
         error: errorMsg,

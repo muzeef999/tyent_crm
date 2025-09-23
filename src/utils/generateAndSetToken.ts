@@ -6,7 +6,8 @@ export function generateAndSetToken(employee: any) {
   // Payload we want inside token
   const payload = {
     id: employee._id,
-    designation: employee.designation,
+    customer: employee.name,
+    designation: employee.designation, 
   };
 
   // Sign the JWT

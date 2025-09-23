@@ -21,23 +21,28 @@ const Page = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(10);
 
-  
-const { id } = useParams();
 
-// Handle id being string | string[]
-const type = Array.isArray(id) ? decodeURIComponent(id[0]) : id ? decodeURIComponent(id) : "";
+  const { id } = useParams();
 
-console.log("id", type);
+// Safely decode `id`
+const designation = Array.isArray(id)
+  ? decodeURIComponent(id[0]) // If it's an array, take the first one
+  : id
+  ? decodeURIComponent(id)    // If it's a string
+  : undefined;                // If nothing
 
-  const {
-    data: employees,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["employees", type],
-    queryFn: () =>
-      getEmployees({ page, limit,type, searchQuery: debouncedSearchText }),
-  });
+console.log("🟢 Decoded Type:", designation);
+
+const {
+  data: employees,
+  isLoading,
+  error,
+} = useQuery({
+  queryKey: ["employees", { page, limit, designation }], // better caching
+  queryFn: () => getEmployees({ page, limit, designation }),
+  enabled: !!designation, // prevents query from running when type is undefined
+});
+
 
   const pagination = employees?.pagination;
   const totalPages = pagination?.totalPages || 1;

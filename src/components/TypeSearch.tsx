@@ -3,24 +3,29 @@
 import React, { useEffect, useRef, useState } from "react";
 
 type TypeSearchProps = {
-    onSearch?: (searchText: string) => void;
-
+  onSearch?: (searchText: string) => void;
   texts?: string[];           // phrases to type (we use single by default)
   typingSpeed?: number;       // ms per char when typing
   deletingSpeed?: number;     // ms per char when deleting
   pauseAfterTyping?: number;  // ms pause after a phrase is typed
   className?: string;         // extra classes for input
   inputName?: string;
+  placeHolderData?: string;   // placeholder text when no typing
 };
 
 export default function TypeSearch({
   onSearch,
-  texts = ["What are you looking for?"],
+  texts,
   typingSpeed = 80,
   deletingSpeed = 40,
   pauseAfterTyping = 1400,
   inputName = "search",
+  placeHolderData = "Search...",
+  className = "",
 }: TypeSearchProps) {
+  // fallback texts if not provided
+  const typingTexts = texts && texts.length > 0 ? texts : [placeHolderData];
+
   const [displayText, setDisplayText] = useState("");
   const [textIndex, setTextIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -47,19 +52,11 @@ export default function TypeSearch({
   useEffect(() => {
     if (!mountedRef.current) return;
 
-    // don't show the typing overlay while user is typing or focused
-    if (isFocused || userValue) {
-      return;
-    }
+    // don't show typing overlay while user is typing or focused
+    if (isFocused || userValue) return;
 
-    const currentText = texts[textIndex] || "";
-    let timeout = typingSpeed;
-
-    if (isDeleting) {
-      timeout = deletingSpeed;
-    } else {
-      timeout = typingSpeed;
-    }
+    const currentText = typingTexts[textIndex] || "";
+    const timeout = isDeleting ? deletingSpeed : typingSpeed;
 
     const timer = window.setTimeout(() => {
       if (isDeleting) {
@@ -68,14 +65,13 @@ export default function TypeSearch({
         setDisplayText(currentText.slice(0, nextCharIndex));
         if (nextCharIndex === 0) {
           setIsDeleting(false);
-          setTextIndex((i) => (i + 1) % texts.length);
+          setTextIndex((i) => (i + 1) % typingTexts.length);
         }
       } else {
         const nextCharIndex = Math.min(charIndex + 1, currentText.length);
         setCharIndex(nextCharIndex);
         setDisplayText(currentText.slice(0, nextCharIndex));
         if (nextCharIndex === currentText.length) {
-          // pause then delete
           setTimeout(() => {
             if (!mountedRef.current) return;
             setIsDeleting(true);
@@ -85,40 +81,31 @@ export default function TypeSearch({
     }, timeout);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [charIndex, isDeleting, textIndex, isFocused, userValue, texts, typingSpeed, deletingSpeed, pauseAfterTyping]);
+  }, [charIndex, isDeleting, textIndex, isFocused, userValue, typingTexts, typingSpeed, deletingSpeed, pauseAfterTyping]);
 
   return (
-    <div className="relative w-full max-w-xl">
+    <div className={`relative w-full max-w-xl ${className}`}>
       {/* actual input */}
       <input
         name={inputName}
         type="search"
         value={userValue}
-        onChange={(e) => { setUserValue(e.target.value);
-           if(onSearch) onSearch(e.target.value);
+        onChange={(e) => {
+          setUserValue(e.target.value);
+          if (onSearch) onSearch(e.target.value);
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`w-[350px] h-[38px] rounded-md  bg-card-background  p-2 focus:outline-none`}
-        placeholder="" // keep empty; overlay shows typing text
+        className="w-full  h-[38px] rounded-md bg-card-background p-2 focus:outline-none"
+        placeholder="" // overlay shows typing text
         aria-label="Search"
       />
 
-      {/* overlay placeholder (shown only when input empty and not focused) */}
+      {/* overlay placeholder */}
       {(!userValue && !isFocused) && (
-        <div
-          className="pointer-events-none absolute inset-y-0 flex items-center text-md p-2 text-gray-500"
-          style={{ transform: "translateY(0)" }}
-        >
+        <div className="pointer-events-none absolute inset-0 flex items-center pl-2 text-gray-500">
           <span>{displayText}</span>
-          <span
-            aria-hidden
-            className="ml-1"
-            style={{ opacity: caretVisible ? 1 : 0 }}
-          >
-            |
-          </span>
+          <span className="ml-1 animate-pulse">|</span>
         </div>
       )}
     </div>
