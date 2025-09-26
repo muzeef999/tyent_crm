@@ -15,9 +15,9 @@ const Anlaytics = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Product Analytics</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Product Stock Information</h2>
 
-      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">  
         {productAnalysis?.message?.map((product: any, index: number) => (
           <div
             key={index}

@@ -213,7 +213,7 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     isError,
   } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => getEmployees({ getAll: true }),
+    queryFn: () => getEmployees({ designation: 'Technician' }),
   });
 
   const employees = response?.data;

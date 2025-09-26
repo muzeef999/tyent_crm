@@ -9,8 +9,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Employee } from "@/types/customer";
 import { CiEdit } from "react-icons/ci";
 import { toast } from "sonner";
-import Button from "@/components/ui/Button";
-import CustomDropdown from "@/components/ui/CustomDropdown";
 
 const serviceTypeOptions = [
   { label: "General Service", value: "GENERAL_SERVICE" },
@@ -51,7 +49,7 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
     isError,
   } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => getEmployees({ getAll: true }),
+    queryFn: () => getEmployees({ designation: "Technician" }),
   });
 
   const { data: getEmployeesDataId } = useQuery({
