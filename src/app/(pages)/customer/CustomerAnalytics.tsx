@@ -5,7 +5,7 @@ import { FaUsers, FaCity, FaMapMarkerAlt } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomDateDropdown from "@/components/ui/CustomDateDropdown";
 import { FaIndianRupeeSign } from "react-icons/fa6";
-import { Option} from "@/types/customer";
+import { Option } from "@/types/customer";
 import Link from "next/link";
 import CountUp from "react-countup";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import AddCustomer from "./AddCustomer";
 import { useAuth } from "@/hooks/useAuth";
 import TypeSearch from "@/components/TypeSearch";
 import useDebounce from "@/hooks/useDebounce";
+import CustomerDetails from "./CustomerDetails";
 
 type CustomerAnalyticsProps = {
   totalCustomers?: number;
@@ -38,6 +39,10 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [selectedStateLabel, setSelectedStateLabel] = useState<string>("");
   const [selectedStateValue, setSelectedStateValue] =
     useState<number>(totalStates);
+    const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
+      const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(
+        null
+      );
 
   const [selectedCityLabel, setSelectedCityLabel] = useState<string>("");
   const [selectedCityValue, setSelectedCityValue] =
@@ -50,7 +55,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [searchText, setSearchText] = useState("");
 
   const { user } = useAuth();
-  
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -65,6 +69,23 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
         end: formatDate(endDate),
       }),
     enabled: !!startDate && !!endDate, // only run when both are picked
+  });
+
+
+  const handleRowClick = (customerId: string) => {
+    setSelectedCustomer(customerId);
+    setShowDetailsSidebar(true);
+  };
+
+  const debouncedSearchText = useDebounce(searchText, 100);
+  const {
+    data: searchCustomer,
+    isLoading: isSearchLoading,
+    isError: isSearchError,
+  } = useQuery({
+    queryKey: ["SearchCustomers", debouncedSearchText],
+    queryFn: () => getCustomers({ q: debouncedSearchText }),
+    enabled: !!debouncedSearchText,
   });
 
   // ✅ Map states and cities to dropdown options with unique keys
@@ -89,8 +110,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const stateli = "state";
   const cityli = "city";
 
-
-
   return (
     <div>
       <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
@@ -102,8 +121,35 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
         </div>
 
         <div>
-          <div className="flex-1 min-w-[580px]">
-            <TypeSearch onSearch={setSearchText} placeHolderData={"🔍 Search customer by contact number, email, invoice, or serial number"} />
+          <div className="flex-1 relative min-w-[580px]">
+            <TypeSearch
+              onSearch={setSearchText}
+              placeHolderData={
+                "🔍 Search customer by contact number, email, invoice, or serial number"
+              }
+            />
+
+            {searchText && (
+              <div className="absolute bg-white w-full  rounded-md border border-gray-200 shadow-lg z-10">
+                {isSearchLoading && (
+                  <div className="p-2 text-gray-500">Loading...</div>
+                )}
+
+                {!isSearchLoading && searchCustomer?.data?.length === 0 && (
+                  <div className="p-2 text-gray-500">No results</div>
+                )}
+
+                {!isSearchLoading &&
+                  searchCustomer?.data?.map((s: any) => (
+                    <div
+                      key={s._id}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleRowClick(s._id!)}>
+                      {s.name}
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -112,7 +158,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           Add Customer
         </Button>
       </div>
-
 
       {/* Cards Row */}
       <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-6">
@@ -244,6 +289,16 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
         <div className="p-4">
           <AddCustomer onClose={() => setShowAddSidebar(false)} />
         </div>
+      </Offcanvas>
+
+      <Offcanvas
+        show={showDetailsSidebar}
+        onClose={() => setShowDetailsSidebar(false)}
+        title="Customer Info"
+      >
+        {selectedCustomerId && (
+          <CustomerDetails customerId={selectedCustomerId} />
+        )}
       </Offcanvas>
     </div>
   );

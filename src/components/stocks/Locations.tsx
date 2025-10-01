@@ -1,8 +1,12 @@
 import { getLocation } from "@/services/serviceApis";
 import { Location } from "@/types/customer";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import TableLoading from "../ui/TableLoading";
+import { useAuth } from "@/hooks/useAuth";
+import TypeSearch from "../TypeSearch";
+import { IoIosAdd } from "react-icons/io";
+import Button from "../ui/Button";
 
 const Locations = () => {
   const { data, isLoading, } = useQuery({
@@ -10,9 +14,35 @@ const Locations = () => {
     queryFn: getLocation,
   });
 
-  const locationData: Location[] = data?.message || [];
+  const [showAddSidebar, setShowAddSidebar] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    
 
+  const locationData: Location[] = data?.message || [];
+  const { user }  = useAuth();
   return (
+    <>
+    
+      <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
+        <div>
+          <h1 className="font-medium text-2xl text-black">
+            Hello,{user?.customer}
+          </h1>
+          <p className="text-md">{user?.designation}</p>
+        </div>
+
+        <div>
+          <div className="flex-1 min-w-[580px]">
+            <TypeSearch onSearch={setSearchText} placeHolderData={"🔍 Search serial number"} />
+          </div>
+        </div>
+
+        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
+          <IoIosAdd size={22} />
+          Add Product
+        </Button>
+      </div>
+    
     <table className="min-w-[1000px] w-full customtable">
       <thead>
         <tr>
@@ -54,6 +84,7 @@ const Locations = () => {
         )}
       </tbody>
     </table>
+    </>
   );
 };
 

@@ -6,15 +6,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ name: string }> }
 ) => {
   try {
 
-    const { id } = await params;
+    const { name } = await params;
 
     await connectDB();
 
-    const product = await Product.findOne({ serialNumber: id });
+    const product = await Product.find({name, status: "In Stock"  });
 
     if (!product) {
       return NextResponse.json(

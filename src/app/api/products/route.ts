@@ -23,6 +23,9 @@ export async function GET() {
           name: "$_id",
           count: 1
         }
+      },
+      {
+        $sort: { name: 1}
       }
     ]);
 

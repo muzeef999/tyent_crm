@@ -22,18 +22,16 @@ export default function RootLayout({
     <html lang="en">
       <QueryClientProvider client={queryClient}>
         <PrefetchEmployees />
-        
+
         <body className={` bg-background text-secondary`}>
           <Toaster richColors position="top-center" />
 
           <ReactQueryDevtools />
 
           <div className="flex">
-            <div className="fixed top-14 left-0 sm:[5%] md:w-[15%] h-screen z-20">
-              <Sidebar />
-            </div>
+            <Sidebar />
 
-            <main className="flex flex-col flex-1 ml-64  w-full rounded-xl bg-card-background h-screen">
+            <main className="flex flex-col flex-1   w-full rounded-xl bg-card-background h-screen">
               <div className="flex-1  overflow-auto">{children}</div>
             </main>
           </div>
@@ -46,9 +44,8 @@ export default function RootLayout({
 function PrefetchEmployees() {
   useQuery({
     queryKey: ["employees"],
-    queryFn: () => getEmployees({ designation: 'Technician' }),
+    queryFn: () => getEmployees({ designation: "Technician" }),
     staleTime: 1000 * 60 * 5, // 5 min cache
   });
   return null; // nothing to render
 }
-

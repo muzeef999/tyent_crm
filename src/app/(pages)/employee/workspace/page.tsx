@@ -1,7 +1,9 @@
 "use client";
+import TypeSearch from "@/components/TypeSearch";
+import { useAuth } from "@/hooks/useAuth";
 import { employeAssignTask, updateService } from "@/services/serviceApis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import {
   FiUser,
   FiHash,
@@ -25,6 +27,12 @@ const Page = () => {
     queryFn: () => employeAssignTask(id),
     enabled: !!id,
   });
+
+
+    const { user } = useAuth();
+  
+
+  const [searchText, setSearchText] = useState("");
 
   const [editableServiceId, setEditableServiceId] = useState<string | null>(null);
   const [statusValue, setStatusValue] = useState("");
@@ -66,23 +74,46 @@ const Page = () => {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="p-6 min-h-screen">
       <div className="max-w-6xl mx-auto">
         {/* Employee Info */}
-        <div className="bg-white shadow-lg rounded-2xl p-6 mb-6 border border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">{employee?.name}</h1>
-          <div className="space-y-2 text-gray-600">
-            <p className="flex items-center gap-2">
-              <FiMail className="text-blue-500" /> {employee?.email}
-            </p>
-            <p className="flex items-center gap-2">
-              <FiPhone className="text-green-500" /> {employee?.contactNumber}
-            </p>
-            <p className="flex items-center gap-2">
-              <FiBriefcase className="text-gray-500" /> {employee?.designation}
-            </p>
+        
+     
+
+
+     <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
+        <div>
+          <h1 className="font-medium text-2xl text-black">
+            Hello,{user?.customer}
+          </h1>
+          <p className="text-md">{user?.designation}</p>
+        </div>
+
+        <div>
+          <div className="flex-1 relative min-w-[580px]">
+            <TypeSearch
+              onSearch={setSearchText}
+              placeHolderData={
+                "🔍 Search customer by contact number, email, invoice, or serial number"
+              }
+            />
+
+            
           </div>
         </div>
+
+        <div>
+          {
+            "manger name"
+          }
+        </div>
+
+      </div>
+
+
+
+
+
 
         {/* Assigned Services */}
         <h2 className="text-xl font-semibold mb-4 text-gray-700">Assigned Services</h2>

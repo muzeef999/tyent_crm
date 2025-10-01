@@ -120,7 +120,7 @@ export const getLeads = () => axios.get("https://www.tyent.co.in/api/lead").then
 //products
 export const getProducts = () => axiosInstance.get(`/products`).then(res => res.data).catch(err => err.message);
 export const getProductsIndetail = (serialNumber:any) => axiosInstance.get(`/products/${serialNumber}`).then(res => res.data).catch(err => err.message);
-
+export const createProduct = (data: {name: string; category: string; serialNumber: string;}) => axiosInstance.post("/products", data).then(res => res.data).catch(err => err.message);
 //location
 export const getLocation = () => axiosInstance.get("/stock/locations").then(res => res.data);
 
