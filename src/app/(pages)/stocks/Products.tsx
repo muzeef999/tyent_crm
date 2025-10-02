@@ -9,7 +9,7 @@ import Anlaytics from "./Anlaytics";
 const Products = () => {
   const { data,  error } = useQuery({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(""),
   });
 
   if (error) {

@@ -5,6 +5,8 @@ import {
   createCustomer,
   getEmployees,
   getProductsIndetail,
+  MarkingMangerOptionsfetch,
+  TechincianOptionsfetch,
 } from "@/services/serviceApis";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -206,25 +208,36 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     debouncedSearch(value); // only search is debounced
   };
 
-  // employees list
   const {
-    data: response,
-    isLoading,
-    isError,
+    data: managerResponse,
   } = useQuery({
-    queryKey: ["employees"],
-    queryFn: () => getEmployees({ designation: 'Technician' }),
+    queryKey: ["MarkingMangerOptions"],
+    queryFn: () => MarkingMangerOptionsfetch(),
   });
 
-  const employees = response?.data;
 
-  const TechincianOptions = employees
-    ?.filter((d: Employee) => d.designation === "Technician")
-    .map((emp: Employee) => ({ label: emp.name, value: emp._id }));
+    const {
+    data: techResponse,
+  } = useQuery({
+    queryKey: ["TechincianOptions"],
+    queryFn: () => TechincianOptionsfetch(),
+  });
 
-  const MarkingMangerOptions = employees
-    ?.filter((d: Employee) => d.designation === "Marketing Manager")
-    .map((emp: Employee) => ({ label: emp.name, value: emp._id }));
+
+
+const TechincianOptions = techResponse?.data?.map((emp:any) => ({
+  label: emp.name,
+  value: emp._id,
+}));
+
+const MarkingMangerOptions = managerResponse?.data?.map((emp:any) => ({
+  label: emp.name,
+  value: emp._id,
+}));
+
+    console.log("TechincianOptions", TechincianOptions);
+
+    console.log("MarkingMangerOptions", MarkingMangerOptions);
 
   const queryClient = useQueryClient();
 
@@ -297,8 +310,6 @@ const AddCustomer: React.FC<AddCustomerProps> = ({ onClose }) => {
     mutation.mutate(preparedData);
   };
 
-  if (isLoading) return <p>Setting Up...</p>;
-  if (isError) return <p>Unknown Error</p>;
 
   const handleToggleAccordion = (id: string) => {
     setOpenSection((prev) => (prev === id ? "" : id)); // only one open at a time

@@ -3,11 +3,14 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 export function generateAndSetToken(employee: any) {
-  // Payload we want inside token
+
+    const firstName = employee.name.split(" ")[0]; 
+  
+
   const payload = {
     id: employee._id,
-    customer: employee.name,
-    designation: employee.designation, 
+    customer: firstName,
+    designation: employee.designation,
   };
 
   // Sign the JWT
@@ -22,8 +25,11 @@ export function generateAndSetToken(employee: any) {
   );
 
   response.cookies.set("token", token, {
-    sameSite: "strict",
+    httpOnly: true, // JS cannot read
+    secure: true, // HTTPS only
+    sameSite: "strict", // CSRF protectio
     path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   });
 
   return { token, response };

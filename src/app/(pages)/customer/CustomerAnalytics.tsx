@@ -54,7 +54,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [showAddSidebar, setShowAddSidebar] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  const { user } = useAuth();
+  const { user} = useAuth();
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -145,7 +145,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
                       key={s._id}
                       className="p-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => handleRowClick(s._id!)}>
-                      {s.name}
+                      {`${s.name} > ${s.contactNumber} > ${s.serialNumber} > ${s.invoiceNumber}`}
                     </div>
                   ))}
               </div>

@@ -5,9 +5,10 @@ import axios from "axios";
 
 
 //Auth
-
 export const login = (contactNumber: string) => axiosInstance.get(`/auth/login?contactNumber=${contactNumber}`).then((res) => res.data);
 export const verifyOtp = (contactNumber: string, otp: string) => axiosInstance.post("/auth/verify-otp", { contactNumber, otp }).then((res) => res.data);
+export const userProfile = () => axiosInstance.get("/auth/me").then((res) => res.data);
+export const logout = () => axiosInstance.post("/auth/me").then((res) => res.data);
 //CUSTOMERS 
 
 
@@ -42,22 +43,17 @@ export const getCustomerById = (id: string) => axiosInstance.get(`/customers/${i
 
 //SERVICES
 export const createService = (data: {customerId: string;serviceDate: string; serviceType: string[];}) => axiosInstance.post("/services", data).then((res) => res.data);
-
 export const updateService = (id: string, updatedFields: Record<string, any>) => axiosInstance.patch(`/services/${id}`,updatedFields).then((res) => res.data);
 export const deleteService = (id: string) => axiosInstance.delete(`/services/${id}`).then((res) => res.data);
 export const getServiceById = (id: string) => axiosInstance.get(`/services/${id}`).then((res) => res.data);
 
 
 // servicesApi.ts
-export const getServices = (query: string) => {
-  console.log("Fetching services with query:", query); // Debug log to check the query value
-  return axiosInstance.get(`/services?${query}`).then((res) => res.data);
-};
+export const getServices = (query: string) =>  axiosInstance.get(`/services?${query}`).then((res) => res.data);
 
 
 // serviceApis.ts
-export const analytics = ({ 
-  startDate, 
+export const analytics = ({   startDate, 
   endDate 
 }: { startDate?: Date | null; endDate?: Date | null }) => {
   const params = new URLSearchParams();
@@ -87,9 +83,6 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 
 //EMPLOYEES
-
-
-
 export const getEmployees = async ({ page = 1, limit = 10, designation,}: { page?: number; limit?: number; designation?: string;}) => {
   const params: Record<string, string | number> = { page, limit,};
   if (designation) {
@@ -101,6 +94,8 @@ export const getEmployees = async ({ page = 1, limit = 10, designation,}: { page
   const res = await axiosInstance.get(`/employees`, { params });return res.data;
 };
 
+export const  MarkingMangerOptionsfetch = () => axiosInstance.get("/employees/MarkingMangerOptions").then((res) => res.data);
+export const  TechincianOptionsfetch = () => axiosInstance.get("/employees/TechincianOptions").then((res) => res.data);
 export const employeAssignTask =(id:string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
 export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
@@ -118,7 +113,7 @@ export const getLeads = () => axios.get("https://www.tyent.co.in/api/lead").then
 
 
 //products
-export const getProducts = () => axiosInstance.get(`/products`).then(res => res.data).catch(err => err.message);
+export const getProducts = (type:string) => axiosInstance.get(`/products/${type}`).then(res => res.data).catch(err => err.message);
 export const getProductsIndetail = (serialNumber:any) => axiosInstance.get(`/products/${serialNumber}`).then(res => res.data).catch(err => err.message);
 export const createProduct = (data: {name: string; category: string; serialNumber: string;}) => axiosInstance.post("/products", data).then(res => res.data).catch(err => err.message);
 //location

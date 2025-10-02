@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
-import { getEmployees } from "@/services/serviceApis";
+import {  MarkingMangerOptionsfetch,  TechincianOptionsfetch } from "@/services/serviceApis";
 import "react-quill/dist/quill.snow.css";
 
 const queryClient = new QueryClient();
@@ -43,9 +43,12 @@ export default function RootLayout({
 
 function PrefetchEmployees() {
   useQuery({
-    queryKey: ["employees"],
-    queryFn: () => getEmployees({ designation: "Technician" }),
-    staleTime: 1000 * 60 * 5, // 5 min cache
-  });
+    queryKey: ["MarkingMangerOptions"],
+    queryFn: () => MarkingMangerOptionsfetch,
+  })
+  useQuery({
+    queryKey: ["TechincianOptions"],
+    queryFn: () => TechincianOptionsfetch,
+  })
   return null; // nothing to render
 }

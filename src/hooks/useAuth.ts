@@ -1,32 +1,42 @@
 // hooks/useAuth.ts
-import { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { useQuery } from "@tanstack/react-query";
+import { userProfile } from "@/services/serviceApis";
 
-interface DecodedToken {
+export interface DecodedToken {
   id: string;
   customer?: string;
   designation: string;
   exp: number;
 }
 
+
+export interface UserProfileResponse {
+  success: boolean;
+  user: DecodedToken;
+}
+
 export const useAuth = () => {
-  const [user, setUser] = useState<DecodedToken | null>(null);
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<UserProfileResponse>({
+    queryKey: ["userProfile"],
+    queryFn: userProfile,
+    // optional: don't automatically refetch on window focus
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
 
-    if (token) {
-      try {
-        const decoded: DecodedToken = jwtDecode(token);
-        setUser(decoded);
-      } catch (err) {
-        console.error("Invalid token", err);
-      }
-    }
-  }, []);
+    // const user = data?.user ?? null;
 
-  return { user, isLoggedIn: !!user };
+
+  return {
+    user: data?.user,
+    isLoggedIn: !!data,
+    isLoading,
+    isError,
+    refetch,
+  };
 };

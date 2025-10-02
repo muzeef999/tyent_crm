@@ -6,11 +6,12 @@ import Image from "next/image";
 
 const Page = () => {
   return (
-    <div className="min-h-screen flex items-between justify-between bg-[linear-gradient(135deg,#04a5e3,#6dd5fa,#ffffff)]">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 items-start  gap-12">
+    <div className="bg-[linear-gradient(135deg,#04a5e3,#6dd5fa,#ffffff)]">
+      <div className="container flex flex-col min-h-screen md:flex-row">
         
         {/* Left Content */}
-        <div className="p-16 mt-[30%] space-y-6">
+        <div className="hidden md:flex justify-center items-center">
+        <div className="p-16 space-y-6">
           {/* Logo */}
           <div className="w-32 md:w-40">
             <Image
@@ -35,9 +36,10 @@ const Page = () => {
             track tasks, and manage daily operations seamlessly.
           </p>
         </div>
+        </div>
 
         {/* Right Content (Login Form) */}
-        <div className="w-full max-w-md flex mx-auto ">
+        <div className="m-2">
           <AddLogin />
         </div>
       </div>

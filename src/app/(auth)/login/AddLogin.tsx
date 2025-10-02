@@ -6,7 +6,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useRef, useState, useEffect, use } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { generateAndSetToken } from "@/utils/generateAndSetToken";
 
 export default function EmployeeLogin() {
   const [phone, setPhone] = useState("");
