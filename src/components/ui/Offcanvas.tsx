@@ -68,7 +68,7 @@ const Offcanvas: React.FC<OffcanvasProps> = ({
           {/* Panel */}
           <motion.div
             key="panel"
-            className="fixed top-0 right-0 w-full sm:w-[800px] h-full bg-white z-50 shadow-xl p-6 overflow-y-auto rounded-l-2xl"
+            className="fixed top-0 right-0 w-full sm:w-[650px] h-full bg-white z-50 shadow-xl p-6 overflow-y-auto rounded-l-2xl"
             variants={panelVariants}
             initial="hidden"
             animate="visible"

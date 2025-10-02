@@ -31,15 +31,13 @@ const designation = Array.isArray(id)
   ? decodeURIComponent(id)    // If it's a string
   : undefined;                // If nothing
 
-console.log("🟢 Decoded Type:", designation);
-
 const {
   data: employees,
   isLoading,
   error,
 } = useQuery({
-  queryKey: ["employees", { page, limit, designation }], // better caching
-  queryFn: () => getEmployees({ page, limit, designation }),
+  queryKey: ["employees", { page, limit, }], // better caching
+  queryFn: () => getEmployees({ page, limit }),
   enabled: !!designation, // prevents query from running when type is undefined
 });
 

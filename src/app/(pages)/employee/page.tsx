@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddEmployee from "@/components/AddEmployee";
 import Button from "@/components/ui/Button";
 import Offcanvas from "@/components/ui/Offcanvas";
-import { employeeAnlaytics } from "@/services/serviceApis";
+import { getEmployees, employeeAnalytics } from "@/services/serviceApis";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { useQuery } from "@tanstack/react-query";
 import { IoIosAdd } from "react-icons/io";
@@ -19,9 +19,9 @@ import {
 } from "react-icons/fa";
 import Link from "next/link";
 import CountUp from "react-countup";
-import Pagination from "@/components/ui/Pagination";
 import TypeSearch from "@/components/TypeSearch";
 import { useAuth } from "@/hooks/useAuth";
+import useDebounce from "@/hooks/useDebounce";
 
 // 🔹 Props for Designation Card
 interface StatsCardProps {
@@ -52,20 +52,44 @@ const DesgCard: React.FC<StatsCardProps> = ({
   </Link>
 );
 
-const Page = () => {
+const EmployeePage  = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
 
-    const { user } = useAuth();
   
+
+  const { user } = useAuth();
+
+ useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setStartDate(urlParams.get("start"));
+    setEndDate(urlParams.get("end"));
+  }, []);
 
   const {
     data: employeesanlaytics,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["employeesAnalaytics"],
-    queryFn: employeeAnlaytics,
+    queryKey: ["employeesAnalaytics", startDate, endDate],
+    queryFn: () =>
+      employeeAnalytics({
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+      }),
+  });
+
+  const debouncedSearchText = useDebounce(searchText, 100);
+  const {
+    data: searchEmployees,
+    isLoading: isSearchLoading,
+    isError: isSearchError,
+  } = useQuery({
+    queryKey: ["SearchCustomers", debouncedSearchText],
+    queryFn: () => getEmployees({ q: debouncedSearchText }),
+    enabled: !!debouncedSearchText,
   });
 
   if (isLoading) {
@@ -76,11 +100,11 @@ const Page = () => {
     return (
       <div className="p-6 text-red-500">Error: {getErrorMessage(error)}</div>
     );
-  } 
+  }
 
   // ✅ Convert API response into lookup { designation: count }
   const counts: Record<string, number> = {};
-  employeesanlaytics?.messaage?.forEach(
+  employeesanlaytics?.data?.forEach(
     (item: { _id: string; count: number }) => {
       counts[item._id] = item.count;
     }
@@ -198,31 +222,53 @@ const Page = () => {
   return (
     <>
       {/* Header */}
- 
-       <div className="m-4">
-      <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
-        <div>
-          <h1 className="font-medium text-2xl text-black">
-            Hello,{user?.customer}
-          </h1>
-          <p className="text-md">{user?.designation}</p>
-        </div>
 
-        <div>
-          <div className="flex-1 min-w-[580px]">
-            <TypeSearch
-              onSearch={setSearchText}
-              placeHolderData={
-                "🔍 Search customer by contact number, email, name, addhar or pan number"
-              }
-            />
+      <div className="m-4">
+        <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
+          <div>
+            <h1 className="font-medium text-2xl text-black">
+              Hello,{user?.customer}
+            </h1>
+            <p className="text-md">{user?.designation}</p>
           </div>
+
+          <div>
+            <div className="flex-1 relative min-w-[580px]">
+              <TypeSearch
+                onSearch={setSearchText}
+                placeHolderData={
+                  "🔍 Search employee by contact number, email, name, addhar or pan number"
+                }
+              />
+
+              {searchText && (
+                <div className="absolute bg-white w-full rounded-md border border-gray-200 shadow-lg z-10">
+                  {isSearchLoading && (
+                    <div className="p-2 text-gray-500">Loading...</div>
+                  )}
+
+                  {!isSearchLoading && searchEmployees?.data?.length === 0 && (
+                    <div className="p-2 text-gray-500">No results</div>
+                  )}
+
+                  {!isSearchLoading &&
+                    searchEmployees?.data?.map((s: any) => (
+                      <div
+                        key={s._id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {`${s.name} > ${s.contactNumber} > ${s.designation} > ${s.panNumber} > ${s.adharNumber}`}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
+            <IoIosAdd size={22} />
+            Add Employee
+          </Button>
         </div>
-        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
-          <IoIosAdd size={22} />
-          Add Employee
-        </Button>
-      </div>
       </div>
 
       {/* Reports + Designations side by side (desktop) / stacked (mobile) */}
@@ -263,4 +309,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default EmployeePage;

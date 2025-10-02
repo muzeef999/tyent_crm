@@ -128,6 +128,8 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
                 "🔍 Search customer by contact number, email, invoice, or serial number"
               }
             />
+          
+
 
             {searchText && (
               <div className="absolute bg-white w-full  rounded-md border border-gray-200 shadow-lg z-10">

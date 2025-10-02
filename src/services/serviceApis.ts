@@ -83,28 +83,43 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 
 //EMPLOYEES
-export const getEmployees = async ({ page = 1, limit = 10, designation,}: { page?: number; limit?: number; designation?: string;}) => {
-  const params: Record<string, string | number> = { page, limit,};
-  if (designation) {
-    const [key, value] = designation.split("="); 
-    if (key && value) {
-      params[key] = value; 
-    }
-  }
-  const res = await axiosInstance.get(`/employees`, { params });return res.data;
+export const getEmployees = async ({  startDate,  endDate,  page = 1, limit = 10, q = "",}: {  page?: number;  limit?: number;
+  q?: string; startDate?: Date | null;  endDate?: Date | null;}) => {
+  const params: Record<string, string | number> = {page, limit,  q,};
+
+  if (startDate) { params.start = startDate.toISOString().split("T")[0];  }
+
+  if (endDate) { params.end = endDate.toISOString().split("T")[0];}
+
+  const res = await axiosInstance.get(`/employees`, { params });
+  return res.data;
 };
 
+
+
+export const employeeAnalytics = async ({  startDate, endDate,}: { startDate?: Date | null; endDate?: Date | null;}) => {
+  
+  const params: Record<string, string> = {};
+
+  if (startDate) {  params.start = startDate.toISOString().split("T")[0]; }
+
+  if (endDate) { params.end = endDate.toISOString().split("T")[0];}
+
+  const res = await axiosInstance.get(`/employees/analytics?`, { params });
+
+  return res.data;
+};
+
+
+export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const  MarkingMangerOptionsfetch = () => axiosInstance.get("/employees/MarkingMangerOptions").then((res) => res.data);
 export const  TechincianOptionsfetch = () => axiosInstance.get("/employees/TechincianOptions").then((res) => res.data);
 export const employeAssignTask =(id:string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
-export const createEmployee = (employee: Employee) => axiosInstance.post("/employees", employee).then((res) => res.data);
 export const updateEmployee = (id: string) => axiosInstance.put(`/employees/${id}`).then((res) => res.data);
 export const deleteEmployee = (id: string) => axiosInstance.delete(`/employees/${id}`).then((res) => res.data);
 export const getEmployeeById = (id: string) => axiosInstance.get(`/employees/${id}`).then((res) => res.data);
 
 
-
-export const employeeAnlaytics = () => axiosInstance.get(`/employees/analytics`).then((res) => res.data);
 
 
 

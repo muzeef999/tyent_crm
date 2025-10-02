@@ -13,16 +13,21 @@ export default function ReportsSection() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-  // 🔹 Router push after selecting dates
-  const pushToRouter = () => {
-    if (startDate && endDate) {
+  // Function to push URL without full page refresh
+  const pushToRouter = (s: string, e: string) => {
+    router.push(`?start=${s}&end=${e}`); // push without full refresh
+  };
+
+  const handleEndDateChange = (date: Date | null) => {
+    setEndDate(date);
+
+    if (startDate && date) {
       const s = startDate.toISOString().split("T")[0];
-      const e = endDate.toISOString().split("T")[0];
-      router.push(`?start=${s}&end=${e}`);
+      const e = date.toISOString().split("T")[0];
+      pushToRouter(s, e);
     }
   };
 
-  // 🔹 Report summary
   const getSummary = () => {
     if (startDate && endDate) {
       return `Showing report from ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}.`;
@@ -41,7 +46,13 @@ export default function ReportsSection() {
           <h3 className="text-lg font-semibold text-gray-800">Employee</h3>
         </div>
         <button
-          onClick={pushToRouter}
+          onClick={() => {
+            if (startDate && endDate) {
+              const s = startDate.toISOString().split("T")[0];
+              const e = endDate.toISOString().split("T")[0];
+              pushToRouter(s, e);
+            }
+          }}
           className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1 hover:bg-gray-50 cursor-pointer"
         >
           <FaDownload className="h-4 w-4" />
@@ -53,7 +64,7 @@ export default function ReportsSection() {
       <div className="flex gap-2 mb-6">
         <DatePicker
           selected={startDate}
-          onChange={(date) => setStartDate(date)}
+          onChange={setStartDate}
           selectsStart
           startDate={startDate}
           endDate={endDate}
@@ -62,10 +73,7 @@ export default function ReportsSection() {
         />
         <DatePicker
           selected={endDate}
-          onChange={(date) => {
-            setEndDate(date);
-            pushToRouter(); // auto-push on end date selection
-          }}
+          onChange={handleEndDateChange}
           selectsEnd
           startDate={startDate}
           endDate={endDate}
@@ -79,7 +87,9 @@ export default function ReportsSection() {
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-2 mb-2">
           <FiFileText className="h-4 w-4 text-gray-600" />
-          <span className="text-sm font-medium text-gray-700">select Employe  data</span>
+          <span className="text-sm font-medium text-gray-700">
+            Select Employee data
+          </span>
         </div>
         <p className="text-sm text-gray-600">{getSummary()}</p>
       </div>

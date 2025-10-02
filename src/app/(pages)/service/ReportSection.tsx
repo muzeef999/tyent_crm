@@ -166,7 +166,7 @@ export default function ReportsSection() {
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
-              selectsStart
+              selectsStart 
               startDate={startDate}
               endDate={endDate}
               placeholderText="Start date"

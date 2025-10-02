@@ -3,6 +3,7 @@ import { IoIosAdd } from "react-icons/io";
 import {
   getEmployees,
   getServiceById,
+  TechincianOptionsfetch,
   updateService,
 } from "@/services/serviceApis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -43,14 +44,17 @@ const AssignService: React.FC<AssignedServiceProp> = ({ onClose, id }) => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const editRef = useRef<HTMLDivElement>(null);
 
-  const {
-    data: employees,
-    isLoading,
+
+
+      const {
+      data: employees,
+      isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["employees"],
-    queryFn: () => getEmployees({ designation: "Technician" }),
-  });
+    } = useQuery({
+      queryKey: ["TechincianOptions"],
+      queryFn: () => TechincianOptionsfetch(),
+    });
+  
 
   const { data: getEmployeesDataId } = useQuery({
     queryKey: ["Assingdata", id],
