@@ -5,6 +5,8 @@ import { saveOtpToRedis } from "@/utils/saveOtpToRedis";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
+
+
 export const GET = async (req: NextRequest) => {
   try {
     const phone = (req.nextUrl.searchParams.get("contactNumber") || "").trim();
@@ -45,13 +47,11 @@ export const GET = async (req: NextRequest) => {
       templateId: "1531142600990906",
     });
 
-
-
-
     return NextResponse.json(
       { success: true, message: "OTP sent successfully." },
-      { status: 200 }
+      { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
+
   } catch (error) {
     const Error = getErrorMessage(error);
     return NextResponse.json({ success: false, error: Error }, { status: 500 });
