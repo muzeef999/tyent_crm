@@ -3,7 +3,7 @@ import Input from "@/components/ui/Input";
 import WelocomeImage from "@/components/ui/WelocomeImage";
 import { login, verifyOtp } from "@/services/serviceApis";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, use } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { generateAndSetToken } from "@/utils/generateAndSetToken";
@@ -32,12 +32,12 @@ export default function EmployeeLogin() {
     data: contactSearch,
     isFetching: isSearching,
     error: searchError,
-    refetch: searchEmployee
+    refetch: searchEmployee,
   } = useQuery({
     queryKey: ["login", phone],
     queryFn: () => login(phone),
     enabled: false, // Don't run automatically
-    retry: false
+    retry: false,
   });
 
   // 🔹 Verify OTP mutation
@@ -47,7 +47,7 @@ export default function EmployeeLogin() {
     onSuccess: (data) => {
       toast.success("OTP verified successfully!");
 
-        window.location.reload();
+      window.location.reload();
       // You might want to redirect or set auth state here
     },
     onError: (error: any) => {
@@ -78,7 +78,7 @@ export default function EmployeeLogin() {
       toast.error("Enter valid 10-digit phone number");
       return;
     }
-    
+
     // Check if employee exists first
     try {
       const result = await searchEmployee();
@@ -89,6 +89,14 @@ export default function EmployeeLogin() {
       toast.error("Employee not found");
     }
   };
+
+  useEffect(() => {
+   
+    if (phone.length == 10) {
+      console.log("Searching for employee...");
+      handleSendOtp();
+    }
+  }, [phone]);
 
   // 🔹 OTP input change
   const handleChange = (
@@ -126,10 +134,16 @@ export default function EmployeeLogin() {
   // 🔹 Resend OTP
   const handleResendOtp = () => {
     if (otpTimer > 0) return;
-    
+
     setOtp(new Array(6).fill(""));
     sendOtpMutation();
   };
+
+
+  useEffect(() => {
+    if ( otp.length == 6 && otp.every((digit) => digit !== ""))
+    verifyOtpMutation();
+  },[otp])
 
   return (
     <motion.div
@@ -153,7 +167,7 @@ export default function EmployeeLogin() {
               <Input
                 label="Phone Number"
                 name="phone"
-                placeholder="+91 98765 43210"
+                placeholder="9876543210"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                 maxLength={10}
@@ -168,14 +182,6 @@ export default function EmployeeLogin() {
               {isSearching && (
                 <p className="text-blue-500 -mt-4 text-sm">Searching...</p>
               )}
-
-              <button
-                onClick={handleSendOtp}
-                disabled={isSendingOtp || isSearching}
-                className="mt-4 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md"
-              >
-                {isSendingOtp ? "Sending..." : "Send OTP"}
-              </button>
             </div>
           ) : (
             <div>
@@ -215,14 +221,6 @@ export default function EmployeeLogin() {
                 ))}
               </div>
 
-              {/* 🔹 Verify / Resend */}
-              <button
-                onClick={() => verifyOtpMutation()}
-                disabled={isVerifying || otp.some(digit => digit === "")}
-                className="mt-6 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium shadow-md w-full"
-              >
-                {isVerifying ? "Verifying..." : "Verify OTP"}
-              </button>
 
               <div className="mt-3 flex justify-center">
                 {otpTimer > 0 ? (
