@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.tyent.co.in',
       },
+      {
+        protocol: 'https',
+        hostname: 'live.bulkly.io',
+        port: '',
+        pathname: '/**',
+      },
     ]
   }
 };
