@@ -133,11 +133,11 @@ export async function middleware(req: NextRequest) {
   }
 }
 
-// export const config = {
-//   matcher: ["/((?!api/:path*|_next/static|_next/image|favicon.ico).*)"],
-// };
-
 
 export const config = {
-  matcher: ["/(.*)"]
-}
+  matcher: [
+    // This regular expression correctly excludes all API routes and other special Next.js paths.
+    // The `|` acts as an "OR" operator inside the negative lookahead `(?!...)`.
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};
