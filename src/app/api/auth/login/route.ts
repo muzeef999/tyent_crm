@@ -47,11 +47,13 @@ export const GET = async (req: NextRequest) => {
       templateId: "1531142600990906",
     });
 
+
+
+
     return NextResponse.json(
       { success: true, message: "OTP sent successfully." },
-      { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } }
+      { status: 200 }
     );
-
   } catch (error) {
     const Error = getErrorMessage(error);
     return NextResponse.json({ success: false, error: Error }, { status: 500 });
