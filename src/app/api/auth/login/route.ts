@@ -39,6 +39,9 @@ export const GET = async (req: NextRequest) => {
 
     console.log(`Generated OTP for ${phone}: ${otp}`);
 
+
+    console.log(process.env.BULKLY_API_URL!);
+    console.log(process.env.BULKLY_API_URL);
     
     await axios.post(process.env.BULKLY_API_URL!, {
       phoneId: "333862093154829",
