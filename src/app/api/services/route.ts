@@ -54,62 +54,53 @@ export const POST = async (req: NextRequest) => {
 };
 
 
+
 export const GET = async (req: Request) => {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
 
+    // --- Query Params ---
     const q = searchParams.get("q")?.trim() || "";
-    const pageStr = searchParams.get("page");
-    const limitStr = searchParams.get("limit");
-    const startParam = searchParams.get("start");
-    const endParam = searchParams.get("end");
-    const type = searchParams.get("type"); // serviceType or monthly/weekly/yearly
-    const status = searchParams.get("status"); // filter status
-
-    const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : 1;
-    const limit = limitStr
-      ? Math.min(50, Math.max(1, parseInt(limitStr, 10)))
-      : 10;
+    const customerQuery = searchParams.get("customer")?.trim() || "";
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "10", 10)));
     const skip = (page - 1) * limit;
 
-    // Build filter
+    const startParam = searchParams.get("start");
+    const endParam = searchParams.get("end");
+    const type = searchParams.get("type"); // serviceType or ticketsToday/monthly/weekly/yearly
+    const status = searchParams.get("status");
+
+    // --- Build Service Filter ---
     const filter: any = {};
 
-    // Free text search
+    // Free text search (notes, status, serviceType)
     if (q) {
       filter.$or = [
+        { notes: { $regex: q, $options: "i" } },
         { status: { $regex: q, $options: "i" } },
         { serviceType: { $regex: q, $options: "i" } },
-        { notes: { $regex: q, $options: "i" } },
       ];
     }
 
-    // Status filter (regex → supports starts/ends/contains)
-    if (status) {
-      filter.status = { $regex: status, $options: "i" };
+    // Status filter
+    if (status) filter.status = { $regex: status, $options: "i" };
+
+    // Service type filter
+    if (type && type !== "monthly" && type !== "weekly" && type !== "yearly") {
+      if (type === "ticketsToday") {
+        const today = new Date();
+        filter.serviceDate = {
+          $gte: new Date(today.setHours(0, 0, 0, 0)),
+          $lte: new Date(today.setHours(23, 59, 59, 999)),
+        };
+      } else {
+        filter.serviceType = { $regex: type, $options: "i" };
+      }
     }
 
-    // ServiceType filter (regex → supports starts/ends/contains)
-    // Handle type filter and ticketsToday
-if (type) {
-  if (type === "ticketsToday") {
-    const today = new Date();
-    filter.serviceDate = {
-      $gte: new Date(today.setHours(0, 0, 0, 0)),
-      $lte: new Date(today.setHours(23, 59, 59, 999)),
-    };
-  } else if (!["monthly", "weekly", "yearly"].includes(type)) {
-    // Regular serviceType filter
-    filter.serviceType = { $regex: type, $options: "i" };
-  }
-}
-
-
-
-
-
-    // Date range
+    // Date range filter
     if (startParam && endParam) {
       filter.serviceDate = {
         $gte: new Date(startParam),
@@ -117,19 +108,32 @@ if (type) {
       };
     }
 
-    const total = await Service.countDocuments(filter);
-
+    // --- Fetch Services with Customer Search ---
     const services = await Service.find(filter)
-      .populate("customerId", "name installedModel")
+      .populate({
+        path: "customerId",
+        select: "name email installedModel",
+        match: customerQuery
+          ? {
+              $or: [
+                { name: { $regex: customerQuery, $options: "i" } },
+                { email: { $regex: customerQuery, $options: "i" } },
+              ],
+            }
+          : undefined,
+      })
       .populate("employeeId", "name email")
       .skip(skip)
       .limit(limit)
       .sort({ serviceDate: -1 })
       .lean();
 
-    // Analytics
-    const totalTickets = total;
+    // Remove services where customer didn't match
+    const filteredServices = services.filter((s) => s.customerId);
 
+    const total = filteredServices.length;
+
+    // --- Analytics ---
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
@@ -139,49 +143,42 @@ if (type) {
       serviceDate: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    // Status counts
     const statusCounts = await Service.aggregate([
       { $match: filter },
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
 
-    // Service type counts
     const serviceTypeCounts = await Service.aggregate([
       { $match: filter },
       { $unwind: "$serviceType" },
       { $group: { _id: "$serviceType", count: { $sum: 1 } } },
     ]);
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Filtered services fetched successfully",
-        data: services,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
-        analytics: {
-          totalTickets,
-          ticketsToday,
-          statusCounts,
-          serviceType: serviceTypeCounts,
-        },
+    return NextResponse.json({
+      success: true,
+      message: "Filtered services fetched successfully",
+      data: filteredServices,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      { status: 200 }
-    );
+      analytics: {
+        totalTickets: total,
+        ticketsToday,
+        statusCounts,
+        serviceType: serviceTypeCounts,
+      },
+    });
   } catch (err: unknown) {
-    const errorMsg = getErrorMessage(err);
     return NextResponse.json(
       {
         success: false,
         message: "Database connection failed",
-        error: errorMsg,
+        error: err instanceof Error ? err.message : String(err),
       },
       { status: 500 }
     );
   }
 };
-

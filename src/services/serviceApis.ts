@@ -47,6 +47,11 @@ export const updateService = (id: string, updatedFields: Record<string, any>) =>
 export const deleteService = (id: string) => axiosInstance.delete(`/services/${id}`).then((res) => res.data);
 export const getServiceById = (id: string) => axiosInstance.get(`/services/${id}`).then((res) => res.data);
 
+export const searchService = (customer: string) => {
+  return axiosInstance
+    .get(`/services`, { params: { customer } }) // send as query param
+    .then((res) => res.data);
+};
 
 // servicesApi.ts
 export const getServices = (query: string) =>  axiosInstance.get(`/services?${query}`).then((res) => res.data);
@@ -83,13 +88,29 @@ export const getPaymentById = (id: string) => axiosInstance.get(`/payments/${id}
 
 
 //EMPLOYEES
-export const getEmployees = async ({  startDate,  endDate,  page = 1, limit = 10, q = "",}: {  page?: number;  limit?: number;
-  q?: string; startDate?: Date | null;  endDate?: Date | null;}) => {
-  const params: Record<string, string | number> = {page, limit,  q,};
+export const getEmployees = async ({
+  startDate,
+  endDate,
+  page = 1,
+  limit = 10,
+  designation,
+}: {
+  page?: number;
+  limit?: number;
+  q?: string;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  designation?: string;
+}) => {
+  const params: Record<string, string | number> = { page, limit};
 
-  if (startDate) { params.start = startDate.toISOString().split("T")[0];  }
+  const str = designation;
 
-  if (endDate) { params.end = endDate.toISOString().split("T")[0];}
+
+  if (typeof str === "string") params.designation = str.replace("designation=", "");
+
+  if (startDate) params.start = startDate.toISOString().split("T")[0];
+  if (endDate) params.end = endDate.toISOString().split("T")[0];
 
   const res = await axiosInstance.get(`/employees`, { params });
   return res.data;

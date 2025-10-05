@@ -42,9 +42,9 @@ const {
   isLoading,
   error,
 } = useQuery({
-  queryKey: ["employees", { page, limit, }], // better caching
-  queryFn: () => getEmployees({ page, limit }),
-  enabled: !!designation, // prevents query from running when type is undefined
+  queryKey: ["employees", { page, limit, designation}], // better caching
+  queryFn: () => getEmployees({ page, limit, designation }),
+  enabled: true, // prevents query from running when type is undefined
 });
 
 

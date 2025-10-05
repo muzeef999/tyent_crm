@@ -11,7 +11,7 @@ import {
   FiShield,
 } from "react-icons/fi";
 import { useQuery } from "@tanstack/react-query";
-import { analytics } from "@/services/serviceApis";
+import { analytics, getCustomers, searchService } from "@/services/serviceApis";
 import CountUp from "react-countup";
 import Button from "@/components/ui/Button";
 import { IoIosAdd } from "react-icons/io";
@@ -24,6 +24,8 @@ import Offcanvas from "@/components/ui/Offcanvas";
 import AddService from "./AddService";
 import TypeSearch from "@/components/TypeSearch";
 import { useAuth } from "@/hooks/useAuth";
+import useDebounce from "@/hooks/useDebounce";
+import AssignService from "./AssignService";
 const SeviceDashboard = dynamic(
   () => import("@/components/skeleton/SeviceDashboard"),
   { ssr: false }
@@ -66,6 +68,14 @@ const PageContent = () => {
 
   const [searchText, setSearchText] = useState("");
 
+
+      const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
+      const [showupDateSidebar, setShowupDateSidebar] = useState<boolean>(false);
+        const [selectedServiceId, setSelectedService] = useState<string | null>(
+          null
+        );
+  
+
   const { user } = useAuth();
 
   const {
@@ -79,6 +89,16 @@ const PageContent = () => {
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
       }),
+  });
+
+  const debouncedSearchText = useDebounce(searchText, 100);
+  const {
+    data: searchCustomer,
+    isLoading: isSearchLoading,
+    isError: isSearchError,
+  } = useQuery({
+    queryKey: ["Searchservice", debouncedSearchText],
+    queryFn: () => searchService(debouncedSearchText),
   });
 
   if (isLoading)
@@ -109,7 +129,7 @@ const PageContent = () => {
       title: "Tickets In Progress",
       value: serviceAnalyticsd?.inProgress || 0,
       icon: <FiClock />,
-      iconBg: "bg-yellow-500", 
+      iconBg: "bg-yellow-500",
       link: `/service/status=ONGOING&start=${startDate}&end=${endDate}`,
     },
     {
@@ -124,14 +144,14 @@ const PageContent = () => {
       value: serviceAnalyticsd?.generalServicesDue || 0,
       icon: <FiAlertTriangle />,
       iconBg: "bg-red-500",
-       link: `/service/type=GENERAL_SERVICE&start=${startDate}&end=${endDate}`,
+      link: `/service/type=GENERAL_SERVICE&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Spares Changed",
       value: serviceAnalyticsd?.sparesChanged || 0,
       icon: <FiTool />,
       iconBg: "bg-teal-500",
-       link: `/service/type=SPARE_PART_REPLACEMENT&start=${startDate}&end=${endDate}`,
+      link: `/service/type=SPARE_PART_REPLACEMENT&start=${startDate}&end=${endDate}`,
     },
     {
       title: "In-Warranty RO",
@@ -177,33 +197,63 @@ const PageContent = () => {
     year: "numeric",
   });
 
+
+    const handleRowClick = (serviceId: string) => {
+    setSelectedService(serviceId);
+    setShowDetailsSidebar(true);
+  };
+
+
   return (
     <>
-    <div className="m-4">
-      <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
-        <div>
-          <h1 className="font-medium text-2xl text-black">
-            Hello,{user?.customer}
-          </h1>
-          <p className="text-md">{user?.designation}</p>
-        </div>
-
-        <div>
-          <div className="flex-1 min-w-[580px]">
-            <TypeSearch
-              onSearch={setSearchText}
-              placeHolderData={
-                "🔍 Search customer by contact number, email, invoice, or serial number"
-              }
-            />
+      <div className="m-4">
+        <div className="flex justify-between items-center shadow-sm bg-white sha p-2 rounded-xl mb-4">
+          <div>
+            <h1 className="font-medium text-2xl text-black">
+              Hello,{user?.customer}
+            </h1>
+            <p className="text-md">{user?.designation}</p>
           </div>
-        </div>
 
-        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
-          <IoIosAdd size={22} />
-          Add Service
-        </Button>
-      </div>
+          <div>
+            <div className="flex-1 relative min-w-[580px]">
+              <TypeSearch
+                onSearch={setSearchText}
+                placeHolderData={
+                  "🔍 Search customer by contact number, email, invoice, or serial number"
+                }
+              />
+
+              {searchText && (
+                <div className="absolute bg-white w-full  rounded-md border border-gray-200 shadow-lg z-10">
+                  {isSearchLoading && (
+                    <div className="p-2 text-gray-500">Loading...</div>
+                  )}
+
+                  {!isSearchLoading && searchCustomer?.data?.length === 0 && (
+                    <div className="p-2 text-gray-500">No results</div>
+                  )}
+
+                  {!isSearchLoading &&
+                    searchCustomer?.data?.map((s: any) => (
+                      <div
+                        key={s._id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleRowClick(s._id!)}
+                      >
+                        {`${s.customerId.name}`}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
+            <IoIosAdd size={22} />
+            Add Service
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4 p-4">
@@ -264,6 +314,21 @@ const PageContent = () => {
         <div className="p-4">
           <AddService onClose={() => setShowAddSidebar(false)} />
         </div>
+      </Offcanvas>
+
+
+      
+      <Offcanvas
+        show={showDetailsSidebar}
+        onClose={() => setShowDetailsSidebar(false)}
+        title="Service Info"
+      >
+        {selectedServiceId && (
+        
+          <AssignService 
+            onClose={() => setShowupDateSidebar(false)}
+            id={selectedServiceId} />
+        )}
       </Offcanvas>
     </>
   );

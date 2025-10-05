@@ -119,7 +119,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           </h1>
           <p className="text-md">{user?.designation}</p>
         </div>
-
+ 
         <div>
           <div className="flex-1 relative min-w-[580px]">
             <TypeSearch
