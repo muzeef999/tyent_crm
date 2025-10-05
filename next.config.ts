@@ -2,7 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    optimizeCss: true, 
+    optimizeCss: true,
+    serverActions: { allowedOrigins: ['*']} 
+  },
+  env: {
+    BULKLY_API_URL: process.env.BULKLY_API_URL,
   },
   images: {
     remotePatterns: [
