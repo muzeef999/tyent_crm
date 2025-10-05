@@ -22,6 +22,7 @@ import CountUp from "react-countup";
 import TypeSearch from "@/components/TypeSearch";
 import { useAuth } from "@/hooks/useAuth";
 import useDebounce from "@/hooks/useDebounce";
+import EmployeeDetails from "./EmployeeDetails";
 
 // 🔹 Props for Designation Card
 interface StatsCardProps {
@@ -57,6 +58,10 @@ const EmployeePage  = () => {
   const [searchText, setSearchText] = useState("");
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
+  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
+        const [selectedemployeeId, setSelectedemployee] = useState<string | null>(
+          null
+        );
 
   
 
@@ -219,6 +224,12 @@ const EmployeePage  = () => {
     },
   ];
 
+
+  const handleRowClick = (employeeId: string) => {
+    setSelectedemployee(employeeId);
+    setShowDetailsSidebar(true);
+  };
+
   return (
     <>
       {/* Header */}
@@ -254,8 +265,10 @@ const EmployeePage  = () => {
                   {!isSearchLoading &&
                     searchEmployees?.data?.map((s: any) => (
                       <div
-                        key={s._id}
                         className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleRowClick(s._id!)}
+                        key={s._id}
+                      
                       >
                         {`${s.name} > ${s.contactNumber} > ${s.designation} > ${s.panNumber} > ${s.adharNumber}`}
                       </div>
@@ -304,6 +317,18 @@ const EmployeePage  = () => {
         <div className="p-4">
           <AddEmployee onClose={() => setShowAddSidebar(false)} />
         </div>
+      </Offcanvas>
+
+
+      
+      <Offcanvas
+        show={showDetailsSidebar}
+        onClose={() => setShowDetailsSidebar(false)}
+        title="Customer Info"
+      >
+        {selectedemployeeId && (
+          <EmployeeDetails employeeId={selectedemployeeId} />
+        )}
       </Offcanvas>
     </>
   );

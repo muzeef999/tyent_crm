@@ -12,11 +12,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import React, { use, useState } from "react";
 import { IoIosAdd } from "react-icons/io";
+import EmployeeDetails from "../EmployeeDetails";
 
 const Page = () => {
   const [showAddSidebar, setShowAddSidebar] = useState(false); // fixed
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 500);
+  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
+    const [selectedEmployeeId, setSelectedEmployee] = useState<string | null>(
+      null
+    );
+  
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(10);
@@ -42,6 +48,11 @@ const {
 });
 
 
+const handleRowClick = (employeeId: string) => {
+    setSelectedEmployee(employeeId);
+    setShowDetailsSidebar(true);
+  };
+
   const pagination = employees?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
@@ -53,19 +64,6 @@ const {
 
   return (
     <>
-      <div className="flex flex-wrap justify-between items-start bg-background px-6 py-4 gap-4">
-        <div>
-          <h1 className="font-bold text-2xl text-black">
-            Employee Analytics Dashboard
-          </h1>
-          <p className="text-md">Water Ionizer Management System Overview</p>
-        </div>
-
-        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
-          <IoIosAdd size={22} />
-          Add Customer
-        </Button>
-      </div>
 
       <div className="p-6 overflow-x-auto">
         <table className="w-full min-w-[1000px] customtable">
@@ -86,7 +84,10 @@ const {
               <TableLoading />
             ) : (
               employees?.data?.map((employee: Employee) => (
-                <tr key={employee._id}>
+                <tr key={employee._id} 
+                                 className="transition hover:bg-gray-50 cursor-pointer border-t"
+
+                onClick={() => handleRowClick(employee._id!)}>
                   <td>{employee.name}</td>
                   <td>{employee.status}</td>
                   <td>{employee?.designation}</td>
@@ -101,7 +102,7 @@ const {
                       : "continue"}
                   </td>
                   <td>{employee.contactNumber}</td>
-                  <td>{employee.email}</td>
+                  <td>{employee.email}</td>  
                   <td>{employee.address}</td>
                 </tr>
               ))
@@ -121,15 +122,18 @@ const {
         />
       </div>
 
-      <Offcanvas
-        show={showAddSidebar}
-        onClose={() => setShowAddSidebar(false)}
-        title="Add Employee" // fixed title
+
+
+<Offcanvas
+        show={showDetailsSidebar}
+        onClose={() => setShowDetailsSidebar(false)}
+        title="Customer Info"
       >
-        <div className="p-4">
-          <AddEmployee onClose={() => setShowAddSidebar(false)} />
-        </div>
+        {selectedEmployeeId && (
+          <EmployeeDetails employeeId={selectedEmployeeId} />
+        )}
       </Offcanvas>
+
     </>
   );
 };

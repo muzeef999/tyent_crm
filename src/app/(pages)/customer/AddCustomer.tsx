@@ -235,9 +235,6 @@ const MarkingMangerOptions = managerResponse?.data?.map((emp:any) => ({
   value: emp._id,
 }));
 
-    console.log("TechincianOptions", TechincianOptions);
-
-    console.log("MarkingMangerOptions", MarkingMangerOptions);
 
   const queryClient = useQueryClient();
 

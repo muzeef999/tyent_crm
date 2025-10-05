@@ -128,7 +128,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
                 "🔍 Search customer by contact number, email, invoice, or serial number"
               }
             />
-          
+                   
 
 
             {searchText && (
