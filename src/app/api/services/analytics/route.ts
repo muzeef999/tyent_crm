@@ -57,22 +57,32 @@ export const GET = async (req: Request) => {
           ],
           sparesChanged: [{ $match: { serviceType: "SPARE_PART_REPLACEMENT" } }, { $count: "count" }],
           generalServicesDue: [{ $match: { serviceType: "GENERAL_SERVICE" } }, { $count: "count" }],
-
+  
           // Avg Response Time (hours)
           avgResponseTime: [
-            {
-              $project: {
-                responseTimeInHours: {
-                  $cond: [
-                    { $and: ["$closingDate", "$serviceDate"] },
-                    { $divide: [{ $subtract: ["$closingDate", "$serviceDate"] }, 1000 * 60 * 60] },
-                    null,
-                  ],
-                },
-              },
-            },
-            { $group: { _id: null, avg: { $avg: "$responseTimeInHours" } } },
-          ],
+  {
+    $project: {
+      responseTimeInHours: {
+        $cond: [
+          {
+            $and: [
+              { $ne: ["$closingDate", null] },
+              { $ne: ["$serviceDate", null] }
+            ]
+          },
+          { $divide: [{ $subtract: ["$closingDate", "$serviceDate"] }, 1000 * 60 * 60] },
+          null
+        ]
+      }
+    }
+  },
+  {
+    $group: { 
+      _id: null,
+      avg: { $avg: "$responseTimeInHours" }
+    }
+  }
+],
 
           // Group by service type (for charts)
 

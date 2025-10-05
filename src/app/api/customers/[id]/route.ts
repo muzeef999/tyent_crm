@@ -2,6 +2,9 @@ import { connectDB } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
+import "@/models/Employee"; // 👈 Important: registers Employee model
+import "@/models/Service";  // 👈 also needed if populating serviceHistory/upcomingServices
+import "@/models/Product";
 
 export const GET = async (
   req: NextRequest,

@@ -4,8 +4,8 @@ const { Schema } = mongoose;
 const employeeSchema = new Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, requred: true, unique: true },
-    contactNumber: { type: String, requred: true, unique: true, index:true },
+    email: { type: String, required: true, unique: true },
+    contactNumber: { type: String, required: true, unique: true, index:true },
     designation: {
       type: String,
       enum: [
@@ -36,7 +36,7 @@ const employeeSchema = new Schema(
       unique: true,
       match: [/^[2-9]{1}[0-9]{11}$/, "Invalid Aadhaar number format"],
       required: true,
-    },
+    }, 
     panNumber: {
       type: String,
       unique: true,

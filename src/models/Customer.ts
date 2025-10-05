@@ -109,7 +109,7 @@ const customerSchema = new Schema(
     },
     installedBy: { 
       type: Schema.Types.ObjectId, 
-      ref: "Employee",
+      ref: "Employee", 
       required: true
     },
     marketingManager: { 
