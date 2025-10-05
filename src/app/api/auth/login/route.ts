@@ -41,21 +41,21 @@ export const GET = async (req: NextRequest) => {
 
 
 
-    // const bulklyUrl = process.env.BULKLY_API_URL;
-    // if (!bulklyUrl) {
-    //   throw new Error("Missing BULKLY_API_URL env variable");
-    // }
+    const bulklyUrl = process.env.BULKLY_API_URL;
+    if (!bulklyUrl) {
+      throw new Error("Missing BULKLY_API_URL env variable");
+    }
 
-    // console.log("Sending OTP to external API:", bulklyUrl);
+    console.log("Sending OTP to external API:", bulklyUrl);
 
-    // const response = await axios.post(`${bulklyUrl}/api/sendbulkly`, {
-    //   phoneId: "333862093154829",
-    //   otp,
-    //   recipientPhone: phone,
-    //   templateId: "1531142600990906",
-    // });
+    const response = await axios.post(`${bulklyUrl}/api/sendbulkly`, {
+      phoneId: "333862093154829",
+      otp,
+      recipientPhone: phone,
+      templateId: "1531142600990906",
+    });
 
-    // console.log("External API response:", response.data);
+    console.log("External API response:", response.data);
 
 
 
