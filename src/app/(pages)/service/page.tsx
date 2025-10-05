@@ -95,7 +95,7 @@ const PageContent = () => {
       value: serviceAnalyticsd?.totalTickets || 0,
       icon: <FiFileText />,
       iconBg: "bg-blue-500",
-      link: `/service/?q=total-tickets&start=${startDate}&end=${endDate}`,
+      link: `/service/start=${startDate}&end=${endDate}`,
     },
 
     {
@@ -103,13 +103,13 @@ const PageContent = () => {
       value: serviceAnalyticsd?.ticketsToday || 0,
       icon: <FiCalendar />,
       iconBg: "bg-green-500",
-      link: `/service/?q=ticketsToday&start=${startDate}&end=${endDate}`,
+      link: `/service/type=ticketsToday&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Tickets In Progress",
       value: serviceAnalyticsd?.inProgress || 0,
       icon: <FiClock />,
-      iconBg: "bg-yellow-500",
+      iconBg: "bg-yellow-500", 
       link: `/service/status=ONGOING&start=${startDate}&end=${endDate}`,
     },
     {
@@ -117,51 +117,35 @@ const PageContent = () => {
       value: serviceAnalyticsd?.closed || 0,
       icon: <FiCheckCircle />,
       iconBg: "bg-purple-500",
-      link: `/service/?q=${"closed"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=CLOSED`
-          : ""
-      }`,
+      link: `/service/status=COMPLETED&start=${startDate}&end=${endDate}`,
     },
     {
       title: "General Services Due",
       value: serviceAnalyticsd?.generalServicesDue || 0,
       icon: <FiAlertTriangle />,
       iconBg: "bg-red-500",
-       link: `/service/type=GENERAL SERVICE&start=${startDate}&end=${endDate}`,
+       link: `/service/type=GENERAL_SERVICE&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Spares Changed",
       value: serviceAnalyticsd?.sparesChanged || 0,
       icon: <FiTool />,
       iconBg: "bg-teal-500",
-      link: `/service/?q=${"sparesChanged"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=Total Tickets Generated`
-          : ""
-      }`,
+       link: `/service/type=SPARE_PART_REPLACEMENT&start=${startDate}&end=${endDate}`,
     },
     {
       title: "In-Warranty RO",
       value: serviceAnalyticsd?.inWarranty || 0,
       icon: <FiShield />,
       iconBg: "bg-indigo-500",
-      link: `/service/?q=${"inWarranty"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=IN_WARRANTY`
-          : ""
-      }`,
+      link: `/service/type=IN_WARRANTY_BREAKDOWN&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Out-Warranty RO",
       value: serviceAnalyticsd?.outWarranty || 0,
       icon: <FiShield />,
       iconBg: "bg-orange-500",
-      link: `/service/?q=${"outWarranty"}${
-        startDate && endDate
-          ? `?start=${startDate}&end=${endDate}&type=OUT_WARRANTY`
-          : ""
-      }`,
+      link: `/service/type=Out-Warranty&start=${startDate}&end=${endDate}`,
     },
     {
       title: "Avg-Ticket Resolution Time",

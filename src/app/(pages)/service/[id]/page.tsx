@@ -70,7 +70,7 @@ const Page = () => {
             {isLoading ? (
               <TableLoading />
             ) : (
-              service.data?.map((item: Service) => (
+              service?.map((item: Service) => (
                 <tr
                   key={item._id}
                   className="transition hover:bg-gray-50 cursor-pointer border-t"

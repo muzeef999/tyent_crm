@@ -91,9 +91,23 @@ export const GET = async (req: Request) => {
     }
 
     // ServiceType filter (regex → supports starts/ends/contains)
-    if (type && !["monthly", "weekly", "yearly"].includes(type)) {
-      filter.serviceType = { $regex: type, $options: "i" };
-    }
+    // Handle type filter and ticketsToday
+if (type) {
+  if (type === "ticketsToday") {
+    const today = new Date();
+    filter.serviceDate = {
+      $gte: new Date(today.setHours(0, 0, 0, 0)),
+      $lte: new Date(today.setHours(23, 59, 59, 999)),
+    };
+  } else if (!["monthly", "weekly", "yearly"].includes(type)) {
+    // Regular serviceType filter
+    filter.serviceType = { $regex: type, $options: "i" };
+  }
+}
+
+
+
+
 
     // Date range
     if (startParam && endParam) {

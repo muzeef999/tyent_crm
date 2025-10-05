@@ -3,6 +3,7 @@ import { redis } from "@/lib/redis";
 export async function saveOtpToRedis(key: string, otp: string ) {
   const redisKey = `otp_${key}`;
   const EXPIRE_SECONDS = 3 * 60; // 3 minutes
+    console.log(`✅ OTP saved to Redis for key: ${redisKey}`);
 
   await redis.set(redisKey, otp, { ex: EXPIRE_SECONDS });
 }
