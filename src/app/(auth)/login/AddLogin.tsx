@@ -64,7 +64,7 @@ export default function EmployeeLogin() {
       setMaskedPhone("XXXXXXXX" + last2);
       setIsOtpSent(true);
       setOtpTimer(60); // 60 seconds timer
-      toast.success("OTP sent successfully!");
+      toast.success(data?.message, {duration: 60000,});
     },
     onError: (error: any) => {
       toast.error(error.message || "Error sending OTP");
@@ -92,7 +92,6 @@ export default function EmployeeLogin() {
   useEffect(() => {
    
     if (phone.length == 10) {
-      console.log("Searching for employee...");
       handleSendOtp();
     }
   }, [phone]);
