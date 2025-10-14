@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { getEmployeeById } from "@/services/serviceApis";
@@ -52,6 +52,8 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
     enabled: !!employeeId,
   });
 
+  const [activeTab, setActiveTab] = useState("ALL");
+
   if (isLoading)
     return (
       <div className="p-6 text-center text-gray-500">
@@ -67,9 +69,24 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
     );
 
   const employee: Employee = response?.message;
+  const isTechnician = employee?.designation?.toLowerCase() === "technician";
 
-  const isTechnician =
-    employee?.designation?.toLowerCase() === "technician";
+  // Calculate analytics counts
+  const analytics = useMemo(() => {
+    const counts: Record<string, number> = { PENDING: 0, ONGOING: 0, COMPLETED: 0 };
+    employee?.assignedServices?.forEach((s) => {
+      if (s?.status && s.status in counts) {
+        counts[s.status] = (counts[s.status] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [employee?.assignedServices]);
+
+  // Filter services by active tab
+  const filteredServices = useMemo(() => {
+    if (activeTab === "ALL") return employee?.assignedServices || [];
+    return employee?.assignedServices.filter((s) => s.status === activeTab) || [];
+  }, [activeTab, employee?.assignedServices]);
 
   return (
     <div className="p-6 space-y-8 max-w-4xl mx-auto">
@@ -133,21 +150,68 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
           <div className="bg-primary text-white px-6 py-3 text-lg font-semibold">
             🛠️ Assigned Services ({employee?.assignedServices?.length || 0})
           </div>
+
+          {/* Analytics Tabs */}
+          <div className="flex space-x-4 p-4 border-b">
+            {["PENDING", "ONGOING", "COMPLETED"].map((status) => (
+              <div
+                key={status}
+                className="flex-1 text-center cursor-pointer"
+                onClick={() => setActiveTab(status)}
+              >
+                <div
+                  className={`text-sm font-semibold ${
+                    activeTab === status ? "text-primary" : "text-gray-600"
+                  }`}
+                >
+                  {status}
+                </div>
+                <div className="text-xl font-bold">{analytics[status] || 0}</div>
+              </div>
+            ))}
+            <div
+              className="flex-1 text-center cursor-pointer"
+              onClick={() => setActiveTab("ALL")}
+            >
+              <div
+                className={`text-sm font-semibold ${
+                  activeTab === "ALL" ? "text-primary" : "text-gray-600"
+                }`}
+              >
+                ALL
+              </div>
+              <div className="text-xl font-bold">{employee?.assignedServices?.length || 0}</div>
+            </div>
+          </div>
+
+          {/* Table */}
           <div className="p-6 overflow-x-auto">
-            {employee?.assignedServices?.length > 0 ? (
+            {filteredServices.length > 0 ? (
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Visit No</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Customer Name</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Service Date</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Service Type</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Visit No
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Customer Name
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Contact
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Service Date
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Service Type
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {employee.assignedServices.map((service: Service, idx: number) => (
+                  {filteredServices.map((service: Service) => (
                     <tr key={service._id}>
                       <td className="px-4 py-2 text-gray-700">Visit #{service.visitNo}</td>
                       <td className="px-4 py-2 text-gray-600">{service.customerId?.name || "—"}</td>
