@@ -26,7 +26,7 @@ const ROLE_ACCESS: Record<string, string[]> = {
   "Accountant": ["/account"],
   "Stock Clerk": ["/employee", "/stock"],
   "Stock Manager": ["/employee", "/stock"],
-  "Technician": ["/workspace"],
+  "Technician": ["/employee/workspace"],
 };
 
 const DEFAULT_ROUTES: Record<string, string> = {
@@ -40,7 +40,7 @@ const DEFAULT_ROUTES: Record<string, string> = {
   "Accountant": "/account",
   "Stock Clerk": "/employee",
   "Stock Manager": "/stock",
-  "Technician": "/workspace",
+  "Technician": "/employee/workspace",
 };
 
 async function verifyJWT(token: string, secret: string) {

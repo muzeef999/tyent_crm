@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
+import "./Service.ts";
+
 
 const employeeSchema = new Schema(
   {

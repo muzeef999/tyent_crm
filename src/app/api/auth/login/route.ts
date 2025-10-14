@@ -55,6 +55,8 @@ export const GET = async (req: NextRequest) => {
       templateId: "1531142600990906",
     });
 
+    
+
     console.log("External API response:", response.data);
 
 

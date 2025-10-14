@@ -18,18 +18,23 @@ import { toast } from "sonner";
 
 const STATUS_OPTIONS = ["PENDING", "ONGOING", "COMPLETED", "CANCELLED", "CLOSED"];
 
+
+
 const Page = () => {
-  const id = "68a1751e34285f7b0874cffd";
+
+  const { user} = useAuth();
+
+ 
+  const id = user?.id;
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["employeAssignTask", id],
-    queryFn: () => employeAssignTask(id),
+    queryFn: () => employeAssignTask(id as string),
     enabled: !!id,
   });
 
 
-    const { user } = useAuth();
   
 
   const [searchText, setSearchText] = useState("");
