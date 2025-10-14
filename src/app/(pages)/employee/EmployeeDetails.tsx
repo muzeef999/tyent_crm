@@ -54,6 +54,35 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
 
   const [activeTab, setActiveTab] = useState("ALL");
 
+  // Safely extract employee
+  const employee: Employee | null = response?.message || null;
+  const isTechnician = employee?.designation?.toLowerCase() === "technician";
+
+  // -------------------
+  // ✅ Hooks must be called before any return
+  // -------------------
+
+  // Analytics counts
+  const analytics = useMemo(() => {
+    const counts: Record<string, number> = { PENDING: 0, ONGOING: 0, COMPLETED: 0 };
+    (employee?.assignedServices || []).forEach((s) => {
+      if (s?.status && s.status in counts) {
+        counts[s.status] = (counts[s.status] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [employee?.assignedServices]);
+
+  // Filter services by active tab
+  const filteredServices = useMemo(() => {
+    const services = employee?.assignedServices || [];
+    if (activeTab === "ALL") return services;
+    return services.filter((s) => s.status === activeTab);
+  }, [activeTab, employee?.assignedServices]);
+
+  // -------------------
+  // Loading / Error / Null checks
+  // -------------------
   if (isLoading)
     return (
       <div className="p-6 text-center text-gray-500">
@@ -68,26 +97,11 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
       </div>
     );
 
-  const employee: Employee = response?.message;
-  const isTechnician = employee?.designation?.toLowerCase() === "technician";
+  if (!employee) return <div className="p-6 text-center">No employee data found.</div>;
 
-  // Calculate analytics counts
-  const analytics = useMemo(() => {
-    const counts: Record<string, number> = { PENDING: 0, ONGOING: 0, COMPLETED: 0 };
-    employee?.assignedServices?.forEach((s) => {
-      if (s?.status && s.status in counts) {
-        counts[s.status] = (counts[s.status] || 0) + 1;
-      }
-    });
-    return counts;
-  }, [employee?.assignedServices]);
-
-  // Filter services by active tab
-  const filteredServices = useMemo(() => {
-    if (activeTab === "ALL") return employee?.assignedServices || [];
-    return employee?.assignedServices.filter((s) => s.status === activeTab) || [];
-  }, [activeTab, employee?.assignedServices]);
-
+  // -------------------
+  // Component render
+  // -------------------
   return (
     <div className="p-6 space-y-8 max-w-4xl mx-auto">
       {/* 🧾 EMPLOYEE BASIC INFO */}
@@ -96,48 +110,48 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
           👤 Employee Info
         </div>
         <div className="p-6 grid grid-cols-2 gap-4 text-sm text-gray-700">
-          <p><strong>Name:</strong> {employee?.name}</p>
-          <p><strong>Contact:</strong> {employee?.contactNumber}</p>
-          <p><strong>Email:</strong> {employee?.email || "—"}</p>
-          <p><strong>Designation:</strong> {employee?.designation || "—"}</p>
+          <p><strong>Name:</strong> {employee.name}</p>
+          <p><strong>Contact:</strong> {employee.contactNumber}</p>
+          <p><strong>Email:</strong> {employee.email || "—"}</p>
+          <p><strong>Designation:</strong> {employee.designation || "—"}</p>
           <p>
             <strong>Status:</strong>{" "}
             <span
               className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                employee?.status === "ACTIVE"
+                employee.status === "ACTIVE"
                   ? "bg-green-100 text-green-800"
                   : "bg-red-100 text-red-800"
               }`}
             >
-              {employee?.status}
+              {employee.status}
             </span>
           </p>
           <p>
             <strong>Joining Date:</strong>{" "}
-            {employee?.joiningDate
+            {employee.joiningDate
               ? format(new Date(employee.joiningDate), "dd MMM yyyy")
               : "—"}
           </p>
           <p>
             <strong>Last Working Date:</strong>{" "}
-            {employee?.lastWorkingDate
+            {employee.lastWorkingDate
               ? format(new Date(employee.lastWorkingDate), "dd MMM yyyy")
               : "—"}
           </p>
-          <p><strong>Aadhar No:</strong> {employee?.aadharNumber || "—"}</p>
-          <p><strong>PAN No:</strong> {employee?.panNumber || "—"}</p>
+          <p><strong>Aadhar No:</strong> {employee.aadharNumber || "—"}</p>
+          <p><strong>PAN No:</strong> {employee.panNumber || "—"}</p>
         </div>
         <div className="px-6 pb-6 text-gray-700 text-sm space-y-2">
-          <p><strong>Address:</strong> {employee?.address || "—"}</p>
+          <p><strong>Address:</strong> {employee.address || "—"}</p>
           <p>
             <strong>Created At:</strong>{" "}
-            {employee?.createdAt
+            {employee.createdAt
               ? format(new Date(employee.createdAt), "dd MMM yyyy")
               : "—"}
           </p>
           <p>
             <strong>Last Updated:</strong>{" "}
-            {employee?.updatedAt
+            {employee.updatedAt
               ? format(new Date(employee.updatedAt), "dd MMM yyyy")
               : "—"}
           </p>
@@ -148,7 +162,7 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
       {isTechnician && (
         <section className="border rounded-xl shadow-lg bg-white overflow-hidden">
           <div className="bg-primary text-white px-6 py-3 text-lg font-semibold">
-            🛠️ Assigned Services ({employee?.assignedServices?.length || 0})
+            🛠️ Assigned Services ({employee.assignedServices?.length || 0})
           </div>
 
           {/* Analytics Tabs */}
@@ -180,7 +194,7 @@ const EmployeeDetails: React.FC<EmployeeDetailsProps> = ({ employeeId }) => {
               >
                 ALL
               </div>
-              <div className="text-xl font-bold">{employee?.assignedServices?.length || 0}</div>
+              <div className="text-xl font-bold">{employee.assignedServices?.length || 0}</div>
             </div>
           </div>
 
