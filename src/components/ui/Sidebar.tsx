@@ -23,7 +23,7 @@ const ROLE_ACCESS: Record<string, string[]> = {
   "Admin": ["*"],
   "Super Admin": ["*"],
   "Marketing Manager": ["/leads", "/"],
-  "Technical Manager": ["/service", "/employee"],
+  "Technical Manager": ["/service", "/employee", "/customer"],
   "Telecall Manager": ["/customer"],
   "HR Executive": ["/employee"],
   "Customer Support": ["/customer"],

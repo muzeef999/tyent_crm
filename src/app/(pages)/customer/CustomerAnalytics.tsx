@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import TypeSearch from "@/components/TypeSearch";
 import useDebounce from "@/hooks/useDebounce";
 import CustomerDetails from "./CustomerDetails";
+import AddService from "../service/AddService";
 
 type CustomerAnalyticsProps = {
   totalCustomers?: number;
@@ -39,10 +40,10 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [selectedStateLabel, setSelectedStateLabel] = useState<string>("");
   const [selectedStateValue, setSelectedStateValue] =
     useState<number>(totalStates);
-    const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
-      const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(
-        null
-      );
+  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
+  const [selectedCustomerId, setSelectedCustomer] = useState<string | null>(
+    null
+  );
 
   const [selectedCityLabel, setSelectedCityLabel] = useState<string>("");
   const [selectedCityValue, setSelectedCityValue] =
@@ -52,9 +53,10 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   const [showAddSidebar, setShowAddSidebar] = useState(false);
+  const [showAddSidebarService, setShowAddSidebarService] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  const { user} = useAuth();
+  const { user } = useAuth();
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -70,7 +72,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
       }),
     enabled: !!startDate && !!endDate, // only run when both are picked
   });
-
 
   const handleRowClick = (customerId: string) => {
     setSelectedCustomer(customerId);
@@ -119,7 +120,7 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           </h1>
           <p className="text-md">{user?.designation}</p>
         </div>
- 
+
         <div>
           <div className="flex-1 relative min-w-[580px]">
             <TypeSearch
@@ -128,8 +129,6 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
                 "🔍 Search customer by contact number, email, invoice, or serial number"
               }
             />
-                   
-
 
             {searchText && (
               <div className="absolute bg-white w-full  rounded-md border border-gray-200 shadow-lg z-10">
@@ -146,7 +145,8 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
                     <div
                       key={s._id}
                       className="p-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => handleRowClick(s._id!)}>
+                      onClick={() => handleRowClick(s._id!)}
+                    >
                       {`${s.name} > ${s.contactNumber} > ${s.serialNumber} > ${s.invoiceNumber}`}
                     </div>
                   ))}
@@ -155,10 +155,22 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
           </div>
         </div>
 
-        <Button variant="primary" onClick={() => setShowAddSidebar(true)}>
-          <IoIosAdd size={22} />
-          Add Customer
-        </Button>
+        <div className="flex">
+          <button
+            className="flex p-3 bg-primary rounded-l-full text-white border border-white cursor-pointer hover:bg-white hover:border-primary hover:text-primary transition-colors duration-200"
+            onClick={() => setShowAddSidebar(true)}
+          >
+            <IoIosAdd size={22} />
+            Add Customer
+          </button>
+          <button
+            className="flex p-3 bg-primary rounded-r-full text-white border border-white cursor-pointer hover:bg-white hover:border-primary hover:text-primary transition-colors duration-200"
+            onClick={() => setShowAddSidebarService(true)}
+          >
+            <IoIosAdd size={22} />
+            Add Service
+          </button>
+        </div>
       </div>
 
       {/* Cards Row */}
@@ -290,6 +302,17 @@ const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({
       >
         <div className="p-4">
           <AddCustomer onClose={() => setShowAddSidebar(false)} />
+        </div>
+      </Offcanvas>
+
+      
+      <Offcanvas
+        show={showAddSidebarService}
+        onClose={() => setShowAddSidebarService(false)}
+        title="Add Service"
+      >
+        <div className="p-4">
+          <AddService onClose={() => setShowAddSidebarService(false)} />
         </div>
       </Offcanvas>
 
