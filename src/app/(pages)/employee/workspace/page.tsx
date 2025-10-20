@@ -2,16 +2,17 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { employeAssignTask, updateService } from "@/services/serviceApis";
+import { createPayment, employeAssignTask, updateService } from "@/services/serviceApis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
-import { FiUser, FiHash, FiClipboard, FiCalendar } from "react-icons/fi";
+import { FiUser, FiHash, FiClipboard, FiCalendar, FiPhone } from "react-icons/fi";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineCancel } from "react-icons/md";
 import CustomDropdown from "@/components/ui/CustomDropdown";
+import Cookies from "js-cookie";
 
 const STATUS_OPTIONS = [
   { label: "Pending", value: "PENDING" },
@@ -19,6 +20,13 @@ const STATUS_OPTIONS = [
   { label: "Completed", value: "COMPLETED" },
   { label: "Cancelled", value: "CANCELLED" },
   { label: "Closed", value: "CLOSED" },
+];
+
+const PAYMENT_MODES = [
+  { label: "CASH", value: "CASH" },
+  { label: "CARD", value: "CARD" },
+  { label: "UPI", value: "UPI" },
+  { label: "NET BANKING", value: "NET_BANKING" },
 ];
 
 const SERVICE_OPTIONS = [
@@ -72,6 +80,7 @@ const Page = () => {
   const [statusValue, setStatusValue] = useState("");
   const [serviceType, setServiceType] = useState<{ label: string; value: string }[]>([]);
   const [notes, setNotes] = useState("");
+  const [paymentMode, setPaymentMode] = useState("CASH"); // default payment mode
   const [editOpen, setEditOpen] = useState(true);
 
   const { data, isLoading, error } = useQuery({
@@ -81,8 +90,7 @@ const Page = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: ({ id, updatedFields }: { id: string; updatedFields: Record<string, any> }) =>
-      updateService(id, updatedFields),
+    mutationFn: ({ id, updatedFields }: { id: string; updatedFields: Record<string, any> }) => updateService(id, updatedFields),
     onSuccess: () => {
       toast.success("Updated Successfully 🎉");
       queryClient.invalidateQueries({ queryKey: ["employeAssignTask", id] });
@@ -91,16 +99,22 @@ const Page = () => {
     onError: () => toast.error("Update failed ❌"),
   });
 
+  const paymentMutation = useMutation({
+    mutationFn: (paymentData: any) => createPayment(paymentData),
+    onSuccess: () => {
+      toast.success("Payment recorded successfully 💰");
+      queryClient.invalidateQueries({ queryKey: ["employeAssignTask", id] });
+    },
+    onError: () => toast.error("Payment failed ❌"),
+  });
+
   if (!id)
     return <div className="text-center text-gray-500 mt-10">No employee ID found</div>;
   if (isLoading) return <div className="text-center mt-10 animate-pulse">Loading...</div>;
-  if (error)
-    return <div className="text-center text-red-500 mt-10">Error fetching data</div>;
+  if (error) return <div className="text-center text-red-500 mt-10">Error fetching data</div>;
 
   const employee = data?.message;
-  const filteredServices = employee?.assignedServices?.filter(
-    (s: any) => s.status === selectedTab
-  );
+  const filteredServices = employee?.assignedServices?.filter((s: any) => s.status === selectedTab);
 
   const totalPrice = (services: { label: string; value: string }[]) =>
     services.reduce((sum, s) => sum + (SERVICE_PRICES[s.value] || 0), 0);
@@ -116,10 +130,24 @@ const Page = () => {
     });
   };
 
+  const handlePayment = (service: any) => {
+    const amount = totalPrice(serviceType.length ? serviceType : service.serviceType.map((v: string) => ({ value: v, label: v })));
+    paymentMutation.mutate({
+      customerId: service.customerId._id,
+      serviceId: service._id,
+      amount,
+      modeOfPayment: paymentMode,
+      pendingAmount: 0,
+      status: "PAID",
+      invoiceNumber: `INV-${Date.now()}`,
+    });
+  };
+
   const handleLogout = async () => {
     try {
-      router.push("/login");
+      Cookies.remove("token");
       toast.success("Logged out successfully");
+      router.push("/login");
     } catch {
       toast.error("Logout failed");
     }
@@ -136,14 +164,12 @@ const Page = () => {
             </h1>
             <p className="text-sm text-gray-500">{user?.designation}</p>
           </div>
-
           <div className="flex-1 mx-6 min-w-[300px]">
             <TypeSearch
               onSearch={() => {}}
               placeHolderData="🔍 Search customer by contact/email/serial..."
             />
           </div>
-
           <Button variant="primary" onClick={handleLogout}>
             Logout
           </Button>
@@ -202,17 +228,31 @@ const Page = () => {
                   )}
                 </div>
 
+                {/* Customer Info */}
                 <div className="flex items-center gap-2 mb-2">
                   <FiUser className="text-gray-500" />
-                  <span className="font-medium">Customer:</span> {service.customerId.name}
+                  <span className="font-medium">Customer:</span>{" "}
+                  {service.customerId.name}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <FiPhone className="text-gray-500" />
+                  <span className="font-medium">Phone:</span>
+                  <a
+                    href={`tel:${service.customerId.contactNumber}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {service.customerId.contactNumber}
+                  </a>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <FiHash className="text-gray-500" />
-                  <span className="font-medium">Serial:</span> {service.customerId.serialNumber}
+                  <span className="font-medium">Serial:</span>{" "}
+                  {service.customerId.serialNumber}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <FiClipboard className="text-gray-500" />
-                  <span className="font-medium">Visit No:</span> {service.visitNo}
+                  <span className="font-medium">Visit No:</span>{" "}
+                  {service.visitNo}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <FiCalendar className="text-gray-500" />
@@ -223,12 +263,11 @@ const Page = () => {
                 {/* Editable Mode */}
                 {editableServiceId === service._id ? (
                   <div className="space-y-3 mt-3">
-                    {/* Multi-select Service Type */}
                     <CustomDropdown
                       label="Service Type"
                       id="serviceType"
                       options={SERVICE_OPTIONS}
-                      selectedValue={serviceType.map((s) => s.value)} // multiple values
+                      selectedValue={serviceType.map((s) => s.value)}
                       multi
                       onSelect={(value) => {
                         const valuesArray = Array.isArray(value) ? value : [value];
@@ -236,7 +275,8 @@ const Page = () => {
                           valuesArray.map((v) => {
                             const strV = String(v);
                             return {
-                              label: SERVICE_OPTIONS.find((s) => s.value === strV)?.label || strV,
+                              label:
+                                SERVICE_OPTIONS.find((s) => s.value === strV)?.label || strV,
                               value: strV,
                             };
                           })
@@ -244,7 +284,6 @@ const Page = () => {
                       }}
                     />
 
-                    {/* Notes */}
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
@@ -259,13 +298,12 @@ const Page = () => {
                       </span>
                     </div>
 
-                    {/* Status Dropdown */}
                     <CustomDropdown
                       label="Status"
                       id="statusValue"
                       options={STATUS_OPTIONS}
                       selectedValue={statusValue}
-                      onSelect={(value: string | number | (string | number)[], label?: string) => {
+                      onSelect={(value) => {
                         if (Array.isArray(value)) {
                           setStatusValue(String(value[0] ?? ""));
                         } else {
@@ -274,7 +312,21 @@ const Page = () => {
                       }}
                     />
 
-                    <Button variant="primary" onClick={() => handleSaveClick(service)}>
+                    <CustomDropdown
+                      label="Payment Mode"
+                      id="paymentMode"
+                      options={PAYMENT_MODES}
+                      selectedValue={paymentMode}
+                      onSelect={(value) => setPaymentMode(String(value))}
+                    />
+
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        handleSaveClick(service);
+                        handlePayment(service);
+                      }}
+                    >
                       Save
                     </Button>
                   </div>
@@ -285,12 +337,13 @@ const Page = () => {
                       {service.serviceType.join(", ")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-semibold">Notes:</span> {service.notes || "—"}
+                      <span className="font-semibold">Notes:</span>{" "}
+                      {service.notes || "—"}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-semibold">Total:</span> ₹{totalPrice(serviceType)}
+                      <span className="font-semibold">Total:</span> ₹
+                      {totalPrice(serviceType)}
                     </p>
-
                     <div className="mt-3">
                       <span
                         className={`px-3 py-1 rounded-lg text-xs font-medium ${

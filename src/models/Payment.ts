@@ -10,7 +10,7 @@ const paymentSchema = new Schema(
     modeOfPayment: { type: String, enum: ["CASH", "CARD", "UPI", "NET_BANKING"] },
     receivedDate: { type: Date, default: Date.now },
     pendingAmount: { type: Number, default: 0 }, // Change to number
-    status: { type: String, enum: ["PAID", "PARTIALLY", "PENDING"], default: "PENDING" },
+    status: { type: String, enum: ["PAID", "PARTIALLY", "PENDING"], default: "PAID" },
     remarks: { type: String },
     invoiceNumber: { type: String, required: true },
   },
