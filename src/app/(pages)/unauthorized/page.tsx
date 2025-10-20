@@ -13,7 +13,6 @@ export default function UnauthorizedPage() {
   const handleLogout = async() => {
    try {
       await axios.post("/api/auth/me");
-      toast.success("Logged out successfully");
       router.push("/login");
     } catch (err) {
       toast.error("Error logging out. Please try again.");

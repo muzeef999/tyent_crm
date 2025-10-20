@@ -3,15 +3,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-// Add unauthorized to public paths
-const PUBLIC_PATHS = ["/login", "/otp", "/unauthorized"];
+const PUBLIC_PATHS = ["/login", "/otp"];
 
 const allowedOrigins = ['*']
+
 
 const corsOptions = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
+
+
 
 const ROLE_ACCESS: Record<string, string[]> = {
   "Admin": ["*"],
@@ -42,18 +44,15 @@ const DEFAULT_ROUTES: Record<string, string | string[]> = {
 };
 
 async function verifyJWT(token: string, secret: string) {
-  try {
-    const secretKey = new TextEncoder().encode(secret);
-    const { payload } = await jwtVerify(token, secretKey);
-    return payload;
-  } catch (error) {
-    console.error("JWT verification failed:", error);
-    throw error;
-  }
+  const secretKey = new TextEncoder().encode(secret);
+  const { payload } = await jwtVerify(token, secretKey);
+  return payload;
 }
 
 export async function middleware(req: NextRequest) {
-  const origin = req.headers.get('origin') ?? ''
+
+
+    const origin = req.headers.get('origin') ?? ''
   const isAllowedOrigin = allowedOrigins.includes(origin)
  
   // Handle preflighted requests
@@ -67,7 +66,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.json({}, { headers: preflightHeaders })
   }
 
-  const response = NextResponse.next()
+    const response = NextResponse.next()
  
   if (isAllowedOrigin) {
     response.headers.set('Access-Control-Allow-Origin', origin)
@@ -76,20 +75,34 @@ export async function middleware(req: NextRequest) {
   Object.entries(corsOptions).forEach(([key, value]) => {
     response.headers.set(key, value)
   })
+ 
+
+
+
 
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  console.log("Pathname:", pathname);
-
-  // Check if it's a public path (including unauthorized)
   if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
-    console.log("Public path access granted");
-    return NextResponse.next();
+    if (token) {
+      try {
+        const decoded = (await verifyJWT(token, process.env.JWT_SECRET!)) as {
+          designation: string;
+        };
+        const role = decoded.designation?.trim();
+        const defaultRouteRaw = DEFAULT_ROUTES[role] ?? "/";
+        const defaultRoute = Array.isArray(defaultRouteRaw) ? defaultRouteRaw[0] : defaultRouteRaw;
+        return NextResponse.redirect(new URL(defaultRoute, req.url));
+      } catch (err) {
+        console.error("Invalid token on public route:", err);
+        return NextResponse.next();
+      }
+    } else {
+      return NextResponse.next(); // No token, show login
+    }
   }
 
   if (!token) {
-    console.log("No token, redirecting to login");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -97,37 +110,30 @@ export async function middleware(req: NextRequest) {
     const decoded = (await verifyJWT(token, process.env.JWT_SECRET!)) as {
       designation: string;
     };
-    
-    console.log("User role:", decoded.designation);
-    
     const role = decoded.designation?.trim();
     const allowedRoutes = ROLE_ACCESS[role];
 
     if (!allowedRoutes) {
-      console.log("No allowed routes found for role:", role);
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
     if (allowedRoutes.includes("*")) {
-      console.log("User has access to all routes");
       return NextResponse.next();
     }
 
     const isAllowed = allowedRoutes.some((route) => pathname.startsWith(route));
-    console.log("Is path allowed:", isAllowed, "for path:", pathname);
 
     if (!isAllowed) {
-      console.log("Access denied for path:", pathname);
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
-    console.log("Access granted");
     return NextResponse.next();
   } catch (err) {
     console.error("JWT verify failed:", err);
     return NextResponse.redirect(new URL("/login", req.url));
   }
 }
+
 
 export const config = {
   matcher: [
