@@ -8,23 +8,37 @@ import { useRouter } from "next/navigation";
 import TypeSearch from "@/components/TypeSearch";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
-import {
-  FiUser,
-  FiHash,
-  FiClipboard,
-  FiSettings,
-  FiCalendar,
-} from "react-icons/fi";
+import { FiUser, FiHash, FiClipboard, FiCalendar } from "react-icons/fi";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineCancel } from "react-icons/md";
-
+import CustomDropdown from "@/components/ui/CustomDropdown";
 
 const STATUS_OPTIONS = [
-  "PENDING",
-  "ONGOING",
-  "COMPLETED",
-  "CANCELLED",
-  "CLOSED",
+  { label: "Pending", value: "PENDING" },
+  { label: "Ongoing", value: "ONGOING" },
+  { label: "Completed", value: "COMPLETED" },
+  { label: "Cancelled", value: "CANCELLED" },
+  { label: "Closed", value: "CLOSED" },
+];
+
+const SERVICE_OPTIONS = [
+  { label: "General Service", value: "GENERAL_SERVICE" },
+  { label: "Paid Service", value: "PAID_SERVICE" },
+  { label: "In Warranty Breakdown", value: "IN_WARRANTY_BREAKDOWN" },
+  { label: "Filter Replacement", value: "FILTER_REPLACEMENT" },
+  { label: "Installation", value: "INSTALLATION" },
+  { label: "Re-Installation", value: "RE_INSTALLATION" },
+  { label: "Feasibility", value: "FEASIBILITY" },
+  { label: "Spare Part Replacement", value: "SPARE_PART_REPLACEMENT" },
+  { label: "Deep Cleaning", value: "DEEP_CLEANING" },
+  { label: "SPMS+ Replacement", value: "SPMS_PLUS_REPLACEMENT" },
+  { label: "Jogdial Replacement", value: "JOGDIAL_REPLACEMENT" },
+  { label: "Display Replacement", value: "DISPLAY_REPLACEMENT" },
+  { label: "PH Level Not Stable", value: "PH_LEVEL_NOT_STABLE" },
+  { label: "Unpleasant Water Taste", value: "UNPLEASANT_WATER_TASTE" },
+  { label: "Touch Panel Unresponsive", value: "TOUCH_PANEL_UNRESPONSIVE" },
+  { label: "RO System Malfunctioning", value: "RO_SYSTEM_MALFUNCTIONING" },
+  { label: "Pressure Tank Not Functioning", value: "PRESSURE_TANK_NOT_FUNCTIONING" },
 ];
 
 const SERVICE_PRICES: Record<string, number> = {
@@ -54,13 +68,11 @@ const Page = () => {
   const queryClient = useQueryClient();
 
   const [selectedTab, setSelectedTab] = useState("PENDING");
-  const [editableServiceId, setEditableServiceId] = useState<string | null>(
-    null
-  );
+  const [editableServiceId, setEditableServiceId] = useState<string | null>(null);
   const [statusValue, setStatusValue] = useState("");
-  const [serviceType, setServiceType] = useState<string[]>([]);
+  const [serviceType, setServiceType] = useState<{ label: string; value: string }[]>([]);
   const [notes, setNotes] = useState("");
-  const [editOpen, setEditOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(true);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["employeAssignTask", id],
@@ -69,13 +81,8 @@ const Page = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: ({
-      id,
-      updatedFields,
-    }: {
-      id: string;
-      updatedFields: Record<string, any>;
-    }) => updateService(id, updatedFields),
+    mutationFn: ({ id, updatedFields }: { id: string; updatedFields: Record<string, any> }) =>
+      updateService(id, updatedFields),
     onSuccess: () => {
       toast.success("Updated Successfully 🎉");
       queryClient.invalidateQueries({ queryKey: ["employeAssignTask", id] });
@@ -85,32 +92,25 @@ const Page = () => {
   });
 
   if (!id)
-    return (
-      <div className="text-center text-gray-500 mt-10">
-        No employee ID found
-      </div>
-    );
-  if (isLoading)
-    return <div className="text-center mt-10 animate-pulse">Loading...</div>;
+    return <div className="text-center text-gray-500 mt-10">No employee ID found</div>;
+  if (isLoading) return <div className="text-center mt-10 animate-pulse">Loading...</div>;
   if (error)
-    return (
-      <div className="text-center text-red-500 mt-10">Error fetching data</div>
-    );
+    return <div className="text-center text-red-500 mt-10">Error fetching data</div>;
 
   const employee = data?.message;
   const filteredServices = employee?.assignedServices?.filter(
     (s: any) => s.status === selectedTab
   );
 
-  const totalPrice = (services: string[]) =>
-    services.reduce((sum, type) => sum + (SERVICE_PRICES[type] || 0), 0);
+  const totalPrice = (services: { label: string; value: string }[]) =>
+    services.reduce((sum, s) => sum + (SERVICE_PRICES[s.value] || 0), 0);
 
   const handleSaveClick = (service: any) => {
     mutation.mutate({
       id: service._id,
       updatedFields: {
         status: statusValue,
-        serviceType,
+        serviceType: serviceType.map((s) => s.value),
         notes,
       },
     });
@@ -153,15 +153,15 @@ const Page = () => {
         <div className="flex gap-3 mb-6 overflow-x-auto">
           {STATUS_OPTIONS.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
+              key={tab.value}
+              onClick={() => setSelectedTab(tab.value)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                selectedTab === tab
+                selectedTab === tab.value
                   ? "bg-blue-600 text-white shadow-md"
                   : "bg-white border text-gray-700 hover:bg-blue-50"
               }`}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -174,38 +174,45 @@ const Page = () => {
                 key={service._id}
                 className="bg-white relative rounded-xl p-5 shadow hover:shadow-lg transition"
               >
-                <div className="absolute bg-primary  top-2 right-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700">
-                  {editOpen ? 
+                {/* Edit Icon */}
+                <div className="absolute bg-primary top-2 right-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700">
+                  {editOpen ? (
                     <CiEdit
-                    className="text-white"
-                    size={20}
-                    onClick={() => {
-
-                      setEditableServiceId(service._id);
-                      setServiceType(service.serviceType);
-                      setNotes(service.notes || "");
-                      setStatusValue(service.status);
-                      setEditOpen(true);
-                    }}
-                  /> : <MdOutlineCancel className="text-white" onClick={() => setEditOpen(true)}
-                    size={20}/>
-                  }
+                      className="text-white"
+                      size={20}
+                      onClick={() => {
+                        setEditableServiceId(service._id);
+                        setServiceType(
+                          service.serviceType.map((v: string) => ({
+                            label: SERVICE_OPTIONS.find((s) => s.value === v)?.label || v,
+                            value: v,
+                          }))
+                        );
+                        setNotes(service.notes || "");
+                        setStatusValue(service.status);
+                        setEditOpen(true);
+                      }}
+                    />
+                  ) : (
+                    <MdOutlineCancel
+                      className="text-white"
+                      onClick={() => setEditOpen(true)}
+                      size={20}
+                    />
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
                   <FiUser className="text-gray-500" />
-                  <span className="font-medium">Customer:</span>{" "}
-                  {service.customerId.name}
+                  <span className="font-medium">Customer:</span> {service.customerId.name}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <FiHash className="text-gray-500" />
-                  <span className="font-medium">Serial:</span>{" "}
-                  {service.customerId.serialNumber}
+                  <span className="font-medium">Serial:</span> {service.customerId.serialNumber}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <FiClipboard className="text-gray-500" />
-                  <span className="font-medium">Visit No:</span>{" "}
-                  {service.visitNo}
+                  <span className="font-medium">Visit No:</span> {service.visitNo}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <FiCalendar className="text-gray-500" />
@@ -216,26 +223,28 @@ const Page = () => {
                 {/* Editable Mode */}
                 {editableServiceId === service._id ? (
                   <div className="space-y-3 mt-3">
-                    <select
-                      multiple
-                      value={serviceType}
-                      onChange={(e) =>
+                    {/* Multi-select Service Type */}
+                    <CustomDropdown
+                      label="Service Type"
+                      id="serviceType"
+                      options={SERVICE_OPTIONS}
+                      selectedValue={serviceType.map((s) => s.value)} // multiple values
+                      multi
+                      onSelect={(value) => {
+                        const valuesArray = Array.isArray(value) ? value : [value];
                         setServiceType(
-                          Array.from(
-                            e.target.selectedOptions,
-                            (opt) => opt.value
-                          )
-                        )
-                      }
-                      className="w-full border rounded-lg p-2 text-sm"
-                    >
-                      {Object.keys(SERVICE_PRICES).map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
+                          valuesArray.map((v) => {
+                            const strV = String(v);
+                            return {
+                              label: SERVICE_OPTIONS.find((s) => s.value === strV)?.label || strV,
+                              value: strV,
+                            };
+                          })
+                        );
+                      }}
+                    />
 
+                    {/* Notes */}
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
@@ -244,32 +253,30 @@ const Page = () => {
                     />
 
                     <div className="text-gray-600 text-sm">
-                      💰 Total Price:{" "}
+                      Total Price:{" "}
                       <span className="font-semibold text-green-600">
                         ₹{totalPrice(serviceType)}
                       </span>
                     </div>
 
-                    <div className="flex gap-2">
-                      <select
-                        value={statusValue}
-                        onChange={(e) => setStatusValue(e.target.value)}
-                        className="border rounded-lg px-3 py-1 text-sm"
-                      >
-                        {STATUS_OPTIONS.map((st) => (
-                          <option key={st} value={st}>
-                            {st}
-                          </option>
-                        ))}
-                      </select>
+                    {/* Status Dropdown */}
+                    <CustomDropdown
+                      label="Status"
+                      id="statusValue"
+                      options={STATUS_OPTIONS}
+                      selectedValue={statusValue}
+                      onSelect={(value: string | number | (string | number)[], label?: string) => {
+                        if (Array.isArray(value)) {
+                          setStatusValue(String(value[0] ?? ""));
+                        } else {
+                          setStatusValue(String(value));
+                        }
+                      }}
+                    />
 
-                      <Button
-                        variant="primary"
-                        onClick={() => handleSaveClick(service)}
-                      >
-                        Save
-                      </Button>
-                    </div>
+                    <Button variant="primary" onClick={() => handleSaveClick(service)}>
+                      Save
+                    </Button>
                   </div>
                 ) : (
                   <div className="mt-3">
@@ -278,12 +285,10 @@ const Page = () => {
                       {service.serviceType.join(", ")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-semibold">Notes:</span>{" "}
-                      {service.notes || "—"}
+                      <span className="font-semibold">Notes:</span> {service.notes || "—"}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-semibold">Total:</span> ₹
-                      {totalPrice(service.serviceType)}
+                      <span className="font-semibold">Total:</span> ₹{totalPrice(serviceType)}
                     </p>
 
                     <div className="mt-3">

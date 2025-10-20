@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_PATHS = ["/login", "/otp"];
+const PUBLIC_PATHS = ["/login", "/otp", "/unauthorized"];
 
 const allowedOrigins = ['*']
 
