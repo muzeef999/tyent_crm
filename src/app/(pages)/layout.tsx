@@ -8,7 +8,10 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
-import {  MarkingMangerOptionsfetch,  TechincianOptionsfetch } from "@/services/serviceApis";
+import {
+  MarkingMangerOptionsfetch,
+  TechincianOptionsfetch,
+} from "@/services/serviceApis";
 import "react-quill/dist/quill.snow.css";
 import { usePathname } from "next/navigation";
 
@@ -19,14 +22,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
 
-
-    const pathname = usePathname();
-
-
-    const hideSidebar = pathname === "/employee/workspace" || "/unauthorized";
-
-    
+  const HIDE_SIDEBAR_PATHS = ["/employee/workspace", "/unauthorized"];
+const hideSidebar = HIDE_SIDEBAR_PATHS.includes(pathname);
 
   return (
     <html lang="en">
@@ -39,7 +38,7 @@ export default function RootLayout({
           <ReactQueryDevtools />
 
           <div className="flex">
-           {!hideSidebar && <Sidebar />}
+            {!hideSidebar && <Sidebar />}
 
             <main className="flex flex-col flex-1   w-full rounded-xl bg-card-background h-screen">
               <div className="flex-1  overflow-auto">{children}</div>
@@ -55,10 +54,10 @@ function PrefetchEmployees() {
   useQuery({
     queryKey: ["MarkingMangerOptions"],
     queryFn: () => MarkingMangerOptionsfetch,
-  })
+  });
   useQuery({
     queryKey: ["TechincianOptions"],
     queryFn: () => TechincianOptionsfetch,
-  })
+  });
   return null; // nothing to render
 }
