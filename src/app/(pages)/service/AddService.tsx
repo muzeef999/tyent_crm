@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import useDebounce from "@/hooks/useDebounce";
 import { getCustomers, createService } from "@/services/serviceApis";
-import { LiaSearchSolid } from "react-icons/lia";
 import { toast } from "sonner";
+import TypeSearch from "@/components/TypeSearch";
 
 type AddServiceProps = {
   onClose: () => void;
@@ -45,18 +44,14 @@ const serviceTypes = [
 
 const AddService: React.FC<AddServiceProps> = ({ onClose }) => {
   const [searchText, setSearchText] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null
-  );
-  const [selectedServiceTypes, setSelectedServiceTypes] = useState<string[]>(
-    []
-  );
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedServiceTypes, setSelectedServiceTypes] = useState<string[]>([]);
+  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
 
-  const debouncedSearchText = useDebounce(searchText, 100);
+  const debouncedSearchText = useDebounce(searchText, 400);
   const queryClient = useQueryClient();
 
-  // 🔹 Search Customers
+  // 🔹 Fetch customers by search text
   const {
     data: searchCustomer,
     isLoading: isSearchLoading,
@@ -72,13 +67,26 @@ const AddService: React.FC<AddServiceProps> = ({ onClose }) => {
     mutationFn: createService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
-       toast.success("Service created successfully");
+      toast.success("Service created successfully");
       onClose();
     },
     onError: (error: any) => {
       alert("Failed to create service: " + error.message);
     },
   });
+
+  const handleRowClick = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setShowDetailsSidebar(true);
+  };
+
+  const toggleServiceType = (type: string) => {
+    setSelectedServiceTypes((prev) =>
+      prev.includes(type)
+        ? prev.filter((t) => t !== type)
+        : [...prev, type]
+    );
+  };
 
   const handleSubmit = () => {
     if (!selectedCustomer) return alert("Select a customer");
@@ -87,68 +95,47 @@ const AddService: React.FC<AddServiceProps> = ({ onClose }) => {
 
     mutation.mutate({
       customerId: selectedCustomer._id,
-      serviceDate: new Date().toISOString(), // today date
+      serviceDate: new Date().toISOString(),
       serviceType: selectedServiceTypes,
     });
   };
 
-  const toggleServiceType = (type: string) => {
-    setSelectedServiceTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-  };
-
   return (
-    <div className="relative w-full  p-6 bg-white rounded-lg shadow-lg">
+    <div className="relative w-full p-6 bg-white rounded-lg shadow-lg">
       {/* 🔹 Search Box */}
-
-      {/* Input */}
-      <Input
-        type="search"
-        value={searchText}
-        onFocus={() => {
-          if (searchCustomer?.data?.length) setIsOpen(true);
-        }}
-        onChange={(e) => setSearchText(e.target.value)}
-        placeholder="🔍 Search by contact, serial, invoice, or email"
-        className="inline-block align-middle w-[calc(100%-40px)] border-none focus:ring-0 focus:outline-none bg-gray-100"
+      <TypeSearch
+        onSearch={setSearchText}
+        placeHolderData="🔍 Search by contact, serial, invoice, or email"
+        className="inline-block w-full border-none focus:ring-0 focus:outline-none bg-gray-100"
       />
 
-      {/* 🔹 Dropdown */}
-      {isOpen && searchCustomer?.data?.length > 0 && (
-        <ul className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto z-10">
-          {searchCustomer.data.slice(0, 5).map((cust: Customer) => (
-            <li
-              key={cust._id}
-              className={`px-4 py-2 cursor-pointer ${
-                selectedCustomer?._id === cust._id
-                  ? "bg-blue-100"
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={() => {
-                setSearchText(cust.contactNumber || cust.serialNumber || "");
-                setSelectedCustomer(cust);
-                setIsOpen(false);
-              }}
-            >
-              {cust.name} — {cust.contactNumber} — {cust.serialNumber} —{" "}
-              {cust.invoiceNumber}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* 🔹 Dropdown Results */}
+      {searchText && (
+        <div className="absolute bg-white w-full mt-1 rounded-md border border-gray-200 shadow-lg z-10 max-h-60 overflow-y-auto">
+          {isSearchLoading && <div className="p-2 text-gray-500">Loading...</div>}
 
-      {/* 🔹 Loading / Error */}
-      {isSearchLoading && (
-        <div className="text-sm text-gray-500 mt-2">Loading...</div>
-      )}
-      {isSearchError && (
-        <div className="text-sm text-red-500 mt-2">Error fetching customer</div>
+          {!isSearchLoading && searchCustomer?.data?.length === 0 && (
+            <div className="p-2 text-gray-500">No results</div>
+          )}
+
+          {!isSearchLoading &&
+            searchCustomer?.data?.map((customer: Customer) => (
+              <div
+                key={customer._id}
+                className="p-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleRowClick(customer)}
+              >
+                {`${customer.name} > ${customer.contactNumber || "-"} > ${
+                  customer.serialNumber || "-"
+                } > ${customer.invoiceNumber || "-"}`}
+              </div>
+            ))}
+        </div>
       )}
 
       {/* 🔹 Selected Customer Info */}
       {selectedCustomer && (
-        <div className="mt-2 p-3 border border-gray-200 rounded-md bg-gray-50">
+        <div className="mt-3 p-3 border border-gray-200 rounded-md bg-gray-50">
           <p>
             <strong>Name:</strong> {selectedCustomer.name}
           </p>
@@ -176,9 +163,9 @@ const AddService: React.FC<AddServiceProps> = ({ onClose }) => {
               key={type}
               type="button"
               onClick={() => toggleServiceType(type)}
-              className={`px-3 py-1 rounded-md border ${
+              className={`px-3 py-1 rounded-md border transition-all duration-200 ${
                 selectedServiceTypes.includes(type)
-                  ? "bg-primary text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
               }`}
             >
@@ -189,13 +176,15 @@ const AddService: React.FC<AddServiceProps> = ({ onClose }) => {
       </div>
 
       {/* 🔹 Submit Button */}
-      <Button
-        variant="primary"
-        onClick={handleSubmit}
-        disabled={mutation.status === "pending"}
-      >
-        {mutation.status === "pending" ? "Creating..." : "Create Service"}
-      </Button>
+      <div className="mt-5">
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={mutation.status === "pending"}
+        >
+          {mutation.status === "pending" ? "Creating..." : "Create Service"}
+        </Button>
+      </div>
     </div>
   );
 };

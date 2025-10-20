@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
+import "./Customer";
 
 const serviceSchema = new Schema(
   {

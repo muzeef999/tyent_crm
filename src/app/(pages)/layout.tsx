@@ -10,6 +10,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
 import {  MarkingMangerOptionsfetch,  TechincianOptionsfetch } from "@/services/serviceApis";
 import "react-quill/dist/quill.snow.css";
+import { usePathname } from "next/navigation";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+    const pathname = usePathname();
+
+
+    const hideSidebar = pathname === "/employee/workspace" || "/unauthorized";
+
+    
+
   return (
     <html lang="en">
       <QueryClientProvider client={queryClient}>
@@ -29,7 +39,7 @@ export default function RootLayout({
           <ReactQueryDevtools />
 
           <div className="flex">
-            <Sidebar />
+           {!hideSidebar && <Sidebar />}
 
             <main className="flex flex-col flex-1   w-full rounded-xl bg-card-background h-screen">
               <div className="flex-1  overflow-auto">{children}</div>

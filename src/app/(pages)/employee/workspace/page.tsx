@@ -1,8 +1,11 @@
 "use client";
 import TypeSearch from "@/components/TypeSearch";
+import Button from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { employeAssignTask, updateService } from "@/services/serviceApis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import React, { use, useState } from "react";
 import {
   FiUser,
@@ -38,6 +41,7 @@ const Page = () => {
   
 
   const [searchText, setSearchText] = useState("");
+  const router = useRouter();
 
   const [editableServiceId, setEditableServiceId] = useState<string | null>(null);
   const [statusValue, setStatusValue] = useState("");
@@ -71,6 +75,17 @@ const Page = () => {
     setStatusValue(service.status);
   };
 
+
+  const LogooutButton  =  async() => {
+    try {
+      await axios.post("/api/auth/me");
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (err) {
+      toast.error("Error logging out. Please try again.");
+    }
+  }
+
   const handleSaveClick = (service: any) => {
     mutation.mutate({
       id: service._id,
@@ -102,23 +117,12 @@ const Page = () => {
                 "🔍 Search customer by contact number, email, invoice, or serial number"
               }
             />
-
-            
           </div>
         </div>
-
         <div>
-          {
-            "manger name"
-          }
+          <Button variant="primary" type="submit"  onClick={LogooutButton} > Logout </Button>
         </div>
-
       </div>
-
-
-
-
-
 
         {/* Assigned Services */}
         <h2 className="text-xl font-semibold mb-4 text-gray-700">Assigned Services</h2>

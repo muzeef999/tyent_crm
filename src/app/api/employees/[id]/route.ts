@@ -1,3 +1,4 @@
+import { connectDB } from "@/lib/mongodb";
 import Employee from "@/models/Employee";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,6 +8,7 @@ export const GET = async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
+    connectDB();
     const { id } = await params;
     const employee = await Employee.findById(id)
       .populate({
