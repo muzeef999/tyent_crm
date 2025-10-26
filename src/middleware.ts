@@ -7,6 +7,7 @@ const PUBLIC_PATHS: string[] = ["/login", "/otp", "/unauthorized"];
 // ✅ Allowed origins for CORS
 const allowedOrigins: string[] = [
   "https://tyent.co.in",
+  "https://www.tyent.co.in",
   "http://localhost:3000",
 ];
 
